@@ -45,25 +45,25 @@ export default function AccessibilityPage() {
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[var(--dmc-brand-emerald)] shrink-0 mt-0.5" aria-hidden="true" />
                 <span>
-                  <strong className="text-[var(--dmc-ink-primary)]">High-Contrast Answer Pills:</strong> Correct answers and Geography reference facts use `#FEF08A` surfaces paired with `#78350F` text (exceeding 10:1 contrast).
+                  <strong className="text-[var(--dmc-ink-primary)]">High-Contrast Answer Pills:</strong> Correct answers and Geography reference facts use <code className="font-mono text-xs">#FEF08A</code> surfaces paired with <code className="font-mono text-xs">#78350F</code> text (exceeding WCAG AAA 7:1 contrast).
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[var(--dmc-brand-emerald)] shrink-0 mt-0.5" aria-hidden="true" />
                 <span>
-                  <strong className="text-[var(--dmc-ink-primary)]">Icon + Text Outcome Feedback:</strong> Correct and incorrect quiz selections always combine color cues with check/cross icons and screen-reader labels rather than relying on color alone.
+                  <strong className="text-[var(--dmc-ink-primary)]">Icon + Text Outcome Feedback:</strong> Correct and incorrect quiz selections preserve keyboard focus after locking, combine color cues with check/cross icons and screen-reader labels, and announce verdicts politely via live regions.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[var(--dmc-brand-emerald)] shrink-0 mt-0.5" aria-hidden="true" />
                 <span>
-                  <strong className="text-[var(--dmc-ink-primary)]">Reduced Motion Support:</strong> Celebration badges automatically render static achievement states when `prefers-reduced-motion: reduce` is enabled.
+                  <strong className="text-[var(--dmc-ink-primary)]">Reduced Motion Support:</strong> Celebration badges and scroll reveals honor <code className="font-mono text-xs">prefers-reduced-motion: reduce</code> with static achievement states.
                 </span>
               </li>
               <li className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-4 h-4 text-[var(--dmc-brand-emerald)] shrink-0 mt-0.5" aria-hidden="true" />
                 <span>
-                  <strong className="text-[var(--dmc-ink-primary)]">Keyboard Landmarks &amp; Skip Link:</strong> Every page includes a keyboard skip-to-content link, sequential headings (`h1` to `h3`), and descriptive `alt` text on national flags.
+                  <strong className="text-[var(--dmc-ink-primary)]">Keyboard Landmarks, Search &amp; Dialog Isolation:</strong> Every page includes a skip-to-content link, surface-calibrated focus rings, keyboard-navigable search comboboxes and <code className="font-mono text-xs">/search</code> category tabs (<code className="font-mono text-xs">ArrowLeft</code>/<code className="font-mono text-xs">ArrowRight</code>/<code className="font-mono text-xs">Home</code>/<code className="font-mono text-xs">End</code>), and focus-trapped dialogs with <code className="font-mono text-xs">inert</code> background isolation.
                 </span>
               </li>
             </ul>
@@ -77,12 +77,15 @@ export default function AccessibilityPage() {
             <div className="flex flex-wrap items-center gap-4 pt-1">
               <a
                 href="mailto:accessibility@docmubashirchaudhary.com?subject=Accessibility%20Feedback"
-                className="inline-flex items-center gap-2 text-xs font-bold text-[var(--dmc-brand-emerald)] hover:underline"
+                className="inline-flex items-center gap-2 min-h-[44px] text-xs font-bold text-[var(--dmc-brand-emerald)] hover:underline"
               >
                 <Mail className="w-4 h-4" aria-hidden="true" />
                 <span>accessibility@docmubashirchaudhary.com</span>
               </a>
-              <Link href="/status" className="text-xs font-semibold text-[var(--dmc-ink-muted)] hover:underline">
+              <Link
+                href="/status"
+                className="inline-flex items-center min-h-[44px] text-xs font-semibold text-[var(--dmc-ink-muted)] hover:text-[var(--dmc-ink-primary)] hover:underline"
+              >
                 View Dataset Status
               </Link>
             </div>

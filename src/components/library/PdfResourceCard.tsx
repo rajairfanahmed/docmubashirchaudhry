@@ -62,7 +62,10 @@ export function PdfResourceCard({ pdf, subjectLabel }: PdfResourceCardProps) {
           href={`/library/resource/${pdf.slug}`}
           className="inline-flex items-center gap-1 min-h-[44px] text-xs font-bold text-[var(--dmc-brand-forest)] hover:underline"
         >
-          <span>Details &amp; SHA-256</span>
+          <span>
+            Details &amp; SHA-256
+            <span className="sr-only"> for {pdf.title}</span>
+          </span>
           <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
         </Link>
 
@@ -72,7 +75,13 @@ export function PdfResourceCard({ pdf, subjectLabel }: PdfResourceCardProps) {
           className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] bg-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-brand-emerald)] text-white text-xs font-bold px-4 py-2 rounded-[var(--dmc-radius-button)]"
         >
           <Download className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>Download</span>
+          <span>
+            Download
+            <span className="sr-only">
+              {' '}
+              {pdf.title} ({formatBytes(pdf.fileSizeBytes)})
+            </span>
+          </span>
         </a>
       </div>
     </article>

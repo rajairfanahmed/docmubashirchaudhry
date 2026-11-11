@@ -23,6 +23,11 @@ export function Navbar() {
   const pathname = usePathname();
 
   useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsMobileSearchOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
         if (isMobileMenuOpen) {

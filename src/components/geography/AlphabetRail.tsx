@@ -58,7 +58,7 @@ export function AlphabetRail({
               isSelected
                 ? 'bg-[var(--dmc-brand-forest)] text-white'
                 : isEmpty
-                  ? 'bg-slate-50 text-[var(--dmc-ink-muted)] opacity-50 hover:opacity-80'
+                  ? 'bg-[var(--dmc-surface-muted)] border border-dashed border-[var(--dmc-border-subtle)] text-[var(--dmc-ink-secondary)] hover:border-[var(--dmc-brand-forest)]'
                   : 'bg-slate-100 text-[var(--dmc-ink-primary)] hover:bg-emerald-50 hover:text-[var(--dmc-brand-forest)]'
             )}
           >

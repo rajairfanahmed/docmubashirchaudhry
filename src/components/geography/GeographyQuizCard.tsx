@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useId } from 'react';
 import { ArrowRight, CheckCircle2, Info, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
@@ -41,6 +41,7 @@ export function GeographyQuizCard({
   onSelectOption,
   onNext
 }: GeographyQuizCardProps) {
+  const promptId = useId();
   const isLocked = selectedOptionId !== null && selectedOptionId !== undefined;
   const isCorrect = isLocked && selectedOptionId === correctOptionId;
 
@@ -91,11 +92,11 @@ export function GeographyQuizCard({
         </div>
       )}
 
-      <h3 className="text-lg sm:text-xl font-bold text-[var(--dmc-ink-primary)] leading-snug">
+      <h3 id={promptId} className="text-lg sm:text-xl font-bold text-[var(--dmc-ink-primary)] leading-snug">
         {prompt}
       </h3>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="group" aria-label="Quiz options A through D">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" role="group" aria-labelledby={promptId}>
         {options.map((opt, idx) => {
           const isPicked = selectedOptionId === opt.id;
           const isRight = opt.id === correctOptionId;
@@ -114,7 +115,7 @@ export function GeographyQuizCard({
               cardClass =
                 'border-2 border-[var(--dmc-status-error-border)] bg-[var(--dmc-status-error-bg)] text-[var(--dmc-status-error-ink)]';
             } else {
-              cardClass = 'border-[var(--dmc-border-subtle)] bg-slate-50 text-[var(--dmc-ink-muted)] opacity-75';
+              cardClass = 'border-[var(--dmc-border-subtle)] bg-slate-50 text-[var(--dmc-ink-secondary)]';
             }
           }
 
@@ -122,11 +123,14 @@ export function GeographyQuizCard({
             <button
               key={opt.id}
               type="button"
-              disabled={isLocked}
+              aria-disabled={isLocked || undefined}
               aria-pressed={isPicked}
-              onClick={() => onSelectOption(opt.id)}
+              onClick={() => {
+                if (!isLocked) onSelectOption(opt.id);
+              }}
               className={cn(
-                'min-h-[54px] text-left rounded-xl border px-4 py-3 flex items-center justify-between gap-2.5 text-sm font-semibold transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.988] motion-reduce:transform-none cursor-pointer disabled:cursor-default disabled:active:scale-100',
+                'min-h-[54px] text-left rounded-xl border px-4 py-3 flex items-center justify-between gap-2.5 text-sm font-semibold transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.988] motion-reduce:transform-none',
+                isLocked ? 'cursor-default active:scale-100' : 'cursor-pointer',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]',
                 cardClass
               )}
@@ -139,10 +143,16 @@ export function GeographyQuizCard({
               </span>
 
               {isLocked && isRight && (
-                <CheckCircle2 className="w-4 h-4 text-[var(--dmc-status-verified-icon)] shrink-0" aria-hidden="true" />
+                <>
+                  <span className="sr-only">(Correct answer)</span>
+                  <CheckCircle2 className="w-4 h-4 text-[var(--dmc-status-verified-icon)] shrink-0" aria-hidden="true" />
+                </>
               )}
               {isLocked && isPicked && !isRight && (
-                <XCircle className="w-4 h-4 text-[var(--dmc-status-error-icon)] shrink-0" aria-hidden="true" />
+                <>
+                  <span className="sr-only">(Your incorrect choice)</span>
+                  <XCircle className="w-4 h-4 text-[var(--dmc-status-error-icon)] shrink-0" aria-hidden="true" />
+                </>
               )}
             </button>
           );
@@ -154,6 +164,11 @@ export function GeographyQuizCard({
           aria-live="polite"
           className="dmc-reveal border-t border-[var(--dmc-border-subtle)] pt-5 space-y-4"
         >
+          <p className="sr-only">
+            {isCorrect
+              ? 'Correct answer.'
+              : 'Incorrect selection. The verified correct answer and explanation are shown below.'}
+          </p>
           <div className="bg-[var(--dmc-surface-muted)] border border-[var(--dmc-border-subtle)] rounded-xl p-4 text-xs sm:text-sm text-[var(--dmc-ink-secondary)] leading-relaxed flex items-start gap-2.5">
             <Info className="w-4 h-4 text-[var(--dmc-brand-forest)] shrink-0 mt-0.5" aria-hidden="true" />
             <p>{explanation}</p>

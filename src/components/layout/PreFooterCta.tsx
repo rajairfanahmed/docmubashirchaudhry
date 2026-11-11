@@ -7,6 +7,7 @@ export function PreFooterCta() {
   return (
     <section
       aria-label="Start Free Practice Call to Action"
+      data-dmc-surface="dark"
       className="bg-[var(--dmc-brand-dark)] text-white py-12 border-t border-[var(--dmc-brand-emerald)]/50"
     >
       <PageContainer size="reading" className="text-center space-y-4">

@@ -34,7 +34,11 @@ export function McqSessionSummary({
 
         <div className="space-y-1">
           <div className="type-label-micro text-[var(--dmc-brand-forest)]">SESSION COMPLETED</div>
-          <h2 className="type-section-heading text-[var(--dmc-ink-primary)] tabular-nums">
+          <h2
+            id="mcq-summary-heading"
+            tabIndex={-1}
+            className="type-section-heading text-[var(--dmc-ink-primary)] tabular-nums focus:outline-none"
+          >
             Score: {correctCount} / {total} ({pct}%)
           </h2>
           <p className="type-body-sm text-[var(--dmc-ink-secondary)]">

@@ -74,10 +74,12 @@ function FactChipRow({
         {remainingCount > 0 && (
           <Link
             href={`/geography/${countrySlug}`}
-            aria-label={`View all ${items.length} ${label.toLowerCase()} for ${countryName}`}
-            className="inline-flex items-center rounded-lg border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] hover:border-[var(--dmc-brand-forest)] hover:text-[var(--dmc-brand-forest)] px-2.5 py-1 min-h-[30px] text-[11px] font-bold text-[var(--dmc-ink-secondary)] transition-colors"
+            className="inline-flex items-center rounded-lg border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] hover:border-[var(--dmc-brand-forest)] hover:text-[var(--dmc-brand-forest)] px-2.5 py-1 min-h-[44px] sm:min-h-[36px] text-[11px] font-bold text-[var(--dmc-ink-secondary)] transition-colors"
           >
             +{remainingCount} more
+            <span className="sr-only">
+              {' '}({items.length} total {label.toLowerCase()} for {countryName})
+            </span>
           </Link>
         )}
 
@@ -182,6 +184,7 @@ export function CountryCard({
           className="inline-flex items-center min-h-[44px] font-semibold text-[var(--dmc-ink-secondary)] hover:text-[var(--dmc-brand-forest)] hover:underline"
         >
           Country Profile
+          <span className="sr-only"> for {country.nameCommon}</span>
         </Link>
 
         {onTestInQuiz ? (
@@ -191,7 +194,10 @@ export function CountryCard({
             className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-lg bg-[var(--dmc-status-verified-bg)] hover:bg-emerald-100 text-[var(--dmc-brand-forest)] font-bold cursor-pointer"
           >
             <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Test in Quiz</span>
+            <span>
+              Test in Quiz
+              <span className="sr-only"> ({country.nameCommon})</span>
+            </span>
           </button>
         ) : (
           <Link
@@ -199,7 +205,10 @@ export function CountryCard({
             className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] px-2 font-bold text-[var(--dmc-brand-forest)] hover:underline"
           >
             <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>Test in Quiz</span>
+            <span>
+              Test in Quiz
+              <span className="sr-only"> ({country.nameCommon})</span>
+            </span>
           </Link>
         )}
       </div>

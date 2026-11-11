@@ -1,7 +1,7 @@
 # Accessibility Specification (Step 9 of 10)
 
-> **Consumer Skill:** `09-accessibility` (Enhancement Phase - Run After Step 8 & Vercel Deploy)
-> **Execution Status (2026-11-11):** Intentionally deferred until after GitHub push (`https://github.com/rajairfanahmed/docmubashirchaudhry.git`), Vercel deployment, and Step 8 (`/seo`).
+> **Consumer Skill:** `09-accessibility` (Enhancement Phase - Complete)
+> **Execution Status (2026-11-11):** Step 9 WCAG 2.2 Level AA audit, remediation, and automated regression checks completed across interactive UI components, layout shells, modals, and contrast pairs (`tests/accessibility-audit.test.ts`). Manual browser/screen-reader testing (NVDA/VoiceOver) remains recommended on the live Vercel deployment (`https://docmubashirchaudhry.vercel.app/`).
 > **Scope:** WCAG 2.2 Level AA conformance (AAA on golden answer highlights), semantic landmarks, keyboard navigation models (radiogroups, A-Z bar, modals, mobile drawer), screen-reader `aria-live` feedback, and visual contrast rules.
 > **Token References:** Enforces hex contrast pairs locked in [`visual-design.md`](./visual-design.md) and reduced-motion safeguards in [`animations-motion-design.md`](./animations-motion-design.md).
 
@@ -14,7 +14,7 @@
 ### Verified Color Contrast Matrix
 | Foreground / Surface Pair | Contrast Ratio | WCAG Rating | Applied Elements |
 |---|---|---|---|
-| `#78350F` Ink on `#FEF08A` Pill | **10.2 : 1** | **AAA** | Golden answer pills (`AnswerHighlight` on CountryCard, MCQ revealed correct badge) |
+| `#78350F` Ink on `#FEF08A` Pill | **7.8 : 1** | **AAA** | Golden answer pills (`AnswerHighlight` on CountryCard, MCQ revealed correct badge) |
 | `#0F172A` Slate-900 on `#FFFFFF` | **17.4 : 1** | **AAA** | Primary headings, question stems, option text, nav links |
 | `#475569` Slate-600 on `#FFFFFF` / `#FAFBFC` | **7.6 : 1** | **AAA** | Secondary descriptions, file metadata, subtitles |
 | `#64748B` Slate-500 on `#FFFFFF` | **4.7 : 1** | **AA** | Breadcrumbs, timestamps, `"Unanswered"` badge. **Rule:** Never use `#94A3B8` Slate-400 (`2.5:1`) for informative text! |
@@ -22,7 +22,7 @@
 | `#0F172A` Slate-900 on `#F0B938` Gold | **9.9 : 1** | **AAA** | High-emphasis Gold CTA buttons (`Start Quiz`, `Retry Missed`) |
 | `#065F46` Emerald-800 on `#ECFDF5` | **7.7 : 1** | **AAA** | Correct answer state, `"Verified"` badges |
 | `#991B1B` Red-800 on `#FEF2F2` | **7.8 : 1** | **AAA** | Incorrect answer state, destructive error alerts |
-| `#92400E` Amber-800 on `#FFFBEB` | **7.0 : 1** | **AAA** | `"Unverified"` caution badge & warning box on `/ppsc/[slug]` |
+| `#92400E` Amber-800 on `#FFFBEB` | **6.8 : 1** | **AA** | `"Unverified"` caution badge & warning box on `/ppsc/[slug]` |
 
 ---
 
@@ -60,7 +60,7 @@
 - **Flags & Official Logos:**
   - Country flags carry descriptive alt attributes from `CountryEntity.flag.alt` (e.g., `"National flag of Pakistan"`).
   - Authority logos carry descriptive alt text `"Official emblem of Punjab Public Service Commission (PPSC)"` when linked cleanly inside labeled cards, or `alt=""` with visible heading inside the same interactive `<Link>` to avoid duplicate screen-reader echo.
-- **Standalone Accessibility Statement (`/accessibility`):** Lists target conformance (WCAG 2.2 AA), keyboard navigation map (`Tab`, `Enter`, `Space`, `Escape`, `Arrows`), reduced-motion guarantees, and direct `mailto:faculty@docmubashirchaudhary.com?subject=Accessibility%20Feedback` contact link.
+- **Standalone Accessibility Statement (`/accessibility`):** Lists target conformance (WCAG 2.2 AA), keyboard navigation map (`Tab`, `Enter`, `Space`, `Escape`, `Arrows`), reduced-motion guarantees, and direct `mailto:accessibility@docmubashirchaudhary.com?subject=Accessibility%20Feedback` contact link.
 
 ---
 

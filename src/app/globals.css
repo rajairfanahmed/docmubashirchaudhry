@@ -586,9 +586,13 @@ html.lenis body {
   }
 }
 
-/* Universal Visible Focus Indicator */
+/* Universal Visible Focus Indicator (AA/AAA on light & dark surfaces) */
 :focus-visible {
   outline: 2px solid var(--dmc-brand-forest);
+  outline-offset: 2px;
+}
+:is(footer, [data-dmc-surface='dark']) :focus-visible {
+  outline: 2px solid var(--dmc-accent-gold);
   outline-offset: 2px;
 }
 

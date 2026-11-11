@@ -10,7 +10,8 @@ export function Footer() {
   return (
     <footer
       role="contentinfo"
-      className="bg-[var(--dmc-brand-footer)] text-slate-300 text-xs border-t border-[var(--dmc-brand-dark)] pt-12 pb-8"
+      data-dmc-surface="dark"
+      className="bg-[var(--dmc-brand-footer)] text-slate-200 text-xs border-t border-[var(--dmc-brand-dark)] pt-12 pb-8"
     >
       <PageContainer>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 mb-10">
@@ -71,7 +72,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="pt-6 border-t border-[var(--dmc-brand-dark)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-400">
+        <div className="pt-6 border-t border-[var(--dmc-brand-dark)] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px] text-slate-300">
           <p>
             &copy; 2024-2026 docmubashirchaudhry. Not affiliated with PPSC, FPSC, NTS, or any government body.
           </p>

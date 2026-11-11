@@ -241,7 +241,7 @@ export function AcademicFeedbackForm() {
                 <button
                   type="button"
                   onClick={() => setComposerReady(false)}
-                  className="inline-flex items-center min-h-[44px] px-2 text-xs font-semibold text-slate-500 hover:text-gray-900 underline cursor-pointer"
+                  className="inline-flex items-center min-h-[44px] px-2 text-xs font-semibold text-[var(--dmc-ink-secondary)] hover:text-[var(--dmc-ink-primary)] underline cursor-pointer"
                 >
                   Edit Draft
                 </button>
@@ -270,7 +270,11 @@ export function AcademicFeedbackForm() {
                       const err = validateForm().fullName;
                       if (err) setErrors((prev) => ({ ...prev, fullName: err }));
                     }}
-                    className="w-full min-h-[44px] text-sm sm:text-xs px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--dmc-brand-forest)]/25 focus:border-[var(--dmc-brand-forest)]"
+                    className={`w-full min-h-[44px] text-sm sm:text-xs px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 ${
+                      errors.fullName
+                        ? 'border-red-600 focus:ring-red-600/20 focus:border-red-600'
+                        : 'border-slate-200 focus:ring-[var(--dmc-brand-forest)]/25 focus:border-[var(--dmc-brand-forest)]'
+                    }`}
                   />
                   {errors.fullName && (
                     <p id="error-fullName" role="alert" className="text-[11px] font-semibold text-red-700 mt-1">
@@ -299,7 +303,11 @@ export function AcademicFeedbackForm() {
                       const err = validateForm().email;
                       if (err) setErrors((prev) => ({ ...prev, email: err }));
                     }}
-                    className="w-full min-h-[44px] text-sm sm:text-xs px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--dmc-brand-forest)]/25 focus:border-[var(--dmc-brand-forest)]"
+                    className={`w-full min-h-[44px] text-sm sm:text-xs px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 ${
+                      errors.email
+                        ? 'border-red-600 focus:ring-red-600/20 focus:border-red-600'
+                        : 'border-slate-200 focus:ring-[var(--dmc-brand-forest)]/25 focus:border-[var(--dmc-brand-forest)]'
+                    }`}
                   />
                   {errors.email && (
                     <p id="error-email" role="alert" className="text-[11px] font-semibold text-red-700 mt-1">
@@ -349,7 +357,11 @@ export function AcademicFeedbackForm() {
                       if (err) setErrors((prev) => ({ ...prev, referenceTitle: err }));
                     }}
                     placeholder="e.g. Set 01 MCQ #142 or South Africa Capital"
-                    className="w-full min-h-[44px] text-sm sm:text-xs px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--dmc-brand-forest)]/25 focus:border-[var(--dmc-brand-forest)]"
+                    className={`w-full min-h-[44px] text-sm sm:text-xs px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 ${
+                      errors.referenceTitle
+                        ? 'border-red-600 focus:ring-red-600/20 focus:border-red-600'
+                        : 'border-slate-200 focus:ring-[var(--dmc-brand-forest)]/25 focus:border-[var(--dmc-brand-forest)]'
+                    }`}
                   />
                   {errors.referenceTitle && (
                     <p id="error-referenceTitle" role="alert" className="text-[11px] font-semibold text-red-700 mt-1">
@@ -379,7 +391,11 @@ export function AcademicFeedbackForm() {
                     if (err) setErrors((prev) => ({ ...prev, message: err }));
                   }}
                   placeholder="Provide official commission notification URL, PDF citation, or UN/ISO reference..."
-                  className="w-full text-sm sm:text-xs px-3 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[var(--dmc-brand-forest)]/25 focus:border-[var(--dmc-brand-forest)]"
+                  className={`w-full text-sm sm:text-xs px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 ${
+                    errors.message
+                      ? 'border-red-600 focus:ring-red-600/20 focus:border-red-600'
+                      : 'border-slate-200 focus:ring-[var(--dmc-brand-forest)]/25 focus:border-[var(--dmc-brand-forest)]'
+                  }`}
                 ></textarea>
                 {errors.message && (
                   <p id="error-message" role="alert" className="text-[11px] font-semibold text-red-700 mt-1">

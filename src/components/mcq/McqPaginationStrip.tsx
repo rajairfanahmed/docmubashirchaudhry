@@ -89,7 +89,7 @@ export function McqPaginationStrip({
           onClick={handlePrev}
           disabled={prevDisabled}
           aria-label="Previous question"
-          className="dmc-press min-h-[40px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-card)] text-xs font-semibold text-[var(--dmc-mcq-heading)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+          className="dmc-press min-h-[44px] min-w-[44px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-card)] text-xs font-semibold text-[var(--dmc-mcq-heading)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
         >
           Prev
         </button>
@@ -119,9 +119,9 @@ export function McqPaginationStrip({
                 type="button"
                 onClick={() => onSelectQuestion(token)}
                 aria-current={isCurrent ? 'step' : undefined}
-                aria-label={`Question ${displayNumber}`}
+                aria-label={`Question ${displayNumber}, ${isAnswered ? 'answered' : 'unanswered'}`}
                 className={cn(
-                  'dmc-press h-10 min-w-[40px] px-2.5 inline-flex items-center justify-center rounded-lg border text-xs font-bold tabular-nums cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]',
+                  'dmc-press min-h-[44px] min-w-[44px] px-2.5 inline-flex items-center justify-center rounded-lg border text-xs font-bold tabular-nums cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]',
                   isCurrent
                     ? 'border-[var(--dmc-mcq-heading)] bg-[var(--dmc-mcq-heading)] text-white shadow-xs'
                     : isAnswered
@@ -140,7 +140,7 @@ export function McqPaginationStrip({
           onClick={handleNext}
           disabled={nextDisabled}
           aria-label={nextLabel}
-          className="dmc-press min-h-[40px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-card)] text-xs font-semibold text-[var(--dmc-mcq-heading)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+          className="dmc-press min-h-[44px] min-w-[44px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-card)] text-xs font-semibold text-[var(--dmc-mcq-heading)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
         >
           {nextLabel}
         </button>

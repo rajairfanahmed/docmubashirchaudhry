@@ -110,13 +110,15 @@ export default function RootLayout({
       </head>
       <body className="bg-[var(--dmc-surface-ground)] text-[var(--dmc-ink-primary)] antialiased min-h-screen flex flex-col justify-between overflow-x-clip selection:bg-emerald-100 selection:text-emerald-900">
         <Providers>
-          <Navbar />
-          <StandingTrustNotice variant="bar" />
-          <main id="main-content" role="main" className="flex-1 w-full">
-            {children}
-          </main>
-          <PreFooterCta />
-          <Footer />
+          <div id="dmc-app-shell" className="flex-1 flex flex-col justify-between min-h-screen">
+            <Navbar />
+            <StandingTrustNotice variant="bar" />
+            <main id="main-content" role="main" className="flex-1 w-full">
+              {children}
+            </main>
+            <PreFooterCta />
+            <Footer />
+          </div>
         </Providers>
       </body>
     </html>

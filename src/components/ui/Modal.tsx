@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,9 +22,19 @@ export function Modal({
   children,
   className
 }: ModalProps) {
+  const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -32,6 +43,14 @@ export function Modal({
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
+    const appShell = document.getElementById('dmc-app-shell');
+    const hadInert = appShell?.hasAttribute('inert') ?? false;
+    const prevAriaHidden = appShell?.getAttribute('aria-hidden') ?? null;
+    if (appShell) {
+      appShell.setAttribute('inert', '');
+      appShell.setAttribute('aria-hidden', 'true');
+    }
+
     const timer = window.setTimeout(() => {
       closeBtnRef.current?.focus();
     }, 30);
@@ -39,7 +58,7 @@ export function Modal({
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
         e.preventDefault();
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -52,10 +71,10 @@ export function Modal({
         const first = focusables[0];
         const last = focusables[focusables.length - 1];
 
-        if (e.shiftKey && document.activeElement === first) {
+        if (e.shiftKey && (!containerRef.current.contains(document.activeElement) || document.activeElement === first)) {
           e.preventDefault();
           last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
+        } else if (!e.shiftKey && (!containerRef.current.contains(document.activeElement) || document.activeElement === last)) {
           e.preventDefault();
           first.focus();
         }
@@ -68,19 +87,26 @@ export function Modal({
       window.clearTimeout(timer);
       window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = prevOverflow;
-      previousFocusRef.current?.focus();
+      if (appShell) {
+        if (!hadInert) appShell.removeAttribute('inert');
+        if (prevAriaHidden === null) appShell.removeAttribute('aria-hidden');
+        else appShell.setAttribute('aria-hidden', prevAriaHidden);
+      }
+      if (previousFocusRef.current?.isConnected) {
+        previousFocusRef.current.focus();
+      }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  const dialogContent = (
     <div
       data-lenis-prevent
       className="dmc-backdrop-enter fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
       role="presentation"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) onCloseRef.current();
       }}
     >
       <div
@@ -101,9 +127,9 @@ export function Modal({
           <button
             ref={closeBtnRef}
             type="button"
-            onClick={onClose}
+            onClick={() => onCloseRef.current()}
             aria-label="Close modal dialog"
-            className="dmc-press min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg flex items-center justify-center text-[var(--dmc-ink-muted)] hover:bg-slate-100 hover:text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)] cursor-pointer shrink-0"
+            className="dmc-press min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg flex items-center justify-center text-[var(--dmc-ink-secondary)] hover:bg-slate-100 hover:text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)] cursor-pointer shrink-0"
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>
@@ -113,5 +139,7 @@ export function Modal({
       </div>
     </div>
   );
+
+  return createPortal(dialogContent, document.body);
 }
 

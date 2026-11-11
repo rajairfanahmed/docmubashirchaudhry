@@ -44,7 +44,10 @@ export function ExamHubCard({ exam, postCount = 0, pdfCount = 0 }: ExamHubCardPr
           className="inline-flex items-center gap-1.5 min-h-[44px] text-sm font-bold text-[var(--dmc-brand-forest)] hover:underline"
         >
           <BookOpen className="w-4 h-4" aria-hidden="true" />
-          <span>Explore Hub</span>
+          <span>
+            Explore Hub
+            <span className="sr-only"> for {exam.title}</span>
+          </span>
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
 
@@ -54,7 +57,10 @@ export function ExamHubCard({ exam, postCount = 0, pdfCount = 0 }: ExamHubCardPr
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 min-h-[44px] text-xs font-semibold text-[var(--dmc-ink-muted)] hover:text-[var(--dmc-ink-primary)]"
         >
-          <span>Official Site</span>
+          <span>
+            Official Site
+            <span className="sr-only"> for {exam.title} (opens in a new tab)</span>
+          </span>
           <ExternalLink className="w-3 h-3" aria-hidden="true" />
         </a>
       </div>

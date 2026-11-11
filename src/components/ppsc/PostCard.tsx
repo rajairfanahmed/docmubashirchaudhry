@@ -78,7 +78,10 @@ export function PostCard({
           href={`/ppsc/${slug}`}
           className="dmc-press inline-flex items-center justify-center gap-2 w-full min-h-[44px] bg-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-brand-emerald)] text-white font-bold text-sm py-2.5 px-4 rounded-xl elevation-1"
         >
-          <span>View Post &amp; Download PDF</span>
+          <span>
+            View Post &amp; Download PDF
+            <span className="sr-only"> for {title}</span>
+          </span>
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
       </div>

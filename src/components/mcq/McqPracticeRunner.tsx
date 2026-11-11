@@ -191,6 +191,11 @@ export function McqPracticeRunner({
         showSummary: true
       });
       scrollToStage();
+      if (typeof window !== 'undefined') {
+        window.requestAnimationFrame(() => {
+          document.getElementById('mcq-summary-heading')?.focus();
+        });
+      }
     }
   };
 
@@ -214,6 +219,11 @@ export function McqPracticeRunner({
       showSummary: false
     });
     scrollToStage();
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        document.getElementById('question-stage-heading')?.focus();
+      });
+    }
   };
 
   const handleRestartAll = () => {
@@ -231,6 +241,11 @@ export function McqPracticeRunner({
       showSummary: false
     });
     scrollToStage();
+    if (typeof window !== 'undefined') {
+      window.requestAnimationFrame(() => {
+        document.getElementById('question-stage-heading')?.focus();
+      });
+    }
   };
 
   const handleClearProgress = () => {
@@ -318,7 +333,7 @@ export function McqPracticeRunner({
       ) : (
         <>
           <div id="mcq-single-question-slot">
-            <h2 id="question-stage-heading" className="sr-only">
+            <h2 id="question-stage-heading" tabIndex={-1} className="sr-only focus:outline-none">
               Active Practice Question
             </h2>
             {currentQuestion && (

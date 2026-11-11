@@ -27,7 +27,7 @@ export function TokenSwatches() {
       contrast: '9.95:1 on Ink (AAA)',
       bg: 'bg-[var(--dmc-accent-gold)]',
       text: 'text-[var(--dmc-ink-primary)]',
-      subText: 'text-[var(--dmc-ink-primary)]/85'
+      subText: 'text-[var(--dmc-ink-primary)]'
     },
     {
       name: 'Answer Highlight',
@@ -80,8 +80,8 @@ export function TokenSwatches() {
           >
             <div className={`text-[11px] uppercase font-bold ${swatch.subText}`}>{swatch.name}</div>
             <div className="text-sm font-bold mt-1 font-mono">{swatch.hex}</div>
-            <div className="text-[10px] opacity-90 mt-1">{swatch.role}</div>
-            <div className="text-[10px] opacity-85 mt-0.5 font-semibold">{swatch.contrast}</div>
+            <div className="text-[10px] mt-1">{swatch.role}</div>
+            <div className="text-[10px] mt-0.5 font-semibold">{swatch.contrast}</div>
           </div>
         ))}
       </div>

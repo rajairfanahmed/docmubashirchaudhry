@@ -185,7 +185,7 @@ export function NavbarSearch({
               : 'flex items-center bg-slate-50 border border-slate-200 rounded-lg px-3 min-h-[38px] text-xs text-slate-500 w-48 max-w-[200px] lg:w-64 lg:max-w-[256px] focus-within:border-[var(--dmc-brand-forest)] focus-within:bg-white focus-within:ring-2 focus-within:ring-[var(--dmc-brand-forest)]/15 transition-[border-color,box-shadow,background-color] duration-150'
           }
         >
-          <Search className="w-4 h-4 mr-2 text-slate-400 shrink-0" aria-hidden="true" />
+          <Search className="w-4 h-4 mr-2 text-[var(--dmc-ink-muted)] shrink-0" aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
@@ -209,7 +209,7 @@ export function NavbarSearch({
             className={
               isMobile
                 ? 'bg-transparent border-none p-0 text-sm focus:ring-0 focus:outline-none w-full min-w-0 text-[var(--dmc-ink-primary)] placeholder-[var(--dmc-ink-muted)]'
-                : 'bg-transparent border-none p-0 text-xs focus:ring-0 focus:outline-none w-full min-w-0 text-slate-800 placeholder-slate-400'
+                : 'bg-transparent border-none p-0 text-xs focus:ring-0 focus:outline-none w-full min-w-0 text-[var(--dmc-ink-primary)] placeholder-[var(--dmc-ink-muted)]'
             }
           />
           {isLoadingIndex && (
@@ -226,7 +226,7 @@ export function NavbarSearch({
                 setActiveIndex(-1);
                 inputRef.current?.focus();
               }}
-              className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] md:min-w-[36px] md:min-h-[36px] text-slate-400 hover:text-slate-600 -mr-2 md:-mr-1.5 cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center min-w-[44px] min-h-[44px] md:min-w-[36px] md:min-h-[36px] text-[var(--dmc-ink-muted)] hover:text-[var(--dmc-ink-primary)] -mr-2 md:-mr-1.5 cursor-pointer shrink-0 rounded-md"
             >
               <X className="w-3.5 h-3.5" aria-hidden="true" />
             </button>

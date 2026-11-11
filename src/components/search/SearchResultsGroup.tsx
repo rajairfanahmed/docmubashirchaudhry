@@ -71,15 +71,31 @@ export function SearchResultsGroup({
         </h2>
 
         <div role="tablist" aria-label="Filter search results by type" className="flex flex-wrap gap-2">
-          {tabs.map((tab) => {
+          {tabs.map((tab, idx) => {
             const active = activeTab === tab.key;
             return (
               <button
                 key={tab.key}
+                id={`search-tab-${tab.key}`}
                 type="button"
                 role="tab"
+                tabIndex={active ? 0 : -1}
                 aria-selected={active}
+                aria-controls="search-results-panel"
                 onClick={() => setActiveTab(tab.key)}
+                onKeyDown={(e) => {
+                  let targetIndex = -1;
+                  if (e.key === 'ArrowRight') targetIndex = (idx + 1) % tabs.length;
+                  else if (e.key === 'ArrowLeft') targetIndex = (idx - 1 + tabs.length) % tabs.length;
+                  else if (e.key === 'Home') targetIndex = 0;
+                  else if (e.key === 'End') targetIndex = tabs.length - 1;
+                  if (targetIndex >= 0) {
+                    e.preventDefault();
+                    const nextTab = tabs[targetIndex];
+                    setActiveTab(nextTab.key);
+                    document.getElementById(`search-tab-${nextTab.key}`)?.focus();
+                  }
+                }}
                 className={`min-h-[44px] px-3.5 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer tabular-nums ${
                   active
                     ? 'bg-[var(--dmc-brand-forest)] text-white border-[var(--dmc-brand-forest)]'
@@ -92,6 +108,13 @@ export function SearchResultsGroup({
           })}
         </div>
       </div>
+
+      <div
+        id="search-results-panel"
+        role="tabpanel"
+        aria-labelledby={`search-tab-${activeTab}`}
+        className="space-y-6"
+      >
 
       {activeTab === 'all' && (
         <nav
@@ -256,6 +279,7 @@ export function SearchResultsGroup({
               </div>
             </section>
           )}
+      </div>
       </div>
     </div>
   );

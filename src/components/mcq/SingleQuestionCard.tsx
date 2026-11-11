@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useId } from 'react';
 import { ArrowRight, CheckCircle2, Info, XCircle } from 'lucide-react';
 import type { OptionId, Question } from '@/lib/schemas';
 import { AnswerHighlight } from '@/components/ui/AnswerHighlight';
@@ -32,9 +32,11 @@ export function SingleQuestionCard({
   answeredCount = 0,
   footer
 }: SingleQuestionCardProps) {
+  const stemId = useId();
   const isLocked = selectedOptionId !== null && selectedOptionId !== undefined;
   const isCorrect = isLocked && selectedOptionId === question.correctOptionId;
   const correctOpt = question.options.find((opt) => opt.id === question.correctOptionId);
+  const selectedOpt = question.options.find((opt) => opt.id === selectedOptionId);
 
   return (
     <article className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-2xl p-4 sm:p-8 lg:p-10 elevation-2 space-y-5 sm:space-y-6">
@@ -59,40 +61,40 @@ export function SingleQuestionCard({
             )}
           </div>
 
-          <h3 className="text-base sm:text-lg lg:text-xl font-bold text-[var(--dmc-mcq-heading)] leading-snug">
+          <h3 id={stemId} className="text-base sm:text-lg lg:text-xl font-bold text-[var(--dmc-mcq-heading)] leading-snug">
             {question.stem}
           </h3>
 
           <div
             className="grid grid-cols-1 md:grid-cols-2 gap-3"
             role="group"
-            aria-label="Answer options"
+            aria-labelledby={stemId}
           >
             {question.options.map((opt) => {
               const isThisSelected = selectedOptionId === opt.id;
               const isThisCorrect = opt.id === question.correctOptionId;
 
               let containerStyle =
-                'border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-card)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] text-[var(--dmc-mcq-heading)]';
+                'border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-card)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] text-[var(--dmc-mcq-heading)] cursor-pointer active:scale-[0.988]';
               let letterStyle = 'text-[var(--dmc-mcq-heading)]';
 
               if (isLocked) {
                 if (isThisCorrect && isThisSelected) {
                   containerStyle =
-                    'border-2 border-[var(--dmc-status-verified-border)] bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)]';
+                    'border-2 border-[var(--dmc-status-verified-border)] bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)] cursor-default';
                   letterStyle = 'text-[var(--dmc-status-verified-ink)]';
                 } else if (isThisCorrect && !isThisSelected) {
                   containerStyle =
-                    'border-2 border-[var(--dmc-accent-gold)] bg-[var(--dmc-highlight-bg)] text-[var(--dmc-highlight-ink)]';
+                    'border-2 border-[var(--dmc-accent-gold)] bg-[var(--dmc-highlight-bg)] text-[var(--dmc-highlight-ink)] cursor-default';
                   letterStyle = 'text-[var(--dmc-highlight-ink)]';
                 } else if (isThisSelected && !isThisCorrect) {
                   containerStyle =
-                    'border-2 border-[var(--dmc-status-error-border)] bg-[var(--dmc-status-error-bg)] text-[var(--dmc-status-error-ink)]';
+                    'border-2 border-[var(--dmc-status-error-border)] bg-[var(--dmc-status-error-bg)] text-[var(--dmc-status-error-ink)] cursor-default';
                   letterStyle = 'text-[var(--dmc-status-error-ink)]';
                 } else {
                   containerStyle =
-                    'border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-muted)]/70 text-[var(--dmc-ink-muted)] opacity-75';
-                  letterStyle = 'text-[var(--dmc-ink-muted)]';
+                    'border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-muted)] text-[var(--dmc-ink-secondary)] cursor-default';
+                  letterStyle = 'text-[var(--dmc-ink-secondary)]';
                 }
               }
 
@@ -100,11 +102,13 @@ export function SingleQuestionCard({
                 <button
                   key={opt.id}
                   type="button"
-                  disabled={isLocked}
+                  aria-disabled={isLocked || undefined}
                   aria-pressed={isThisSelected}
-                  onClick={() => onSelectOption?.(opt.id)}
+                  onClick={() => {
+                    if (!isLocked) onSelectOption?.(opt.id);
+                  }}
                   className={cn(
-                    'w-full min-h-[52px] text-left rounded-lg border px-4 py-3 flex items-center justify-between gap-2.5 text-sm font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out active:scale-[0.988] motion-reduce:transform-none cursor-pointer disabled:cursor-default disabled:active:scale-100',
+                    'w-full min-h-[52px] text-left rounded-lg border px-4 py-3 flex items-center justify-between gap-2.5 text-sm font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out motion-reduce:transform-none',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]',
                     containerStyle
                   )}
@@ -114,18 +118,24 @@ export function SingleQuestionCard({
                       {opt.id}.
                     </span>
                     <span className="leading-snug min-w-0 break-words">{opt.text}</span>
+                    {isLocked && isThisCorrect && (
+                      <span className="sr-only"> (Correct answer)</span>
+                    )}
+                    {isLocked && isThisSelected && !isThisCorrect && (
+                      <span className="sr-only"> (Your selection, incorrect)</span>
+                    )}
                   </span>
 
                   {isLocked && isThisCorrect && (
                     <CheckCircle2
                       className="w-4 h-4 text-[var(--dmc-status-verified-icon)] shrink-0"
-                      aria-label="Correct option"
+                      aria-hidden="true"
                     />
                   )}
                   {isLocked && isThisSelected && !isThisCorrect && (
                     <XCircle
                       className="w-4 h-4 text-[var(--dmc-status-error-icon)] shrink-0"
-                      aria-label="Incorrect selection"
+                      aria-hidden="true"
                     />
                   )}
                 </button>
@@ -149,6 +159,12 @@ export function SingleQuestionCard({
           aria-live="polite"
           className="dmc-reveal border-t border-[var(--dmc-border-subtle)] pt-5 space-y-3.5"
         >
+          <span className="sr-only">
+            {isCorrect
+              ? `Correct! Option ${question.correctOptionId.toUpperCase()} (${correctOpt?.text ?? ''}) is right.`
+              : `Incorrect. You selected Option ${String(selectedOptionId).toUpperCase()} (${selectedOpt?.text ?? ''}); the correct answer is Option ${question.correctOptionId.toUpperCase()} (${correctOpt?.text ?? ''}).`}
+          </span>
+
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="font-bold text-[var(--dmc-ink-primary)]">
               {isCorrect ? 'Correct pick:' : 'Correct option:'}

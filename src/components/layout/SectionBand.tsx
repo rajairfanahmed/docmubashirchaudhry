@@ -49,11 +49,14 @@ export function SectionBand({
   containerClassName,
   children
 }: SectionBandProps) {
+  const isDarkSurface = surface === 'hero' || surface === 'emerald' || surface === 'footer';
+
   return (
     <section
       id={id}
       aria-labelledby={labelledBy}
       aria-label={ariaLabel}
+      data-dmc-surface={isDarkSurface ? 'dark' : undefined}
       className={cn(SURFACE_CLASSES[surface], DENSITY_CLASSES[density], className)}
     >
       <PageContainer size={size} className={containerClassName}>

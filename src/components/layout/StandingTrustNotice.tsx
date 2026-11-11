@@ -22,6 +22,7 @@ export function StandingTrustNotice({
       <div
         role="region"
         aria-label="Standing Platform Notice"
+        data-dmc-surface="dark"
         className={cn(
           'bg-[var(--dmc-brand-dark)] text-emerald-50 border-b border-[var(--dmc-brand-emerald)]/40 text-xs',
           className
