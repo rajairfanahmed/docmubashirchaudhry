@@ -1,0 +1,36 @@
+# docmubashirchaudhry Learning Portal
+
+> Independent, free competitive exam preparation platform and solved study booklet archive curated by Doc Mubashir Chaudhry for PPSC, CSS/PMS, FPSC, and NTS candidates. Not affiliated with PPSC, FPSC, NTS, or any government commission.
+
+## Site Overview
+- Canonical Domain: https://docmubashirchaudhary.com/
+- Content Model: Open Educational Resource (OER), zero login, zero ads
+- Verification Policy: https://docmubashirchaudhary.com/methodology
+- Corrections Contact: editorial@docmubashirchaudhary.com (see https://docmubashirchaudhary.com/corrections)
+- System Manifest & Dataset Integrity: https://docmubashirchaudhary.com/status
+
+## Canonical Routes & Educational Modules
+- World Geography Reference & Quiz (`/geography`): Verified reference guide and interactive quiz covering sovereign countries and territories in the v1 dataset (`250` published records across `6` continents and `25` regions with ISO 3166-1 codes, multi-capital handling, ISO 4217 currencies, and official languages).
+- Continent Breakdowns (`/geography/continent/{slug}`): Regional groupings and linked sovereign states by continent.
+- Individual Country Profiles (`/geography/{slug}`): Sovereign country pages displaying ISO codes, capitals, currencies, official languages, source citations, and last-verified dates.
+- Exams Directory (`/exams`) & PPSC Hub (`/ppsc`): Published Punjab Public Service Commission overview and post-level recruitment hubs.
+- PPSC Post Syllabus Guides (`/ppsc/{slug}` & `/ppsc/{slug}/blueprint`): Dedicated post guides including Intelligence Officer (`BS-14`, `/ppsc/intelligent-officer`) and Tehsil Sports Officer (`BS-16`, `/ppsc/tehsil-sports-officer`), separating unverified secondary recruitment notices from editorial study plans.
+- Interactive MCQ Engine (`/mcq` & `/topics/{subject}/{topic}`): Subject and topic-filtered one-paper practice mode with explanations.
+- Open PDF Library (`/library`, `/library/{exam}`, `/library/resource/{slug}`): Direct downloadable study booklets with SHA-256 verification metadata and rights statements.
+
+## Verified Downloadable PDF Booklets (v1)
+- `(Set 01) Intelligence Officer PPSC (BS-14) 500+ MCQS` by Doc Mubashir Chaudhry (`/library/resource/intelligence-officer-bs-14-set-01`): 500+ solved one-liner MCQs, 2.63 MB (2,630,400 bytes), PDF at `/documents/ppsc/intelligent-officer/%28Set%2001%29%20Intelligence%20Officer%20PPSC%20%28BS-14%29%20500%2B%20MCQS%20By%20Doc%20Mubashir%20Chaudhry%20%281%29.pdf`.
+- `TSO PPSC (BS-16) 500+ MCQS By Doc Mubashir Chaudhry` (`/library/resource/tso-ppsc-bs-16-500-mcqs`): 500+ Physical Education, sports rules, and GK solved MCQs, 2.85 MB (2,852,491 bytes), PDF at `/documents/ppsc/intelligent-officer/TSO%20PPSC%20%28BS-16%29%20500%2B%20MCQS%20By%20Doc%20Mubashir%20Chaudhry%20%281%29.pdf`.
+
+## Static Verification Data Endpoints
+Machine-readable dataset manifests and provenance records are publicly readable under `/data/v1/`:
+- Dataset Version & Checksums Manifest: `/data/v1/manifest.json`
+- Authority Source Registry: `/data/v1/sources.json`
+- Sovereign Countries Reference Dataset: `/data/v1/geography/countries.json`
+- PDF Resource Metadata Catalog: `/data/v1/resources/pdfs.json`
+- PPSC Post & Blueprint Metadata: `/data/v1/examinations/posts-ppsc.json`, `/data/v1/examinations/blueprints-ppsc.json`
+
+## Machine Extraction Notes
+- Legacy path `/countries` permanently redirects (HTTP 308) to `/geography`.
+- Schema.org JSON-LD (`EducationalOrganization`, `WebSite` with `SearchAction`, `BreadcrumbList`, `Country`/`DefinedTermSet`, `DigitalDocument`, `Quiz`, and `LearningResource`) is embedded directly in rendered HTML pages.
+- Unverified commission records are explicitly badged as `unverified` in both visible UI and dataset JSON until an official primary gazette or commission PDF is attached.

@@ -1,0 +1,129 @@
+{
+  "datasetVersion": "v1-13cc189a56e2",
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-11T07:27:11.837Z",
+  "counts": {
+    "sources": 8,
+    "continents": 6,
+    "regions": 25,
+    "currencies": 160,
+    "languages": 154,
+    "countriesTotal": 250,
+    "countriesPublished": 250,
+    "exams": 1,
+    "recruitmentPosts": 2,
+    "blueprints": 1,
+    "questions": 4,
+    "pdfResources": 2
+  },
+  "files": {
+    "sources.json": {
+      "bytes": 2829,
+      "sha256": "13d083db200a9a66b214e91013a63d33e072710615dc7f6c809919f6a008f46b"
+    },
+    "geography/reference.json": {
+      "bytes": 25423,
+      "sha256": "868bcd0949d28eed3ab0850c28300f2e3ad010fe7ef888858d5f8daa9e1d219e"
+    },
+    "geography/countries.json": {
+      "bytes": 178548,
+      "sha256": "f473c5055272eec8a56ea8d7986267f3ced149a92a65623c3252d7462159b911"
+    },
+    "geography/countries-quiz-v1.json": {
+      "bytes": 96100,
+      "sha256": "d1f84cd52a98370d914be2325533c518375f8a92e94781a139d0c4883278fa48"
+    },
+    "geography/pages/page-1.json": {
+      "bytes": 17118,
+      "sha256": "50bfe9c920b6a3e487e91768200fbd2fa47e2539b6f2bc236e0d8b15fe7e70f2"
+    },
+    "geography/pages/page-2.json": {
+      "bytes": 17087,
+      "sha256": "7c3b84ef06d28fdde90b7219113df16589932bfc7d0188f41345f9cede86c0b4"
+    },
+    "geography/pages/page-3.json": {
+      "bytes": 17101,
+      "sha256": "5721851fc0954ea94c7526f62049411d9bd1a01124b939c736de026b7f69b8cc"
+    },
+    "geography/pages/page-4.json": {
+      "bytes": 17322,
+      "sha256": "a3054ea4e0592fc0c1ec814fec1ada6ac652198edb4d7e280f30b571aa54483f"
+    },
+    "geography/pages/page-5.json": {
+      "bytes": 17119,
+      "sha256": "bb8569d2da0567fa5f0ec63e79802cd6356f20ba2e6da3060164f8a420f8928d"
+    },
+    "geography/pages/page-6.json": {
+      "bytes": 17338,
+      "sha256": "49f1e336d8b430cbf30dd7fbca341b3bc6ece0cf57865254ee42d6aab9caf4d3"
+    },
+    "geography/pages/page-7.json": {
+      "bytes": 17078,
+      "sha256": "39a5c776ed9330fb5041c421d91756c3b0f07f46aee4473e904ccf7f106e700b"
+    },
+    "geography/pages/page-8.json": {
+      "bytes": 17259,
+      "sha256": "b52cbab79db9a74dd2cfc0dbea0125db98a094193eabde3e84ede9376ef495a6"
+    },
+    "geography/pages/page-9.json": {
+      "bytes": 17535,
+      "sha256": "1b9d8f1df3da76e9cf4c39eef35efec838fd1619c214a5e85bf36ab88c76c4bc"
+    },
+    "geography/pages/page-10.json": {
+      "bytes": 17390,
+      "sha256": "dd58c7820011bada9db2742ff63051e1679b419095c43ecbaf39cf2541a89a62"
+    },
+    "geography/pages/page-11.json": {
+      "bytes": 7554,
+      "sha256": "b92d546fdf5cee35886070953d71c53571109c0c6e6bf500293a59b4d623cb12"
+    },
+    "geography/pages/index.json": {
+      "bytes": 489,
+      "sha256": "2ff9a13a4c4daa0960525c2bcde67002debf3c3fd97d2a2f3c35f72a81c2000a"
+    },
+    "examinations/exams.json": {
+      "bytes": 733,
+      "sha256": "df5501167efff5bda23704e012afe53ca2540caa2fd93748f96d2107078a0256"
+    },
+    "examinations/branding.json": {
+      "bytes": 1908,
+      "sha256": "46b6b1ee4d602ec01f224d97415c9303d78dbd1a0231f01658363977c124f9b7"
+    },
+    "examinations/posts-ppsc.json": {
+      "bytes": 2073,
+      "sha256": "58faf10ad8ebb81fb3944fff7719a0f8e0eaaae464a72d68494bc240bd8bb27e"
+    },
+    "examinations/blueprints-ppsc.json": {
+      "bytes": 3367,
+      "sha256": "391b7982ea6c7134c4d70e7a3481d98758c0f0606c71316016b9f258589b4203"
+    },
+    "taxonomy/subjects.json": {
+      "bytes": 2331,
+      "sha256": "a7240b135450515e9783f49683fbc00dbb98f7cadbca2e2d44439cdcac536b8e"
+    },
+    "taxonomy/topics.json": {
+      "bytes": 2194,
+      "sha256": "961e6dc6f45ab709b973d7902ff5caac33b2020bc89fa994aad903b0bd33b928"
+    },
+    "questions/ppsc-samples.json": {
+      "bytes": 3334,
+      "sha256": "fac35359393923b718d27982f67fdd1c4d4f2be14a8c2c379b9cc8cddf921097"
+    },
+    "questions/pages/page-1.json": {
+      "bytes": 3442,
+      "sha256": "4f80933625caec5f826b55f6ce8f8d17ac0327b2a45ba54b9aa2b1c58f42a8d6"
+    },
+    "questions/pages/index.json": {
+      "bytes": 94,
+      "sha256": "aac29648dbeae051c7f9b25b8a4e99c43f993e3113fc5d786448d94727906313"
+    },
+    "resources/pdfs.json": {
+      "bytes": 2580,
+      "sha256": "d059627452f8a18a83d12b7d59a6a533edfd7ba2772f7dfcda0103d0fbc79b02"
+    },
+    "search-index/all.json": {
+      "bytes": 122466,
+      "sha256": "2fb58fd9091d0222fd7571723109487943c004455402e5c42810bb3c457ad678"
+    }
+  }
+}

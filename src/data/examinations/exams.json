@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "exams": [
+    {
+      "id": "exam-ppsc",
+      "slug": "ppsc",
+      "bodyCode": "PPSC",
+      "title": "Punjab Public Service Commission (PPSC)",
+      "fullName": "Punjab Public Service Commission",
+      "jurisdiction": "Punjab, Pakistan",
+      "officialPortalUrl": "https://www.ppsc.gop.pk/",
+      "logoDomain": "ppsc.gop.pk",
+      "logoUrl": "https://img.logo.dev/ppsc.gop.pk?token=pk_e4a3hiZuS9GaAmHepVmkcw&size=128&format=png&fallback=404",
+      "fallbackMonogram": "PPSC",
+      "summary": "Constitutional provincial recruitment commission conducting competitive one-paper and written examinations for BS-11 through BS-19 provincial cadres.",
+      "status": "published",
+      "verification": {
+        "status": "verified",
+        "sourceIds": ["src-ppsc-portal"],
+        "verifiedAt": "2026-11-11",
+        "lastCheckedAt": "2026-11-11",
+        "reviewIntervalDays": 90
+      }
+    },
+    {
+      "id": "exam-fpsc",
+      "slug": "fpsc",
+      "bodyCode": "FPSC",
+      "title": "Federal Public Service Commission (FPSC)",
+      "fullName": "Federal Public Service Commission",
+      "jurisdiction": "Federal Government of Pakistan",
+      "officialPortalUrl": "https://www.fpsc.gov.pk/",
+      "logoDomain": "fpsc.gov.pk",
+      "logoUrl": "https://img.logo.dev/fpsc.gov.pk?token=pk_e4a3hiZuS9GaAmHepVmkcw&size=128&format=png&fallback=404",
+      "fallbackMonogram": "FPSC",
+      "summary": "Federal civil service recruiting agency conducting CSS Competitive Examinations and General Recruitment one-paper MCQ tests.",
+      "status": "draft",
+      "verification": {
+        "status": "unverified",
+        "sourceIds": ["src-doc-mubashir-editorial"],
+        "lastCheckedAt": "2026-11-11",
+        "reviewIntervalDays": 90,
+        "notes": "Scheduled for Sprint S7 dedicated exam hub expansion."
+      }
+    }
+  ]
+}
+

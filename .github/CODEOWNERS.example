@@ -1,0 +1,6 @@
+# Example repository reviewers for sensitive data & PDF rights directories
+/src/data/sources.json @docmubashirchaudhry-maintainer
+/src/data/examinations/ @docmubashirchaudhry-maintainer
+/src/data/resources/pdf-resources.json @docmubashirchaudhry-maintainer
+/public/documents/ @docmubashirchaudhry-maintainer
+

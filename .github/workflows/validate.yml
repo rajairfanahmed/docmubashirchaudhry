@@ -1,0 +1,39 @@
+name: Dataset & Build Integrity CI
+
+on:
+  pull_request:
+    branches: [main, master]
+  push:
+    branches: [main, master]
+
+jobs:
+  validate-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate JSON schemas, foreign keys & PDF checksums
+        run: npm run validate
+
+      - name: Build static /data/v1 artifacts & search index
+        run: npm run data:build
+
+      - name: Run Vitest unit and integration suite
+        run: npm test
+
+      - name: Production Next.js build
+        run: npm run build
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+

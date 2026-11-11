@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "continents": [
+    { "id": "cont-asia", "slug": "asia", "name": "Asia", "code": "AS" },
+    { "id": "cont-europe", "slug": "europe", "name": "Europe", "code": "EU" },
+    { "id": "cont-africa", "slug": "africa", "name": "Africa", "code": "AF" },
+    { "id": "cont-americas", "slug": "americas", "name": "Americas", "code": "AM" },
+    { "id": "cont-oceania", "slug": "oceania", "name": "Oceania", "code": "OC" },
+    { "id": "cont-antarctica", "slug": "antarctica", "name": "Antarctica", "code": "AN" }
+  ]
+}
+

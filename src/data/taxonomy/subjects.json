@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "subjects": [
+    {
+      "id": "sub-gk",
+      "slug": "general-knowledge",
+      "name": "General Knowledge & World Geography",
+      "description": "World capitals, currencies, organizations, geographical records, and high-yield exam facts.",
+      "accentHex": "#0d4a28",
+      "iconName": "Globe",
+      "badgeLabel": "GK & World"
+    },
+    {
+      "id": "sub-pak-studies",
+      "slug": "pakistan-affairs",
+      "name": "Pakistan Affairs & History",
+      "description": "Constitutional history, pre-partition struggle, physical geography of Pakistan, and national landmarks.",
+      "accentHex": "#15803d",
+      "iconName": "Landmark",
+      "iconUrl": "https://flagcdn.com/pk.svg",
+      "badgeLabel": "Pakistan"
+    },
+    {
+      "id": "sub-islamic-studies",
+      "slug": "islamic-studies",
+      "name": "Islamic Studies & Ethics",
+      "description": "Quranic sciences, Seerah, Islamic jurisprudence fundamentals, and historical milestones.",
+      "accentHex": "#b45309",
+      "iconName": "BookOpenCheck",
+      "badgeLabel": "Islamiat"
+    },
+    {
+      "id": "sub-everyday-science",
+      "slug": "everyday-science",
+      "name": "Everyday Science",
+      "description": "Human biology, basic physics, chemistry concepts, vitamins, and atmospheric science.",
+      "accentHex": "#7e22ce",
+      "iconName": "FlaskConical",
+      "badgeLabel": "Science"
+    },
+    {
+      "id": "sub-english",
+      "slug": "english",
+      "name": "English Grammar & Vocabulary",
+      "description": "Prepositions, idioms, sentence correction, active/passive voice, and analogies.",
+      "accentHex": "#1d4ed8",
+      "iconName": "Languages",
+      "badgeLabel": "English"
+    },
+    {
+      "id": "sub-urdu",
+      "slug": "urdu",
+      "name": "Urdu Literature & Grammar",
+      "description": "Classic Urdu prose/poetry authors, proverbs, grammar, and terminology.",
+      "accentHex": "#c2410c",
+      "iconName": "Feather",
+      "badgeLabel": "Urdu"
+    },
+    {
+      "id": "sub-math",
+      "slug": "basic-mathematics",
+      "name": "Basic Mathematics & Mental Ability",
+      "description": "Ratios, percentages, averages, number series, and word problems.",
+      "accentHex": "#be123c",
+      "iconName": "Calculator",
+      "badgeLabel": "Math"
+    },
+    {
+      "id": "sub-computer",
+      "slug": "basic-computer-studies",
+      "name": "Basic Computer Studies & IT",
+      "description": "Hardware, networking protocols, MS Office shortcuts, databases, and cybersecurity concepts.",
+      "accentHex": "#0369a1",
+      "iconName": "Cpu",
+      "badgeLabel": "CS / IT"
+    },
+    {
+      "id": "sub-sports",
+      "slug": "sports-and-physical-education",
+      "name": "Sports & Physical Education",
+      "description": "Olympic records, field dimensions, tournament rules, and sports governance for TSO exams.",
+      "accentHex": "#d97706",
+      "iconName": "Trophy",
+      "badgeLabel": "Sports"
+    }
+  ]
+}

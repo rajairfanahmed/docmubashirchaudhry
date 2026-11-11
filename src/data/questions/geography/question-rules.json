@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "factTypes": ["capital", "currency", "language"],
+  "minimumDistractorsRequired": 3,
+  "distractorPriority": ["sameRegion", "sameContinent", "global"],
+  "requireVerifiedCountryForQuiz": true,
+  "excludeDisputedFacts": true,
+  "normalization": {
+    "unicodeForm": "NFD",
+    "stripCombiningDiacritics": true,
+    "caseInsensitive": true
+  }
+}
+

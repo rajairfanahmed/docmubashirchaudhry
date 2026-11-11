@@ -1,0 +1,672 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-inter, 'Inter'), var(--font-jakarta, 'Plus Jakarta Sans'), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-jakarta, 'Plus Jakarta Sans'), var(--font-inter, 'Inter'), system-ui, -apple-system, sans-serif;
+
+  /* Brand & Surface Colors */
+  --color-brand-forest: var(--dmc-brand-forest);
+  --color-brand-dark: var(--dmc-brand-dark);
+  --color-brand-emerald: var(--dmc-brand-emerald);
+  --color-brand-surface: var(--dmc-brand-surface);
+  --color-brand-surface-dark: var(--dmc-brand-surface-dark);
+  --color-brand-footer: var(--dmc-brand-footer);
+  --color-brand-flag: var(--dmc-brand-flag);
+  --color-brand-primary: var(--dmc-brand-forest);
+  --color-brand-hover: var(--dmc-brand-emerald);
+  --color-brand-amber: var(--dmc-accent-gold-hover);
+  --color-brand-gold: var(--dmc-accent-gold);
+  --color-brand-amber-light: var(--dmc-status-unverified-bg);
+  --color-brand-amber-dark: var(--dmc-accent-gold-dark);
+  --color-brand-accent: var(--dmc-accent-sand);
+  --color-footer-base: var(--dmc-brand-footer);
+
+  /* Surfaces & Ink */
+  --color-surface-ground: var(--dmc-surface-ground);
+  --color-surface-card: var(--dmc-surface-card);
+  --color-surface-muted: var(--dmc-surface-muted);
+  --color-surface-mcq-sheet: var(--dmc-surface-mcq-sheet);
+  --color-surface-mcq-sheet-tint: var(--dmc-surface-mcq-sheet-tint);
+  --color-mcq-sheet-arc: var(--dmc-mcq-sheet-arc);
+  --color-mcq-heading: var(--dmc-mcq-heading);
+  --color-ring-track: var(--dmc-ring-track);
+  --color-ring-fill: var(--dmc-brand-forest);
+  --color-ink-primary: var(--dmc-ink-primary);
+  --color-ink-secondary: var(--dmc-ink-secondary);
+  --color-ink-muted: var(--dmc-ink-muted);
+  --color-border-subtle: var(--dmc-border-subtle);
+  --color-border-strong: var(--dmc-border-strong);
+
+  /* Accents & Golden Highlighter Pills (#FEF08A / #78350F AAA) */
+  --color-accent-gold: var(--dmc-accent-gold);
+  --color-accent-gold-hover: var(--dmc-accent-gold-hover);
+  --color-accent-amber: var(--dmc-accent-gold-dark);
+  --color-accent-surface: var(--dmc-status-unverified-bg);
+  --color-accent-highlight: var(--dmc-highlight-bg);
+  --color-accent-highlight-text: var(--dmc-highlight-ink);
+  --color-highlight-bg: var(--dmc-highlight-bg);
+  --color-highlight-ink: var(--dmc-highlight-ink);
+  --color-highlight-border: var(--dmc-highlight-border);
+
+  /* Semantic & Epistemic Tokens */
+  --color-status-verified-bg: var(--dmc-status-verified-bg);
+  --color-status-verified-border: var(--dmc-status-verified-border);
+  --color-status-verified-ink: var(--dmc-status-verified-ink);
+  --color-status-verified-icon: var(--dmc-status-verified-icon);
+  --color-status-error-bg: var(--dmc-status-error-bg);
+  --color-status-error-border: var(--dmc-status-error-border);
+  --color-status-error-ink: var(--dmc-status-error-ink);
+  --color-status-error-icon: var(--dmc-status-error-icon);
+  --color-status-unverified-bg: var(--dmc-status-unverified-bg);
+  --color-status-unverified-border: var(--dmc-status-unverified-border);
+  --color-status-unverified-ink: var(--dmc-status-unverified-ink);
+  --color-status-unverified-icon: var(--dmc-status-unverified-icon);
+  --color-status-disputed-bg: var(--dmc-status-disputed-bg);
+  --color-status-disputed-border: var(--dmc-status-disputed-border);
+  --color-status-disputed-ink: var(--dmc-status-disputed-ink);
+  --color-status-archived-bg: var(--dmc-status-archived-bg);
+  --color-status-archived-border: var(--dmc-status-archived-border);
+  --color-status-archived-ink: var(--dmc-status-archived-ink);
+  --color-status-outdated-bg: var(--dmc-status-outdated-bg);
+  --color-status-outdated-border: var(--dmc-status-outdated-border);
+  --color-status-outdated-ink: var(--dmc-status-outdated-ink);
+  --color-status-editorial-bg: var(--dmc-status-editorial-bg);
+  --color-status-editorial-border: var(--dmc-status-editorial-border);
+  --color-status-editorial-ink: var(--dmc-status-editorial-ink);
+
+  /* Spacing Scale */
+  --spacing-dmc-1: var(--dmc-space-1);
+  --spacing-dmc-2: var(--dmc-space-2);
+  --spacing-dmc-3: var(--dmc-space-3);
+  --spacing-dmc-4: var(--dmc-space-4);
+  --spacing-dmc-5: var(--dmc-space-5);
+  --spacing-dmc-6: var(--dmc-space-6);
+  --spacing-dmc-8: var(--dmc-space-8);
+  --spacing-dmc-12: var(--dmc-space-12);
+  --spacing-dmc-16: var(--dmc-space-16);
+
+  /* Radii & Material Elevations */
+  --radius-pill: var(--dmc-radius-pill);
+  --radius-button: var(--dmc-radius-button);
+  --radius-squircle: var(--dmc-radius-squircle);
+  --radius-card: var(--dmc-radius-card);
+  --radius-modal: var(--dmc-radius-modal);
+  --shadow-material-0: var(--dmc-shadow-0);
+  --shadow-material-1: var(--dmc-shadow-1);
+  --shadow-material-2: var(--dmc-shadow-2);
+  --shadow-material-3: var(--dmc-shadow-3);
+
+  /* Legacy & Feature Component Token Mappings */
+  --color-pdf-icon-bg: var(--dmc-pdf-icon-bg);
+  --color-pdf-icon-fg: var(--dmc-pdf-icon-fg);
+  --color-pdf-border-subtle: var(--dmc-pdf-border-subtle);
+  --color-pdf-spine-primary: var(--dmc-brand-forest);
+  --color-pdf-spine-secondary: var(--dmc-accent-gold-dark);
+  --color-pdf-chip-bg: var(--dmc-status-archived-bg);
+  --color-pdf-chip-text: var(--dmc-status-archived-ink);
+  --color-cta-gold-base: var(--dmc-accent-gold);
+  --color-cta-gold-hover: var(--dmc-accent-gold-hover);
+  --color-cta-gold-text: var(--dmc-ink-primary);
+  --color-meter-track: var(--dmc-status-archived-bg);
+  --color-meter-gk: var(--dmc-meter-gk);
+  --color-meter-pakistan: var(--dmc-brand-forest);
+  --color-meter-islamic: var(--dmc-meter-islamic);
+  --color-meter-science: var(--dmc-meter-science);
+  --color-meter-english: var(--dmc-meter-english);
+  --color-meter-urdu: var(--dmc-meter-urdu);
+  --color-meter-math-comp: var(--dmc-meter-math-comp);
+  --color-success-base: var(--dmc-status-verified-icon);
+  --color-success-surface: var(--dmc-status-verified-bg);
+  --color-success-text: var(--dmc-status-verified-ink);
+  --color-error-base: var(--dmc-status-error-icon);
+  --color-error-surface: var(--dmc-status-error-bg);
+  --color-error-text: var(--dmc-status-error-ink);
+}
+
+/**
+ * docmubashirchaudhary - Canonical Visual Design System (Step 2 Populated)
+ * Implements docs/visual-design.md: Academic Emerald & Gold + Material Elevation
+ * Strictly Audited for WCAG 2.2 AA/AAA Contrast and Zero Em Dashes
+ */
+
+:root {
+  /* 1. Brand & Core Surfaces */
+  --dmc-brand-forest: #0d4a28;
+  --dmc-brand-dark: #08331b;
+  --dmc-brand-emerald: #116135;
+  --dmc-brand-surface: #093a1f;
+  --dmc-brand-surface-dark: var(--dmc-brand-surface);
+  --dmc-brand-footer: #051c0e;
+  --dmc-brand-flag: #01411c;
+
+  /* 2. Accents & Exact Golden Highlight Pill (#FEF08A / #78350F = 10.2:1 AAA) */
+  --dmc-accent-gold: #f0b938;
+  --dmc-accent-gold-hover: #f59e0b;
+  --dmc-accent-gold-dark: #d97706;
+  --dmc-accent-sand: #d4a373;
+  --dmc-highlight-bg: #fef08a;
+  --dmc-highlight-ink: #78350f;
+  --dmc-highlight-border: #fde047;
+
+  /* 3. Neutral Surfaces, /mcq/practice Sheet, Typography Ink & Borders */
+  --dmc-surface-ground: #fafbfc;
+  --dmc-surface-muted: #f8fafc;
+  --dmc-surface-card: #ffffff;
+  --dmc-surface-mcq-sheet: #e6f4f1;
+  --dmc-surface-mcq-sheet-tint: #f0fbf8;
+  --dmc-mcq-sheet-arc: rgba(13, 74, 40, 0.08);
+  --dmc-mcq-heading: #14281d;
+  --dmc-ring-track: #e5e7eb;
+  --dmc-ink-primary: #0f172a;
+  --dmc-ink-secondary: #475569;
+  --dmc-ink-muted: #64748b;
+  --dmc-border-subtle: #e2e8f0;
+  --dmc-border-strong: #cbd5e1;
+
+  /* 4. Semantic, Epistemic & Quiz States */
+  --dmc-status-verified-bg: #ecfdf5;
+  --dmc-status-verified-border: #10b981;
+  --dmc-status-verified-ink: #065f46;
+  --dmc-status-verified-icon: #059669;
+
+  --dmc-status-error-bg: #fef2f2;
+  --dmc-status-error-border: #ef4444;
+  --dmc-status-error-ink: #991b1b;
+  --dmc-status-error-icon: #dc2626;
+
+  --dmc-status-unverified-bg: #fffbeb;
+  --dmc-status-unverified-border: #f59e0b;
+  --dmc-status-unverified-ink: #92400e;
+  --dmc-status-unverified-icon: #d97706;
+
+  --dmc-status-disputed-bg: #fff7ed;
+  --dmc-status-disputed-border: #f97316;
+  --dmc-status-disputed-ink: #9a3412;
+
+  --dmc-status-archived-bg: #f1f5f9;
+  --dmc-status-archived-border: #94a3b8;
+  --dmc-status-archived-ink: #334155;
+
+  --dmc-status-outdated-bg: var(--dmc-status-archived-bg);
+  --dmc-status-outdated-border: var(--dmc-status-archived-border);
+  --dmc-status-outdated-ink: var(--dmc-status-archived-ink);
+
+  --dmc-status-editorial-bg: #eff6ff;
+  --dmc-status-editorial-border: #93c5fd;
+  --dmc-status-editorial-ink: #1e3a8a;
+
+  /* Feature Accent & Document Badges */
+  --dmc-pdf-icon-bg: #fee2e2;
+  --dmc-pdf-icon-fg: #dc2626;
+  --dmc-pdf-border-subtle: #fecaca;
+  --dmc-meter-gk: #2563eb;
+  --dmc-meter-islamic: #ca8a04;
+  --dmc-meter-science: #7c3aed;
+  --dmc-meter-english: #9333ea;
+  --dmc-meter-urdu: #ea580c;
+  --dmc-meter-math-comp: #0284c7;
+
+  /* 5. Subject Taxonomy Pastel Tile Palette (10 Categories) */
+  --dmc-subject-gk-bg: #ecfdf5;       --dmc-subject-gk-ink: #0d4a28;
+  --dmc-subject-pak-bg: #dcfce7;      --dmc-subject-pak-ink: #15803d;
+  --dmc-subject-islamic-bg: #fef3c7;  --dmc-subject-islamic-ink: #b45309;
+  --dmc-subject-science-bg: #f3e8ff;  --dmc-subject-science-ink: #7e22ce;
+  --dmc-subject-english-bg: #dbeafe;  --dmc-subject-english-ink: #1d4ed8;
+  --dmc-subject-urdu-bg: #ffedd5;     --dmc-subject-urdu-ink: #c2410c;
+  --dmc-subject-math-bg: #ffe4e6;     --dmc-subject-math-ink: #be123c;
+  --dmc-subject-computer-bg: #e0f2fe; --dmc-subject-computer-ink: #0369a1;
+  --dmc-subject-sports-bg: #fef9c3;   --dmc-subject-sports-ink: #a16207;
+  --dmc-subject-mixed-bg: #ede9fe;    --dmc-subject-mixed-ink: #6d28d9;
+
+  /* 6. Spacing Scale (4px / 8px Base Rhythm) */
+  --dmc-space-1: 0.25rem;
+  --dmc-space-2: 0.5rem;
+  --dmc-space-3: 0.75rem;
+  --dmc-space-4: 1rem;
+  --dmc-space-5: 1.25rem;
+  --dmc-space-6: 1.5rem;
+  --dmc-space-8: 2rem;
+  --dmc-space-12: 3rem;
+  --dmc-space-16: 4rem;
+
+  /* 7. Fluid Typography Scale & Measure Tokens */
+  --dmc-text-display-hero: clamp(2rem, 3.2vw + 1.15rem, 2.75rem);
+  --dmc-text-page-title: clamp(1.625rem, 2.2vw + 1.05rem, 2.125rem);
+  --dmc-text-section-heading: clamp(1.375rem, 1.4vw + 0.95rem, 1.75rem);
+  --dmc-text-card-title: clamp(1.0625rem, 0.5vw + 0.95rem, 1.1875rem);
+  --dmc-text-body-base: clamp(0.9375rem, 0.25vw + 0.875rem, 1rem);
+  --dmc-text-body-sm: 0.875rem;
+  --dmc-text-label-micro: 0.75rem;
+  --dmc-text-label-xs: 0.6875rem;
+  --dmc-measure-prose: 68ch;
+
+  /* 8. Radii Tokens */
+  --dmc-radius-pill: 9999px;
+  --dmc-radius-button: 0.625rem;
+  --dmc-radius-squircle: 0.75rem;
+  --dmc-radius-card: 1rem;
+  --dmc-radius-modal: 1.25rem;
+
+  /* 9. Material Design Elevation Shadows */
+  --dmc-shadow-0: none;
+  --dmc-shadow-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+  --dmc-shadow-2: 0 8px 20px -4px rgba(13, 74, 40, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
+  --dmc-shadow-3: 0 20px 32px -8px rgba(8, 51, 27, 0.18), 0 8px 16px -4px rgba(15, 23, 42, 0.06);
+
+  /* Legacy Aliases (bridging components cleanly onto single-source --dmc-* tokens) */
+  --color-brand-dark: var(--dmc-brand-dark);
+  --color-brand-forest: var(--dmc-brand-forest);
+  --color-brand-emerald: var(--dmc-brand-emerald);
+  --color-brand-surface: var(--dmc-brand-surface);
+  --color-brand-amber: var(--dmc-accent-gold-hover);
+  --color-brand-gold: var(--dmc-accent-gold);
+  --color-brand-amber-light: var(--dmc-status-unverified-bg);
+  --color-brand-amber-dark: var(--dmc-accent-gold-dark);
+  --color-brand-accent: var(--dmc-accent-sand);
+  --color-footer-base: var(--dmc-brand-footer);
+  --color-surface-ground: var(--dmc-surface-ground);
+  --color-accent-gold: var(--dmc-accent-gold);
+  --color-accent-amber: var(--dmc-accent-gold-dark);
+  --color-accent-surface: var(--dmc-status-unverified-bg);
+  --color-accent-highlight: var(--dmc-highlight-bg);
+  --color-accent-highlight-text: var(--dmc-highlight-ink);
+  --color-surface-base: var(--dmc-surface-card);
+  --color-border-subtle: var(--dmc-border-subtle);
+  --color-border-strong: var(--dmc-border-strong);
+  --color-border-focus: var(--dmc-brand-forest);
+  --color-text-main: var(--dmc-ink-primary);
+  --color-text-body: var(--dmc-ink-secondary);
+  --color-text-muted: var(--dmc-ink-muted);
+  --color-text-subtle: var(--dmc-ink-muted);
+  --color-success-base: var(--dmc-status-verified-icon);
+  --color-success-surface: var(--dmc-status-verified-bg);
+  --color-success-text: var(--dmc-status-verified-ink);
+  --color-error-base: var(--dmc-status-error-icon);
+  --color-error-surface: var(--dmc-status-error-bg);
+  --color-error-text: var(--dmc-status-error-ink);
+  --color-pdf-icon-bg: var(--dmc-pdf-icon-bg);
+  --color-pdf-icon-fg: var(--dmc-pdf-icon-fg);
+  --color-pdf-border-subtle: var(--dmc-pdf-border-subtle);
+  --color-pdf-spine-primary: var(--dmc-brand-forest);
+  --color-pdf-spine-secondary: var(--dmc-accent-gold-dark);
+  --color-pdf-chip-bg: var(--dmc-status-archived-bg);
+  --color-pdf-chip-text: var(--dmc-status-archived-ink);
+  --color-cta-gold-base: var(--dmc-accent-gold);
+  --color-cta-gold-hover: var(--dmc-accent-gold-hover);
+  --color-cta-gold-text: var(--dmc-ink-primary);
+  --color-meter-track: var(--dmc-status-archived-bg);
+  --color-meter-gk: var(--dmc-meter-gk);
+  --color-meter-pakistan: var(--dmc-brand-forest);
+  --color-meter-islamic: var(--dmc-meter-islamic);
+  --color-meter-science: var(--dmc-meter-science);
+  --color-meter-english: var(--dmc-meter-english);
+  --color-meter-urdu: var(--dmc-meter-urdu);
+  --color-meter-math-comp: var(--dmc-meter-math-comp);
+  --pastel-general-bg: var(--dmc-subject-gk-bg);        --pastel-general-icon: var(--dmc-subject-gk-ink);
+  --pastel-affairs-bg: var(--dmc-subject-islamic-bg);   --pastel-affairs-icon: var(--dmc-subject-islamic-ink);
+  --pastel-pakistan-bg: var(--dmc-subject-pak-bg);      --pastel-pakistan-icon: var(--dmc-subject-pak-ink);
+  --pastel-geography-bg: var(--dmc-subject-gk-bg);      --pastel-geography-icon: var(--dmc-subject-gk-ink);
+  --pastel-science-bg: var(--dmc-subject-science-bg);   --pastel-science-icon: var(--dmc-subject-science-ink);
+  --pastel-islamic-bg: var(--dmc-subject-sports-bg);    --pastel-islamic-icon: var(--dmc-subject-sports-ink);
+  --pastel-computer-bg: var(--dmc-subject-computer-bg); --pastel-computer-icon: var(--dmc-subject-computer-ink);
+  --pastel-math-bg: var(--dmc-subject-math-bg);         --pastel-math-icon: var(--dmc-subject-math-ink);
+  --pastel-english-bg: var(--dmc-subject-english-bg);   --pastel-english-icon: var(--dmc-subject-english-ink);
+  --pastel-urdu-bg: var(--dmc-subject-urdu-bg);         --pastel-urdu-icon: var(--dmc-subject-urdu-ink);
+}
+
+/* Base Canvas & Typographic Role Tokens */
+body {
+  font-family: var(--font-inter, 'Inter'), var(--font-jakarta, 'Plus Jakarta Sans'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: var(--dmc-text-body-base);
+  line-height: 1.6;
+  background-color: var(--dmc-surface-ground);
+  color: var(--dmc-ink-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans'), var(--font-inter, 'Inter'), system-ui, -apple-system, sans-serif;
+}
+
+.type-display-hero {
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans'), sans-serif;
+  font-size: var(--dmc-text-display-hero);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+.type-page-title {
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans'), sans-serif;
+  font-size: var(--dmc-text-page-title);
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.type-section-heading {
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans'), sans-serif;
+  font-size: var(--dmc-text-section-heading);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.type-card-title {
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans'), sans-serif;
+  font-size: var(--dmc-text-card-title);
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.type-body-base {
+  font-size: var(--dmc-text-body-base);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.type-body-sm {
+  font-size: var(--dmc-text-body-sm);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.type-label-micro {
+  font-family: var(--font-jakarta, 'Plus Jakarta Sans'), var(--font-inter, 'Inter'), system-ui, sans-serif;
+  font-size: var(--dmc-text-label-micro);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.type-prose-measure {
+  max-width: var(--dmc-measure-prose);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Brand Hero Gradient Surface */
+.hero-gradient {
+  background: linear-gradient(180deg, var(--dmc-brand-emerald) 0%, var(--dmc-brand-forest) 55%, var(--dmc-brand-dark) 100%);
+}
+
+/* Pill Badges */
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.85rem;
+  border-radius: var(--dmc-radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Lenis Smooth Scroll Structural Rules */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+/* Card Hover & Tactile Press Micro-Interactions */
+.track-card {
+  transition:
+    transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.18s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.18s ease,
+    background-color 0.16s ease;
+}
+.track-card:hover {
+  transform: translate3d(0, -2px, 0);
+  box-shadow: var(--dmc-shadow-2);
+}
+.track-card:active {
+  transform: translate3d(0, 0, 0) scale(0.992);
+  transition-duration: 90ms;
+}
+
+/* Tactile Press Feedback for Clickable Controls */
+.dmc-press {
+  transition:
+    transform 120ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+.dmc-press:active {
+  transform: scale(0.985);
+}
+
+/* Animated 3-Line Hamburger Icon Morph */
+.dmc-hamburger {
+  position: relative;
+  width: 20px;
+  height: 14px;
+  display: inline-block;
+}
+.dmc-hamburger-line {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 9999px;
+  background-color: currentColor;
+  transform-origin: center center;
+  transition:
+    transform 190ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 140ms ease;
+}
+.dmc-hamburger-line-1 {
+  top: 0;
+}
+.dmc-hamburger-line-2 {
+  top: 6px;
+}
+.dmc-hamburger-line-3 {
+  top: 12px;
+}
+.dmc-hamburger[data-open='true'] .dmc-hamburger-line-1 {
+  transform: translate3d(0, 6px, 0) rotate(45deg);
+}
+.dmc-hamburger[data-open='true'] .dmc-hamburger-line-2 {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.dmc-hamburger[data-open='true'] .dmc-hamburger-line-3 {
+  transform: translate3d(0, -6px, 0) rotate(-45deg);
+}
+
+/* GPU-Composited Surface & Disclosure Entrances */
+@keyframes dmcFadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes dmcBackdropFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dmcModalEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+@keyframes dmcToastEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+.dmc-reveal {
+  animation: dmcFadeSlideDown 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dmc-question-enter {
+  animation: dmcFadeSlideDown 170ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dmc-drawer-enter {
+  animation: dmcFadeSlideDown 190ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.dmc-backdrop-enter {
+  animation: dmcBackdropFade 160ms ease-out both;
+}
+.dmc-modal-enter {
+  animation: dmcModalEnter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.dmc-toast-enter {
+  animation: dmcToastEnter 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes dmcSkeletonPulse {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+.dmc-skeleton {
+  background-color: var(--dmc-border-subtle);
+  animation: dmcSkeletonPulse 1.4s ease-in-out infinite;
+}
+
+/* Pulsating Live Status Dot */
+.pulse-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--dmc-status-verified-icon);
+  box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.65);
+  animation: pulseAnimation 2s ease-in-out infinite;
+}
+@keyframes pulseAnimation {
+  0% {
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.65);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(5, 150, 105, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
+  }
+}
+
+/* Universal Visible Focus Indicator */
+:focus-visible {
+  outline: 2px solid var(--dmc-brand-forest);
+  outline-offset: 2px;
+}
+
+/* Signature Golden Answer Pill (#FEF08A + #78350F) */
+.answer-highlight {
+  background-color: var(--dmc-highlight-bg);
+  color: var(--dmc-highlight-ink);
+  border: 1px solid var(--dmc-highlight-border);
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: var(--dmc-radius-pill);
+  display: inline-block;
+  line-height: 1.35;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+
+/* Soft pale-mint outer practice surface (/mcq/practice only) */
+.mcq-sheet-surface {
+  background: linear-gradient(180deg, var(--dmc-surface-mcq-sheet) 0%, var(--dmc-surface-mcq-sheet-tint) 100%);
+}
+
+/* Hide scrollbar for touch ribbons */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Material Design Elevation Utility Classes */
+.elevation-0 {
+  box-shadow: var(--dmc-shadow-0);
+}
+.elevation-1 {
+  box-shadow: var(--dmc-shadow-1);
+}
+.elevation-2 {
+  box-shadow: var(--dmc-shadow-2);
+}
+.elevation-3 {
+  box-shadow: var(--dmc-shadow-3);
+}
+
+/* Universal Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pulse-dot,
+  .pulse-dot::after,
+  .animate-celebration-particle,
+  .dmc-reveal,
+  .dmc-question-enter,
+  .dmc-drawer-enter,
+  .dmc-modal-enter,
+  .dmc-backdrop-enter,
+  .dmc-toast-enter,
+  .dmc-skeleton {
+    animation: none !important;
+  }
+  .track-card:hover,
+  .track-card:active,
+  .dmc-press:active {
+    transform: none !important;
+  }
+}
+
+/* Mobile sticky PDF bar clearance for Footer without affecting other routes */
+@media (max-width: 767px) {
+  body:has([data-sticky-download-bar]) footer[role='contentinfo'] {
+    padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
+  }
+}

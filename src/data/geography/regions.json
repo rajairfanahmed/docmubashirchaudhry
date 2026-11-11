@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "regions": [
+    {
+      "id": "reg-southern-asia",
+      "slug": "southern-asia",
+      "name": "Southern Asia",
+      "continentId": "cont-asia"
+    },
+    {
+      "id": "reg-western-asia",
+      "slug": "western-asia",
+      "name": "Western Asia",
+      "continentId": "cont-asia"
+    },
+    {
+      "id": "reg-eastern-asia",
+      "slug": "eastern-asia",
+      "name": "Eastern Asia",
+      "continentId": "cont-asia"
+    },
+    {
+      "id": "reg-south-eastern-asia",
+      "slug": "south-eastern-asia",
+      "name": "South-Eastern Asia",
+      "continentId": "cont-asia"
+    },
+    {
+      "id": "reg-central-asia",
+      "slug": "central-asia",
+      "name": "Central Asia",
+      "continentId": "cont-asia"
+    },
+    {
+      "id": "reg-western-europe",
+      "slug": "western-europe",
+      "name": "Western Europe",
+      "continentId": "cont-europe"
+    },
+    {
+      "id": "reg-northern-europe",
+      "slug": "northern-europe",
+      "name": "Northern Europe",
+      "continentId": "cont-europe"
+    },
+    {
+      "id": "reg-southern-europe",
+      "slug": "southern-europe",
+      "name": "Southern Europe",
+      "continentId": "cont-europe"
+    },
+    {
+      "id": "reg-eastern-europe",
+      "slug": "eastern-europe",
+      "name": "Eastern Europe",
+      "continentId": "cont-europe"
+    },
+    {
+      "id": "reg-southeast-europe",
+      "slug": "southeast-europe",
+      "name": "Southeast Europe",
+      "continentId": "cont-europe"
+    },
+    {
+      "id": "reg-northern-africa",
+      "slug": "northern-africa",
+      "name": "Northern Africa",
+      "continentId": "cont-africa"
+    },
+    {
+      "id": "reg-western-africa",
+      "slug": "western-africa",
+      "name": "Western Africa",
+      "continentId": "cont-africa"
+    },
+    {
+      "id": "reg-southern-africa",
+      "slug": "southern-africa",
+      "name": "Southern Africa",
+      "continentId": "cont-africa"
+    },
+    {
+      "id": "reg-north-america",
+      "slug": "north-america",
+      "name": "North America",
+      "continentId": "cont-americas"
+    },
+    {
+      "id": "reg-south-america",
+      "slug": "south-america",
+      "name": "South America",
+      "continentId": "cont-americas"
+    },
+    {
+      "id": "reg-australia-nz",
+      "slug": "australia-and-new-zealand",
+      "name": "Australia and New Zealand",
+      "continentId": "cont-oceania"
+    },
+    {
+      "id": "reg-caribbean",
+      "slug": "caribbean",
+      "name": "Caribbean",
+      "continentId": "cont-americas"
+    },
+    {
+      "id": "reg-middle-africa",
+      "slug": "middle-africa",
+      "name": "Middle Africa",
+      "continentId": "cont-africa"
+    },
+    {
+      "id": "reg-polynesia",
+      "slug": "polynesia",
+      "name": "Polynesia",
+      "continentId": "cont-oceania"
+    },
+    {
+      "id": "reg-antarctic",
+      "slug": "antarctic",
+      "name": "Antarctic",
+      "continentId": "cont-antarctica"
+    },
+    {
+      "id": "reg-eastern-africa",
+      "slug": "eastern-africa",
+      "name": "Eastern Africa",
+      "continentId": "cont-africa"
+    },
+    {
+      "id": "reg-central-america",
+      "slug": "central-america",
+      "name": "Central America",
+      "continentId": "cont-americas"
+    },
+    {
+      "id": "reg-central-europe",
+      "slug": "central-europe",
+      "name": "Central Europe",
+      "continentId": "cont-europe"
+    },
+    {
+      "id": "reg-melanesia",
+      "slug": "melanesia",
+      "name": "Melanesia",
+      "continentId": "cont-oceania"
+    },
+    {
+      "id": "reg-micronesia",
+      "slug": "micronesia",
+      "name": "Micronesia",
+      "continentId": "cont-oceania"
+    }
+  ]
+}
