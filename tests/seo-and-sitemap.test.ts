@@ -240,6 +240,9 @@ describe('Dynamic Sitemap & Robots Configuration', () => {
     const llms = fs.readFileSync(path.join(process.cwd(), 'public/llms.txt'), 'utf8');
     expect(llms).toContain('https://docmubashirchaudhry.vercel.app/');
     expect(llms).not.toContain('https://docmubashirchaudhary.com/');
+
+    const layoutSrc = fs.readFileSync(path.join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
+    expect(layoutSrc).toContain("google: 'cyPaDLlCl9e3xk1KzdznBwXvizColXpowGUNSc2M4Ws'");
   });
 });
 

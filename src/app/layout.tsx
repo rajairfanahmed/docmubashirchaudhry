@@ -56,6 +56,9 @@ export const metadata: Metadata = {
   authors: [{ name: 'Doc Mubashir Chaudhry' }],
   creator: SITE_NAME,
   publisher: SITE_NAME,
+  verification: {
+    google: 'cyPaDLlCl9e3xk1KzdznBwXvizColXpowGUNSc2M4Ws'
+  },
   icons: {
     icon: '/icon.svg',
     shortcut: '/icon.svg',
