@@ -4,7 +4,7 @@ Independent, free competitive exam preparation platform and solved study booklet
 
 - **GitHub Repository:** `https://github.com/rajairfanahmed/docmubashirchaudhry` (`main` branch)
 - **Hosting Target:** Vercel (Next.js 15 App Router + serverless API Route Handlers + static `/data/v1/` artifacts)
-- **Live URL Status:** Awaiting initial Vercel deployment from `main`. After Vercel assigns the live URL, SEO (`/seo`), Accessibility (`/accessibility`), and Performance Optimization (`/performance-optimization`) passes run directly against the deployed domain.
+- **Live URL Status:** Configured for `https://docmubashirchaudhry.vercel.app/`. Step 8 (`/seo`) is complete; Accessibility (`/accessibility`) and Performance Optimization (`/performance-optimization`) remain queued as Steps 9-10.
 
 ## Architecture Overview
 
@@ -25,12 +25,12 @@ This portal runs with zero external SQL/NoSQL databases and zero user login wall
    - `npm run build` automatically executes dataset integrity checks (`tsx scripts/validate.ts`), static artifact generation (`tsx scripts/build-static-data.ts`), and `next build`.
 3. **Environment Variables (Optional / Post-Deploy):**
    - `NEXT_PUBLIC_LOGO_DEV_PUBLISHABLE_KEY` (public publishable Logo.dev key, already defaulted safely for client CDN image tags).
-   - `NEXT_PUBLIC_SITE_URL` (set to your assigned `https://<project>.vercel.app` or custom domain once Vercel deploys; when unset, `src/lib/seo/metadata.ts` automatically falls back to Vercel's `VERCEL_PROJECT_PRODUCTION_URL` / `VERCEL_URL` system environment variables or `https://docmubashirchaudhary.com`).
+   - `NEXT_PUBLIC_SITE_URL` (`https://docmubashirchaudhry.vercel.app`; when unset, `src/lib/seo/metadata.ts` automatically falls back to Vercel's `VERCEL_PROJECT_PRODUCTION_URL` / `VERCEL_URL` system environment variables or `https://docmubashirchaudhry.vercel.app`).
 4. **Security & Cache Headers (`next.config.ts` & `public/_headers`):**
    - Vercel does not read `public/_headers` directly, so all CSP (`flagcdn.com`, `upload.wikimedia.org`, `img.logo.dev`), HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, and `/data/v1/` + `/documents/` `Cache-Control` rules are enforced via `async headers()` in [`next.config.ts`](./next.config.ts).
 5. **Post-Deploy Verification:**
-   - Check `https://<your-vercel-domain>/api/health` (`200 OK`) and `https://<your-vercel-domain>/status`.
-   - Pass the live Vercel URL to `/seo` to finalize canonical tags, `public/llms.txt`, and social meta, then run `/accessibility` and `/performance-optimization`.
+   - Check `https://docmubashirchaudhry.vercel.app/api/health` (`200 OK`) and `https://docmubashirchaudhry.vercel.app/status`.
+   - Step 8 (`/seo`) is complete for `https://docmubashirchaudhry.vercel.app/`; proceed next with `/accessibility` (Step 9) and `/performance-optimization` (Step 10).
 
 ## Pipeline Status
 
@@ -38,9 +38,9 @@ This portal runs with zero external SQL/NoSQL databases and zero user login wall
 |---|---|---|
 | Backend Data, APIs, Pagination & Vercel Prep | Zod schemas, 250 countries, `/api/countries`, `/api/questions`, `/api/health`, `vercel.json`, headers, CI | Complete |
 | Steps 1-7 (`/frontend-architecture` through `/animations-motion-design`) | App Router pages, design tokens, structural layout, MCQ/geography components, responsive & motion passes | Complete |
-| Step 8 (`/seo`) | Finalize Vercel live domain canonicals, `llms.txt`, Search/OG validation against deployed URL | Deferred (awaiting Vercel URL) |
-| Step 9 (`/accessibility`) | Final WCAG 2.2 AA audit against deployed/built UI | Deferred (after Step 8) |
-| Step 10 (`/performance-optimization`) | Final Lighthouse/CWV & bundle optimization pass on Vercel deploy | Deferred (after Step 9) |
+| Step 8 (`/seo`) | Canonical URLs (`https://docmubashirchaudhry.vercel.app`), titles, viewport, Schema.org (`CollectionPage` + truthful counts), `robots.ts`, `llms.txt`, image alt/dimensions | Complete |
+| Step 9 (`/accessibility`) | Final WCAG 2.2 AA audit against deployed/built UI | Next |
+| Step 10 (`/performance-optimization`) | Final Lighthouse/CWV & bundle optimization pass on Vercel deploy | Queued (after Step 9) |
 
 ## Scripts
 

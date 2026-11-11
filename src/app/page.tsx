@@ -16,7 +16,7 @@ import { buildPageMetadata } from '@/lib/seo/metadata';
 export const metadata: Metadata = buildPageMetadata({
   absoluteTitle: 'docmubashirchaudhry | Free PPSC, CSS/PMS, Geography Quiz & Solved PDFs',
   description:
-    'Independent, free competitive exam preparation portal for PPSC, CSS/PMS, FPSC, and NTS candidates. Practice World Geography, explore recruitment blueprints, and download solved MCQ booklets.',
+    'Independent, free competitive exam preparation portal for PPSC, CSS/PMS, FPSC, and NTS candidates. Practice World Geography, browse recruitment post guides, and download solved MCQ booklets.',
   path: '/'
 });
 

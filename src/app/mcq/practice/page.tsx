@@ -12,7 +12,7 @@ import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildQuizResourceSchema } from '@/lib/seo/structured-data';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'MCQ Practice Session | Single-Question Active Recall',
+  title: 'Interactive MCQ Practice Session',
   description:
     'Interactive single-question practice workspace with locked option feedback, verified golden-pill answer reveals, explanations, and missed-question retry.',
   path: '/mcq/practice',

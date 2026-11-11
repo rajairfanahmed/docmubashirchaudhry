@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const cssPdfs = pdfs.filter((pdf) => pdf.slug.includes('css') || pdf.slug.includes('pms'));
 
   return buildPageMetadata({
-    title: 'CSS & PMS Preparation Hub | Federal & Provincial Screening',
+    title: 'CSS & PMS Examination Preparation Hub',
     description:
       'CSS and PMS hub status with links to published World Geography drills, shared screening MCQs, and downloadable PDF booklets.',
     path: '/css-pms',

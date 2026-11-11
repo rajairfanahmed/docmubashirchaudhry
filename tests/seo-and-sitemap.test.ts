@@ -162,5 +162,84 @@ describe('Dynamic Sitemap & Robots Configuration', () => {
     ).toBe('https://docmubashirchaudhry.vercel.app');
     expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: 'http://[::invalid' })).toBe(DEFAULT_SITE_URL);
   });
+
+  it('uses the Vercel canonical domain, emits CollectionPage JSON-LD, hardens robots, and keeps country meta truthful', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const { buildCanonicalUrl, buildCountryPageMetadata } = await import('@/lib/seo/metadata');
+    const { buildCollectionPageSchema } = await import('@/lib/seo/structured-data');
+    const { default: robotsFn } = await import('@/app/robots');
+    const { getContentRepository } = await import('@/lib/data');
+
+    expect(DEFAULT_SITE_URL).toBe('https://docmubashirchaudhry.vercel.app');
+    expect(buildCanonicalUrl('/')).toBe('https://docmubashirchaudhry.vercel.app/');
+
+    const collection = buildCollectionPageSchema({
+      title: 'Exam Library',
+      description: 'Solved booklets.',
+      path: '/library',
+      items: [{ name: 'PPSC Booklets', path: '/library/ppsc' }],
+      totalItems: 1
+    });
+    expect(collection['@type']).toBe('CollectionPage');
+    expect(collection.url).toBe(`${DEFAULT_SITE_URL}/library`);
+    const mainEntity = collection.mainEntity as {
+      '@type': string;
+      numberOfItems: number;
+      itemListElement: Array<{ url: string; position: number; name: string }>;
+    };
+    expect(mainEntity['@type']).toBe('ItemList');
+    expect(mainEntity.numberOfItems).toBe(1);
+    expect(mainEntity.itemListElement[0]?.url).toBe(`${DEFAULT_SITE_URL}/library/ppsc`);
+
+    const robotsConfig = robotsFn();
+    const rules = Array.isArray(robotsConfig.rules) ? robotsConfig.rules : [robotsConfig.rules];
+    const wildcardRule = rules.find((rule) => rule.userAgent === '*');
+    const gptRule = rules.find(
+      (rule) => Array.isArray(rule.userAgent) && rule.userAgent.includes('GPTBot')
+    );
+    expect(wildcardRule?.disallow).toContain('/api/');
+    expect(gptRule?.disallow).toContain('/api/');
+    expect(robotsConfig.sitemap).toBe(`${DEFAULT_SITE_URL}/sitemap.xml`);
+
+    const repo = getContentRepository();
+    const [pakistan, antarctica, palestine, reference] = await Promise.all([
+      repo.getCountry('pakistan'),
+      repo.getCountry('antarctica'),
+      repo.getCountry('palestine'),
+      repo.getGeographyReference()
+    ]);
+    expect(pakistan).toBeTruthy();
+    expect(antarctica).toBeTruthy();
+    expect(palestine).toBeTruthy();
+
+    const pakistanMeta = buildCountryPageMetadata({
+      country: pakistan!,
+      currencies: reference.currencies,
+      languages: reference.languages
+    });
+    expect(pakistanMeta.description).toContain('Islamabad');
+    expect(pakistanMeta.alternates?.canonical).toBe(`${DEFAULT_SITE_URL}/geography/pakistan`);
+    expect(String(pakistanMeta.title)).not.toContain(' | docmubashirchaudhry | ');
+
+    const antarcticaMeta = buildCountryPageMetadata({
+      country: antarctica!,
+      currencies: reference.currencies,
+      languages: reference.languages
+    });
+    expect(antarcticaMeta.description).not.toContain('capitals ()');
+    expect(antarcticaMeta.description).toContain('no designated administrative capital');
+
+    const palestineMeta = buildCountryPageMetadata({
+      country: palestine!,
+      currencies: reference.currencies,
+      languages: reference.languages
+    });
+    expect(String(palestineMeta.description).toLowerCase()).not.toContain('verified country');
+
+    const llms = fs.readFileSync(path.join(process.cwd(), 'public/llms.txt'), 'utf8');
+    expect(llms).toContain('https://docmubashirchaudhry.vercel.app/');
+    expect(llms).not.toContain('https://docmubashirchaudhary.com/');
+  });
 });
 

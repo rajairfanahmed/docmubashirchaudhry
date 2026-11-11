@@ -48,7 +48,10 @@ export function SubjectIconChip({
       {meta?.iconUrl ? (
         <img
           src={meta.iconUrl}
-          alt={iconOnly ? '' : displayLabel}
+          alt={iconOnly ? displayLabel : ''}
+          aria-hidden={!iconOnly}
+          width={size === 'sm' ? 20 : 24}
+          height={size === 'sm' ? 14 : 16}
           loading="lazy"
           decoding="async"
           className={cn(

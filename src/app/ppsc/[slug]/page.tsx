@@ -33,7 +33,7 @@ export async function generateMetadata({
 
   if (!postEntity) {
     return buildPageMetadata({
-      title: 'Post Not Found | PPSC Preparation',
+      title: 'PPSC Post Not Found',
       description: 'Requested PPSC recruitment post guide was not found.',
       path: `/ppsc/${slug}`,
       index: false

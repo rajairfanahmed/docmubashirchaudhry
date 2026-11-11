@@ -8,7 +8,7 @@ import { ClearSavedProgressControl } from '@/components/privacy/ClearSavedProgre
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Privacy Policy | Zero Tracking & Local Storage Explanation',
+  title: 'Privacy Policy & Local Storage Notice',
   description:
     'Learn why docmubashirchaudhry requires no accounts or tracking cookies, and how browser localStorage saves only your local quiz progress.',
   path: '/privacy'

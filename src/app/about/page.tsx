@@ -19,7 +19,7 @@ import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'About docmubashirchaudhry | Mission, Leadership & Provenance',
+  title: 'About docmubashirchaudhry: Mission & Provenance',
   description:
     'Learn about docmubashirchaudhry: faculty leadership of Dr. Mubashir Chaudhry, open educational access, official source methodology, and zero-ad guarantee.',
   path: '/about'

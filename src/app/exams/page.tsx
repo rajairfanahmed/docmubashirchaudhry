@@ -5,11 +5,13 @@ import { ArrowRight, ExternalLink, FileText, Shield } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
 import { ExamHubCard } from '@/components/exams/ExamHubCard';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
+import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Pakistani Competitive Exams Hub | PPSC & Commission Directory',
+  title: 'Competitive Examinations & Commission Directory',
   description:
     'Browse verified syllabus references, recruitment post records, and downloadable solved MCQ booklets across tracked examination commissions.',
   path: '/exams'
@@ -32,6 +34,18 @@ export default async function ExamsHubPage() {
 
   return (
     <>
+      <JsonLd
+        data={buildCollectionPageSchema({
+          title: 'Competitive Examinations Directory',
+          description:
+            'Independent Pakistani competitive examination hubs covering PPSC, FPSC, recruitment posts, and free downloadable solved MCQ booklets.',
+          path: '/exams',
+          items: exams.map((exam) => ({
+            name: exam.title,
+            path: `/exams/${exam.slug}`
+          }))
+        })}
+      />
       <SectionBand surface="ground" density="compact" labelledBy="exams-hub-heading">
         <div className="space-y-5">
           <Breadcrumbs items={[{ label: 'Exams' }]} currentPath="/exams" />

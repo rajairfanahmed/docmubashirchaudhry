@@ -8,6 +8,7 @@ import { GeographyWorkbench } from '@/components/geography/GeographyWorkbench';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { getServerDatasetVersion } from '@/lib/data/server-manifest';
+import { generateGeographyQuizSet } from '@/lib/quiz/engine';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildQuizResourceSchema } from '@/lib/seo/structured-data';
 
@@ -25,6 +26,14 @@ export default async function GeographyWorkbenchPage() {
     repo.getGeographyReference()
   ]);
   const datasetVersion = getServerDatasetVersion();
+  const eligibleQuizQuestionCount = generateGeographyQuizSet({
+    countries,
+    allCountries: countries,
+    maps: {
+      currenciesById: new Map(reference.currencies.map((currency) => [currency.id, currency])),
+      languagesById: new Map(reference.languages.map((language) => [language.id, language]))
+    }
+  }).length;
 
   return (
     <>
@@ -32,10 +41,10 @@ export default async function GeographyWorkbenchPage() {
         data={buildQuizResourceSchema({
           title: 'World Geography Reference Guide & Interactive Recall Quiz',
           description:
-            'Browsable sovereign country reference and 4-option self-test quiz covering capitals, ISO 4217 currencies, and official languages.',
+            'Browsable country and territory reference paired with an interactive 4-option quiz covering capitals, ISO 4217 currencies, and official languages.',
           path: '/geography',
           about: ['World Geography', 'Country Capitals', 'World Currencies', 'Official Languages'],
-          questionCount: countries.length * 3
+          questionCount: eligibleQuizQuestionCount
         })}
       />
       {/* Band 1: Header & Continent Hub Links */}

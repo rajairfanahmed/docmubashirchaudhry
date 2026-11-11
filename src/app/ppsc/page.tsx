@@ -15,13 +15,15 @@ import { SectionBand } from '@/components/layout/SectionBand';
 import { ProvenanceBox } from '@/components/ui/ProvenanceBox';
 import { PostFilterBar } from '@/components/exams/PostFilterBar';
 import { CommissionBrandBadge } from '@/components/branding/CommissionBrandBadge';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
+import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'PPSC 2026 Examination Hub | Free Syllabus & Solved MCQ Booklets',
+  title: 'PPSC Recruitment Posts & Solved PDF Booklets',
   description:
-    'Free PPSC exam preparation, data-driven paper patterns, and verified solved MCQ PDF booklets curated by Doc Mubashir Chaudhry.',
+    'Free PPSC exam preparation hub featuring tracked recruitment posts, official portal provenance, online practice MCQs, and downloadable solved MCQ PDF booklets.',
   path: '/ppsc'
 });
 
@@ -45,6 +47,18 @@ export default async function PPSCPage() {
 
   return (
     <>
+      <JsonLd
+        data={buildCollectionPageSchema({
+          title: 'PPSC Recruitment Posts & Solved MCQ Booklets',
+          description:
+            'Open-access PPSC recruitment post guides and downloadable SHA-256 verified solved MCQ booklets.',
+          path: '/ppsc',
+          items: posts.map((post) => ({
+            name: post.title,
+            path: `/ppsc/${post.slug}`
+          }))
+        })}
+      />
       <SectionBand surface="ground" density="compact" labelledBy="ppsc-hub-heading">
         <div className="space-y-6">
           <Breadcrumbs

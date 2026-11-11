@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const isPopulated = fpscExam?.status === 'published' || pdfs.length > 0 || questions.length > 0;
 
   return buildPageMetadata({
-    title: 'FPSC Preparation Hub | Federal Public Service Commission',
+    title: 'FPSC Examination Preparation Hub',
     description:
       'Federal Public Service Commission (FPSC) official portal status and shared one-paper MCQ preparation resources.',
     path: '/fpsc',

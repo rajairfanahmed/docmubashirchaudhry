@@ -13,7 +13,7 @@ import { buildPageMetadata } from '@/lib/seo/metadata';
 export function generateMetadata(): Metadata {
   const manifest = getServerManifest();
   return buildPageMetadata({
-    title: `System & Dataset Status (${manifest.datasetVersion}) | Health & Counts`,
+    title: `Platform & Dataset Status (${manifest.datasetVersion})`,
     description: `Live build-time counts and manifest integrity (${manifest.datasetVersion}) across verified countries, recruitment posts, MCQs, and SHA-256 PDF booklets.`,
     path: '/status'
   });

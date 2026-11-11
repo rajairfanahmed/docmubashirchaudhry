@@ -1,9 +1,9 @@
 # SEO & Discoverability Specification (Step 8 of 10)
 
-> **Consumer Skill:** `08-seo` (Enhancement Phase - Run After Vercel Deploy)
-> **Execution Status (2026-11-11):** Intentionally deferred before GitHub push (`https://github.com/rajairfanahmed/docmubashirchaudhry.git`) and initial Vercel deployment so the deployed Vercel URL (`https://<project>.vercel.app`) can be supplied directly to `/seo`. Backend `resolveSiteUrl()` in `src/lib/seo/metadata.ts` already reads `NEXT_PUBLIC_SITE_URL`, `SITE_CANONICAL_URL`, `VERCEL_PROJECT_PRODUCTION_URL`, and `VERCEL_URL`; once Vercel deploys, update `NEXT_PUBLIC_SITE_URL`, finalize `public/llms.txt` / canonical references in Step 8, then proceed to Steps 9-10.
+> **Consumer Skill:** `08-seo` (Enhancement Phase - Complete)
+> **Execution Status (2026-11-11):** Step 8 (`/seo`) completed against live deployment URL `https://docmubashirchaudhry.vercel.app/`. `DEFAULT_SITE_URL` in `src/lib/seo/metadata.ts`, `.env.example`, `src/data/sources.json`, `public/llms.txt`, single-pipe App Router `<title>` templates, `viewport` export (`src/app/layout.tsx`), truthful 0-capital/unverified territory metadata, accurate `/geography` `Quiz` fact count, `SubjectIconChip` & country flag image dimensions/alt attributes, `CollectionPage` + `ItemList` JSON-LD on hub/collection routes, and unified `/api/` `robots.ts` disallow rules are all implemented and verified. Proceed next to Steps 9 (`/accessibility`) and 10 (`/performance-optimization`).
 > **Scope:** Per-route HTML semantics, dynamic `<title>`/description metadata, canonical consolidation (`/countries` -> `/geography`), Schema.org JSON-LD structured data, dynamic `sitemap.ts`, `robots.txt`, and AI discoverability (`llms.txt`).
-> **Site Domain Baseline:** `https://docmubashirchaudhary.com` (fallback default; overridden dynamically by Vercel env vars via `resolveSiteUrl()` and preserved per [`DESIGN_BRIEF.md`](./DESIGN_BRIEF.md)).
+> **Site Domain Baseline:** `https://docmubashirchaudhry.vercel.app` (fallback default and Vercel deployment origin; overridden dynamically by env vars via `resolveSiteUrl()`).
 
 ---
 
@@ -20,7 +20,7 @@
 
 ## 2. Page Metadata & Canonical Matrix
 
-Every App Router page MUST implement explicit static `metadata` or dynamic `generateMetadata()` using `metadataBase: new URL('https://docmubashirchaudhary.com')`:
+Every App Router page MUST implement explicit static `metadata` or dynamic `generateMetadata()` using `metadataBase: new URL(resolveSiteUrl())` (defaulting to `https://docmubashirchaudhry.vercel.app`):
 
 | Route | Title Template | Indexing & Canonical Rule |
 |---|---|---|
@@ -47,11 +47,12 @@ Every App Router page MUST implement explicit static `metadata` or dynamic `gene
 
 - **Social Meta:** Provide complete `openGraph` (`title`, `description`, `url`, `siteName`, `type: 'website' | 'article'`, `images`) and `twitter` (`card: 'summary_large_image'`). Avoid broken OG image links: ensure a static verified `/public/images/og-default.png` exists or fallback cleanly to verified commission/brand image.
 - **Structured Data (`application/ld+json` rendered server-side cleanly):**
-  1. **Root `/` (`src/app/layout.tsx` / `page.tsx`):** `EducationalOrganization` + `WebSite` with `SearchAction` (`target: 'https://docmubashirchaudhary.com/search?q={search_term_string}'`).
+  1. **Root `/` (`src/app/layout.tsx` / `page.tsx`):** `EducationalOrganization` + `WebSite` with `SearchAction` (`target: 'https://docmubashirchaudhry.vercel.app/search?q={search_term_string}'`).
   2. **Nested Routes:** `BreadcrumbList` synced dynamically with the rendered `<Breadcrumbs />` array on every nested page.
-  3. **`/geography` & `/mcq/practice`:** `Quiz` + `LearningResource` (`isAccessibleForFree: true`, `educationalUse: 'assessment'`, `inLanguage: 'en'`).
+  3. **`/geography` & `/mcq/practice`:** `Quiz` + `LearningResource` (`isAccessibleForFree: true`, `educationalUse: 'assessment'`, `inLanguage: 'en'`, with `/geography` `numberOfQuestions` set from exact verified/non-disputed non-empty country facts).
   4. **`/geography/[slug]`:** `Country` / `DefinedTermSet` educational profile linking official source citations.
   5. **`/library/resource/[slug]`:** `DigitalDocument` (`name`, `author`, `encodingFormat: 'application/pdf'`, `contentSize`, `license` or copyright attribution note, `dateModified: verification.lastCheckedAt`). Never emit `Archived` PDFs as `inStock` primary results without `expires`/note metadata.
+  6. **Hub & Collection Routes (`/exams`, `/exams/[slug]`, `/ppsc`, `/library`, `/library/[exam]`, `/mcq`, `/geography/continent/[slug]`):** `CollectionPage` + `ItemList` via `buildCollectionPageSchema()` matching the rendered published entities.
 
 ---
 
@@ -60,12 +61,11 @@ Every App Router page MUST implement explicit static `metadata` or dynamic `gene
 - **`src/app/sitemap.ts` (Dynamic Next.js Sitemap Generator):**
   - Dynamically enumerates from `ContentRepository`:
     - Static core pages (`/`, `/exams`, `/ppsc`, `/mcq`, `/geography`, `/library`, `/about`, `/methodology`, `/corrections`, `/copyright`, `/privacy`, `/accessibility`, `/status`).
-    - All published/active commissions (`/exams/[slug]`), PPSC posts (`/ppsc/[slug]`), topics (`/topics/[subject]/[topic]` with real questions or PDFs), continent hubs (`/geography/continent/[slug]`), country profiles (`/geography/[slug]` across all `250` sovereign profiles), and published PDF resources (`/library/resource/[slug]`, `/library/[exam]` with `pdfs.length > 0`).
+    - All published/active commissions (`/exams/[slug]`), PPSC posts (`/ppsc/[slug]`), topics (`/topics/[subject]/[topic]` with real questions or PDFs), continent hubs (`/geography/continent/[slug]`), country profiles (`/geography/[slug]` across all `250` country & territory profiles), and published PDF resources (`/library/resource/[slug]`, `/library/[exam]` with `pdfs.length > 0`).
   - Excludes `/countries`, `/search`, `/mcq/practice`, `/ppsc/[slug]/blueprint`, and empty commission hubs (`fpsc`, `css-pms`, `nts`).
   - Sets real `lastModified` dates derived from `verification.lastCheckedAt` or `manifest.generatedAt` (never hardcoded dummy timestamps).
 - **`src/app/robots.ts` / `public/robots.txt`:**
-  - Allows crawling across `/`, `/geography`, `/ppsc`, `/library`, `/topics`, `/data/v1/*.json`.
-  - Disallows nothing needed for verification transparency; references `Sitemap: https://docmubashirchaudhary.com/sitemap.xml`.
+  - Allows crawling across `/`, `/geography`, `/ppsc`, `/library`, `/topics`, `/data/v1/*.json` while uniformly disallowing `/api/` across wildcard and AI crawler rules; references `Sitemap: https://docmubashirchaudhry.vercel.app/sitemap.xml`.
 - **AI Search Discoverability (`public/llms.txt`):**
   - Plain markdown manifest at `/llms.txt` summarizing platform scope, explicit commission non-affiliation disclaimer, canonical URL templates (`/geography/{slug}`, `/library/resource/{slug}`, `/ppsc/{slug}`), and links to machine-readable public JSON endpoints under `/data/v1/manifest.json`.
 

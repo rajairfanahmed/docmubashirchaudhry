@@ -7,7 +7,7 @@ import { SectionBand } from '@/components/layout/SectionBand';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Accessibility Statement | WCAG 2.2 AA Standards',
+  title: 'Accessibility Statement (WCAG 2.2 AA)',
   description:
     'Accessibility commitment across keyboard navigation, screen reader semantics, high-contrast pills, and reduced motion preferences.',
   path: '/accessibility'

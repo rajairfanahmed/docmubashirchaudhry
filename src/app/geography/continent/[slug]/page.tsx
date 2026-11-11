@@ -5,8 +5,10 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowRight, Globe, PlayCircle } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
+import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
 export async function generateStaticParams() {
   const repo = getContentRepository();
@@ -65,6 +67,18 @@ export default async function ContinentDetailPage({
 
   return (
     <>
+      <JsonLd
+        data={buildCollectionPageSchema({
+          title: `${continent.name} Regions & Countries`,
+          description: `${countries.length} countries and territories grouped across ${continentRegions.length} geographic sub-regions in ${continent.name}.`,
+          path: `/geography/continent/${continent.slug}`,
+          totalItems: countries.length,
+          items: countries.slice(0, 50).map((c) => ({
+            name: c.nameCommon,
+            path: `/geography/${c.slug}`
+          }))
+        })}
+      />
       <SectionBand surface="ground" density="compact" labelledBy="continent-heading">
         <div className="space-y-6">
           <Breadcrumbs
@@ -142,6 +156,8 @@ export default async function ContinentDetailPage({
                           <img
                             src={country.flag.svgPath}
                             alt={country.flag.alt}
+                            width={40}
+                            height={28}
                             className="w-full h-full object-contain"
                             loading="lazy"
                           />

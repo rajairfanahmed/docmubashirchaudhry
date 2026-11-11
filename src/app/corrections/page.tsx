@@ -8,7 +8,7 @@ import { SectionBand } from '@/components/layout/SectionBand';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Report a Correction | Error & Errata Submission',
+  title: 'Report a Correction & Errata',
   description:
     'Help keep exam dates, syllabus citations, MCQ answer keys, and country facts accurate by reporting errors by email or quick form.',
   path: '/corrections'

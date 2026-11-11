@@ -6,9 +6,11 @@ import { ArrowRight, BookOpen, ExternalLink, FileText, ShieldCheck } from 'lucid
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
 import { CommissionBrandBadge } from '@/components/branding/CommissionBrandBadge';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { formatBytes, formatVerificationDate } from '@/lib/format';
 import { buildPageMetadata } from '@/lib/seo/metadata';
+import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
 export async function generateStaticParams() {
   const repo = getContentRepository();
@@ -35,7 +37,7 @@ export async function generateMetadata({
   }
 
   return buildPageMetadata({
-    title: `${exam.title} | Overview, Official Portal & PDFs`,
+    title: `${exam.bodyCode}: ${exam.title} Resources`,
     description: exam.summary,
     path: `/exams/${exam.slug}`,
     index: exam.status === 'published'
@@ -61,8 +63,29 @@ export default async function ExamDetailPage({
     repo.getPdfResources({ examSlug: exam.slug, includeDrafts: false })
   ]);
 
+  const schemaItems = [
+    ...posts.map((post) => ({
+      name: post.title,
+      path: `/${exam.slug}/${post.slug}`
+    })),
+    ...pdfs.map((pdf) => ({
+      name: pdf.title,
+      path: `/library/resource/${pdf.slug}`
+    }))
+  ];
+
   return (
     <>
+      {exam.status === 'published' && schemaItems.length > 0 && (
+        <JsonLd
+          data={buildCollectionPageSchema({
+            title: `${exam.title} Recruitment Posts & Solved PDFs`,
+            description: exam.summary,
+            path: `/exams/${exam.slug}`,
+            items: schemaItems
+          })}
+        />
+      )}
       <SectionBand surface="ground" density="compact" labelledBy="exam-detail-heading">
         <div className="space-y-6">
           <Breadcrumbs

@@ -271,3 +271,39 @@ export function buildLearningResourceSchema(options: {
   };
 }
 
+/**
+ * Builds Schema.org CollectionPage + ItemList markup strictly matching visible rendered links.
+ */
+export function buildCollectionPageSchema(options: {
+  title: string;
+  description: string;
+  path: string;
+  items: Array<{ name: string; path: string }>;
+  totalItems?: number;
+}): Record<string, unknown> {
+  const canonicalUrl = buildCanonicalUrl(options.path);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    '@id': `${canonicalUrl}#collection`,
+    name: options.title,
+    description: options.description,
+    url: canonicalUrl,
+    inLanguage: 'en',
+    isAccessibleForFree: true,
+    publisher: {
+      '@id': `${SITE_URL}/#organization`
+    },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: options.totalItems ?? options.items.length,
+      itemListElement: options.items.map((entry, idx) => ({
+        '@type': 'ListItem',
+        position: idx + 1,
+        name: entry.name,
+        url: buildCanonicalUrl(entry.path)
+      }))
+    }
+  };
+}
+

@@ -15,7 +15,7 @@ import { ProvenanceBox } from '@/components/ui/ProvenanceBox';
 import { CorrectionTrigger } from '@/components/feedback/CorrectionTrigger';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
-import { buildPageMetadata } from '@/lib/seo/metadata';
+import { buildCountryPageMetadata, buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCountryProfileSchema } from '@/lib/seo/structured-data';
 
 export async function generateStaticParams() {
@@ -31,7 +31,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const repo = getContentRepository();
-  const country = await repo.getCountry(slug);
+  const [country, reference] = await Promise.all([
+    repo.getCountry(slug),
+    repo.getGeographyReference()
+  ]);
 
   if (!country) {
     return buildPageMetadata({
@@ -42,11 +45,10 @@ export async function generateMetadata({
     });
   }
 
-  return buildPageMetadata({
-    title: `${country.nameCommon} | Capital, Currency, Languages & Profile`,
-    description: `Verified country facts for ${country.nameCommon} (${country.isoAlpha3}): capitals (${country.capitals.join(', ')}), currencies, official languages, and source citations.`,
-    path: `/geography/${country.slug}`,
-    index: country.status === 'published'
+  return buildCountryPageMetadata({
+    country,
+    currencies: reference.currencies,
+    languages: reference.languages
   });
 }
 
@@ -111,6 +113,8 @@ export default async function CountryProfilePage({
                 <img
                   src={country.flag.svgPath}
                   alt={country.flag.alt}
+                  width={112}
+                  height={84}
                   className="w-full h-full object-contain"
                 />
               </div>

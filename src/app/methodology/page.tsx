@@ -7,7 +7,7 @@ import { SectionBand } from '@/components/layout/SectionBand';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Verification Methodology | How Content Is Checked',
+  title: 'Content Verification Methodology',
   description:
     'Learn how docmubashirchaudhry verifies official exam notices, separates editorial study recommendations from commission facts, and validates country profiles.',
   path: '/methodology'

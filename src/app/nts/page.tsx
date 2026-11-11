@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const ntsPdfs = pdfs.filter((pdf) => pdf.slug.includes('nts'));
 
   return buildPageMetadata({
-    title: 'NTS Preparation Hub | National Testing Service',
+    title: 'NTS Examination Preparation Hub',
     description:
       'National Testing Service (NTS) portal status and cross-links to published MCQ and World Geography practice modules.',
     path: '/nts',

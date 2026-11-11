@@ -9,7 +9,7 @@ import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Search Repository | PDFs, Countries, Exams & Topics',
+  title: 'Search Study PDFs, Countries & Exams',
   description:
     'Search across downloadable solved MCQ PDF booklets, verified sovereign countries, PPSC exams, and subject study topics.',
   path: '/search',

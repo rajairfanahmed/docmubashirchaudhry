@@ -5,11 +5,13 @@ import { FileText } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
 import { PdfFilterToolbar } from '@/components/library/PdfFilterToolbar';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
+import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Open PDF Library | Solved MCQ Booklets & Study Guides',
+  title: 'Free Solved Exam PDFs & Study Booklets Library',
   description:
     'Free, zero-login educational PDF booklets with verified metadata, page counts, file sizes, SHA-256 checksums, and direct downloads.',
   path: '/library'
@@ -34,6 +36,18 @@ export default async function PdfLibraryPage() {
 
   return (
     <>
+      <JsonLd
+        data={buildCollectionPageSchema({
+          title: 'PDF Study Booklets Library',
+          description:
+            'Free, SHA-256 verified solved MCQ compilations and competitive examination study booklets.',
+          path: '/library',
+          items: pdfs.map((pdf) => ({
+            name: pdf.title,
+            path: `/library/resource/${pdf.slug}`
+          }))
+        })}
+      />
       <SectionBand surface="ground" density="compact" labelledBy="library-heading">
         <div className="space-y-6">
           <Breadcrumbs items={[{ label: 'Library' }]} currentPath="/library" />

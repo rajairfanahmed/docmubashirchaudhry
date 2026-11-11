@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import type { CountryEntity, Currency, Language } from '@/lib/schemas/geography';
 
-export const DEFAULT_SITE_URL = 'https://docmubashirchaudhary.com';
+export const DEFAULT_SITE_URL = 'https://docmubashirchaudhry.vercel.app';
 export const SITE_NAME = 'docmubashirchaudhry';
 export const DEFAULT_OG_IMAGE_PATH = '/images/og-default.png';
 
@@ -123,5 +124,52 @@ export function buildPageMetadata({
       }
     }
   };
+}
+
+/**
+ * Generates truthful per-territory metadata for /geography/[slug] profiles,
+ * handling 0-capital territories and unverified/disputed verification statuses.
+ */
+export function buildCountryPageMetadata(options: {
+  country: CountryEntity;
+  currencies: readonly Currency[];
+  languages: readonly Language[];
+}): Metadata {
+  const { country, currencies, languages } = options;
+  const currencyNames = country.currencyIds
+    .map((id) => currencies.find((c) => c.id === id))
+    .filter((c): c is Currency => Boolean(c))
+    .slice(0, 3)
+    .map((c) => `${c.name} (${c.code})`);
+
+  const languageNames = country.officialLanguageIds
+    .map((id) => languages.find((l) => l.id === id)?.name)
+    .filter((name): name is string => Boolean(name))
+    .slice(0, 3);
+
+  const prefix =
+    country.verification.status === 'verified'
+      ? `Verified country profile for ${country.nameCommon} (${country.isoAlpha3})`
+      : `Documented profile for ${country.nameCommon} (${country.isoAlpha3}, status: ${country.verification.status})`;
+
+  const factParts: string[] = [];
+  factParts.push(
+    country.capitals.length > 0
+      ? `capital${country.capitals.length > 1 ? 's' : ''}: ${country.capitals.join(', ')}`
+      : 'no designated administrative capital'
+  );
+  if (currencyNames.length > 0) {
+    factParts.push(`currencies: ${currencyNames.join(', ')}`);
+  }
+  if (languageNames.length > 0) {
+    factParts.push(`official languages: ${languageNames.join(', ')}`);
+  }
+
+  return buildPageMetadata({
+    title: `${country.nameCommon}: Capital, Currency & Languages`,
+    description: `${prefix}: ${factParts.join('; ')}, with source citations and quiz practice.`,
+    path: `/geography/${country.slug}`,
+    index: country.status === 'published'
+  });
 }
 

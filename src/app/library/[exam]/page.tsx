@@ -7,8 +7,10 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
 import { PdfFilterToolbar } from '@/components/library/PdfFilterToolbar';
 import { EmptyStateCard } from '@/components/ui/EmptyStateCard';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
+import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
 const SCOPED_EXAM_META: Record<string, { label: string; description: string }> = {
   ppsc: {
@@ -62,7 +64,7 @@ export async function generateMetadata({
   const description = meta?.description ?? examRecord?.summary ?? '';
 
   return buildPageMetadata({
-    title: `${label} | Open PDF Library`,
+    title: `${label} Free PDF Library`,
     description,
     path: `/library/${exam}`,
     index: pdfs.length > 0
@@ -94,6 +96,19 @@ export default async function ScopedLibraryPage({
 
   return (
     <>
+      {pdfs.length > 0 && (
+        <JsonLd
+          data={buildCollectionPageSchema({
+            title: `${label} Free PDF Library`,
+            description,
+            path: `/library/${exam}`,
+            items: pdfs.map((pdf) => ({
+              name: pdf.title,
+              path: `/library/resource/${pdf.slug}`
+            }))
+          })}
+        />
+      )}
       <SectionBand surface="ground" density="compact" labelledBy="scoped-lib-heading">
         <div className="space-y-6">
           <Breadcrumbs

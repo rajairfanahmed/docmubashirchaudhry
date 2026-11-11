@@ -6,12 +6,14 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
 import { McqSetupForm } from '@/components/mcq/McqSetupForm';
 import { SubjectIconChip } from '@/components/branding/SubjectIconChip';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
+import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 import { SUBJECT_PASTEL_TOKENS } from '@/lib/tokens/visual-tokens';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'MCQ Practice Matrix | Exam, Subject & Topic Active Recall',
+  title: 'MCQ Practice Launcher & Subject Filters',
   description:
     'Filter verified competitive exam MCQs by exam, subject, and syllabus topic. Launch single-question practice with instant explanations and zero login.',
   path: '/mcq'
@@ -26,6 +28,7 @@ export default async function McqHubPage() {
     repo.getQuestions({ includeDrafts: false })
   ]);
   const posts = (await Promise.all(exams.map((exam) => repo.getRecruitmentPosts(exam.slug)))).flat();
+  const subjById = new Map(subjects.map((s) => [s.id, s]));
 
   const countByTopic = new Map<string, number>();
   for (const q of questions) {
@@ -34,8 +37,22 @@ export default async function McqHubPage() {
     }
   }
 
+  const populatedTopics = topics.filter((t) => (countByTopic.get(t.id) ?? 0) > 0 && subjById.has(t.subjectId));
+
   return (
     <>
+      <JsonLd
+        data={buildCollectionPageSchema({
+          title: 'Competitive Exam MCQ Practice & Syllabus Topics',
+          description:
+            'Subject and topic-indexed active recall MCQ drills with verified answer explanations.',
+          path: '/mcq',
+          items: populatedTopics.map((topic) => ({
+            name: topic.name,
+            path: `/topics/${subjById.get(topic.subjectId)!.slug}/${topic.slug}`
+          }))
+        })}
+      />
       <SectionBand surface="ground" density="compact" labelledBy="mcq-hub-heading">
         <div className="space-y-6">
           <Breadcrumbs items={[{ label: 'MCQs' }]} currentPath="/mcq" />
