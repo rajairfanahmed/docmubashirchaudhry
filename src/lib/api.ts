@@ -1,10 +1,8 @@
-import {
-  getContentRepository,
-  toLegacyCountry,
-  type PaginatedCountryFilter,
-  type PaginatedQuestionFilter,
-  type PaginatedResult
-} from '@/lib/data';
+import type {
+  PaginatedCountryFilter,
+  PaginatedQuestionFilter,
+  PaginatedResult
+} from '@/lib/data/repository';
 import type { Country } from '@/types/country';
 import type { CountryEntity, DatasetManifest, Question } from '@/lib/schemas';
 
@@ -127,7 +125,8 @@ export async function fetchAllCountries(): Promise<FetchResult> {
     };
   }
 
-  // Final deterministic fallback directly from version-controlled ContentRepository JSON bundle
+  // Final deterministic fallback loaded lazily so client bundles avoid statically embedding ContentRepository JSON
+  const { getContentRepository, toLegacyCountry } = await import('@/lib/data');
   const repo = getContentRepository();
   const [entities, ref] = await Promise.all([
     repo.getCountries({ includeDrafts: false }),
@@ -191,6 +190,7 @@ export async function fetchCountriesPage(
     }
   }
 
+  const { getContentRepository } = await import('@/lib/data');
   return getContentRepository().getCountriesPaginated({ ...filter, includeDrafts: false });
 }
 
@@ -242,5 +242,6 @@ export async function fetchQuestionsPage(
     }
   }
 
+  const { getContentRepository } = await import('@/lib/data');
   return getContentRepository().getQuestionsPaginated({ ...filter, includeDrafts: false });
 }

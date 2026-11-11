@@ -2,6 +2,7 @@ export interface CommissionBrandBadgeProps {
   examCodeOrSlug: string;
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
+  priority?: boolean;
   className?: string;
 }
 

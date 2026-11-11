@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { RotateCcw, Trash2 } from 'lucide-react';
 import type { OptionId, Question } from '@/lib/schemas';
@@ -9,9 +10,13 @@ import { useSmoothScroll } from '@/components/motion/SmoothScrollProvider';
 import { EmptyStateCard } from '@/components/ui/EmptyStateCard';
 import { useToast } from '@/components/ui/ToastProvider';
 import { SingleQuestionCard } from './SingleQuestionCard';
-import { McqSessionSummary } from './McqSessionSummary';
 import { McqPaginationStrip } from './McqPaginationStrip';
 import { MCQ_DEFAULT_PAGE_SIZE } from '@/lib/pagination';
+
+const McqSessionSummary = dynamic(
+  () => import('./McqSessionSummary').then((mod) => mod.McqSessionSummary),
+  { ssr: false }
+);
 
 export interface McqPracticeRunnerProps {
   questions: Question[];

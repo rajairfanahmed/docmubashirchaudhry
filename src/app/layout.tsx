@@ -12,7 +12,7 @@ import { buildRootSchema } from '@/lib/seo/structured-data';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['500', '600', '700', '800'],
+  weight: ['600', '700', '800'],
   variable: '--font-jakarta',
   display: 'swap',
   adjustFontFallback: true
@@ -106,6 +106,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${plusJakartaSans.variable} ${inter.variable}`}>
       <head>
+        <link rel="dns-prefetch" href="https://img.logo.dev" />
+        <link rel="dns-prefetch" href="https://flagcdn.com" />
         <JsonLd data={buildRootSchema()} />
       </head>
       <body className="bg-[var(--dmc-surface-ground)] text-[var(--dmc-ink-primary)] antialiased min-h-screen flex flex-col justify-between overflow-x-clip selection:bg-emerald-100 selection:text-emerald-900">

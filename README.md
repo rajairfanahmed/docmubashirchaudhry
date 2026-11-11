@@ -4,7 +4,7 @@ Independent, free competitive exam preparation platform and solved study booklet
 
 - **GitHub Repository:** `https://github.com/rajairfanahmed/docmubashirchaudhry` (`main` branch)
 - **Hosting Target:** Vercel (Next.js 15 App Router + serverless API Route Handlers + static `/data/v1/` artifacts)
-- **Live URL Status:** Configured for `https://docmubashirchaudhry.vercel.app/`. Steps 8 (`/seo`) and 9 (`/accessibility`) are complete; Performance Optimization (`/performance-optimization`) remains queued as Step 10.
+- **Live URL Status:** Configured for `https://docmubashirchaudhry.vercel.app/`. All 10 frontend steps (`/frontend-architecture` through `/performance-optimization`) are complete.
 
 ## Architecture Overview
 
@@ -30,7 +30,7 @@ This portal runs with zero external SQL/NoSQL databases and zero user login wall
    - Vercel does not read `public/_headers` directly, so all CSP (`flagcdn.com`, `upload.wikimedia.org`, `img.logo.dev`), HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, and `/data/v1/` + `/documents/` `Cache-Control` rules are enforced via `async headers()` in [`next.config.ts`](./next.config.ts).
 5. **Post-Deploy Verification:**
    - Check `https://docmubashirchaudhry.vercel.app/api/health` (`200 OK`) and `https://docmubashirchaudhry.vercel.app/status`.
-   - Steps 8 (`/seo`) and 9 (`/accessibility`) are complete for `https://docmubashirchaudhry.vercel.app/`; proceed next with `/performance-optimization` (Step 10).
+   - Steps 8 (`/seo`), 9 (`/accessibility`), and 10 (`/performance-optimization`) are complete for `https://docmubashirchaudhry.vercel.app/`; run live Lighthouse / screen-reader smoke checks against the deployed Vercel URL as a final live sanity check.
 
 ## Pipeline Status
 
@@ -40,7 +40,7 @@ This portal runs with zero external SQL/NoSQL databases and zero user login wall
 | Steps 1-7 (`/frontend-architecture` through `/animations-motion-design`) | App Router pages, design tokens, structural layout, MCQ/geography components, responsive & motion passes | Complete |
 | Step 8 (`/seo`) | Canonical URLs (`https://docmubashirchaudhry.vercel.app`), titles, viewport, Schema.org (`CollectionPage` + truthful counts), `robots.ts`, `llms.txt`, image alt/dimensions | Complete |
 | Step 9 (`/accessibility`) | WCAG 2.2 AA audit, focus rings, modal `inert` isolation, ARIA tablist/quiz semantics, and contrast tests | Complete |
-| Step 10 (`/performance-optimization`) | Final Lighthouse/CWV & bundle optimization pass on Vercel deploy | Next |
+| Step 10 (`/performance-optimization`) | Code splitting (`minisearch`, `lenis`, `GeographyScoreModal`, `McqSessionSummary`, lazy `@/lib/data`), font pruning, image dimensions/priority hints, edge caching, and budget tests | Complete |
 
 ## Scripts
 

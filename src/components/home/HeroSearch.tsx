@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, FileText, Globe, HelpCircle, Loader2, RotateCcw, Search, Shield } from 'lucide-react';
-import { PortalSearchEngine, type SearchHit } from '@/lib/search';
+import type { PortalSearchEngine, SearchHit } from '@/lib/search';
 import { DATA_ENDPOINTS, fetchStaticData } from '@/lib/data/client-fetch';
 import { notifyNavigationStart } from '@/lib/motion/navigation-events';
 import { Button } from '@/components/ui/Button';
@@ -38,7 +38,10 @@ export function HeroSearch({
     setIsLoading(true);
     setHasError(false);
     try {
-      const res = await fetchStaticData<unknown>(DATA_ENDPOINTS.searchIndex, { bypassCache });
+      const [res, { PortalSearchEngine }] = await Promise.all([
+        fetchStaticData<unknown>(DATA_ENDPOINTS.searchIndex, { bypassCache }),
+        import('@/lib/search')
+      ]);
       if (!res.ok) {
         setHasError(true);
         return null;

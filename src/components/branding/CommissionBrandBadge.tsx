@@ -11,6 +11,12 @@ const SIZE_CLASSES: Record<NonNullable<CommissionBrandBadgeProps['size']>, strin
   lg: 'h-12 w-12 text-xs'
 };
 
+const SIZE_PIXELS: Record<NonNullable<CommissionBrandBadgeProps['size']>, number> = {
+  sm: 36,
+  md: 44,
+  lg: 48
+};
+
 /**
  * Official commission emblem badge using Logo.dev CDN URLs with clean monogram fallback.
  */
@@ -18,6 +24,7 @@ export function CommissionBrandBadge({
   examCodeOrSlug,
   size = 'md',
   showLabel = false,
+  priority = false,
   className
 }: CommissionBrandBadgeProps) {
   const branding = getExamBranding(examCodeOrSlug);
@@ -26,6 +33,7 @@ export function CommissionBrandBadge({
   const monogram = branding?.fallbackMonogram ?? examCodeOrSlug.toUpperCase().slice(0, 5);
   const label = branding?.code ?? monogram;
   const shouldRenderLogo = Boolean(branding?.logoUrl && !imageFailed);
+  const pixelSize = SIZE_PIXELS[size];
 
   return (
     <span className={cn('inline-flex items-center gap-2.5 shrink-0', className)}>
@@ -40,7 +48,10 @@ export function CommissionBrandBadge({
           <img
             src={branding.logoUrl}
             alt={`${branding.title} official emblem`}
-            loading="lazy"
+            width={pixelSize}
+            height={pixelSize}
+            loading={priority ? 'eager' : 'lazy'}
+            fetchPriority={priority ? 'high' : undefined}
             decoding="async"
             onError={() => setImageFailed(true)}
             className="h-full w-full object-contain p-1.5"

@@ -60,6 +60,10 @@ export function PdfDetailPanel({ pdf, sources, relatedItems }: PdfDetailPanelPro
                 <img
                   src={pdf.thumbnailPath}
                   alt={`${pdf.title} cover preview`}
+                  width={480}
+                  height={640}
+                  loading="eager"
+                  decoding="async"
                   className="w-full h-full object-cover"
                 />
               </div>

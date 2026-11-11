@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import Lenis from 'lenis';
+import type LenisType from 'lenis';
 import { isReducedMotionPreferred, useReducedMotion } from '@/lib/motion/useReducedMotion';
 
 export interface ScrollTargetOptions {
@@ -22,7 +22,7 @@ const SmoothScrollContext = createContext<SmoothScrollContextValue>({
 export function SmoothScrollProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const prefersReducedMotion = useReducedMotion();
-  const lenisRef = useRef<Lenis | null>(null);
+  const lenisRef = useRef<LenisType | null>(null);
   const previousPathRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -32,24 +32,32 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
       return;
     }
 
-    const lenis = new Lenis({
-      lerp: 0.115,
-      smoothWheel: true,
-      autoRaf: true,
-      stopInertiaOnNavigate: true,
-      respectReducedMotion: true,
-      anchors: {
-        offset: -76
-      },
-      prevent: (node) => Boolean(node.closest('[data-lenis-prevent]'))
+    let cancelled = false;
+    let instance: LenisType | null = null;
+
+    void import('lenis').then(({ default: Lenis }) => {
+      if (cancelled) return;
+      instance = new Lenis({
+        lerp: 0.115,
+        smoothWheel: true,
+        autoRaf: true,
+        stopInertiaOnNavigate: true,
+        respectReducedMotion: true,
+        anchors: {
+          offset: -76
+        },
+        prevent: (node) => Boolean(node.closest('[data-lenis-prevent]'))
+      });
+      lenisRef.current = instance;
     });
 
-    lenisRef.current = lenis;
-
     return () => {
-      lenis.destroy();
-      if (lenisRef.current === lenis) {
-        lenisRef.current = null;
+      cancelled = true;
+      if (instance) {
+        instance.destroy();
+        if (lenisRef.current === instance) {
+          lenisRef.current = null;
+        }
       }
     };
   }, [prefersReducedMotion]);

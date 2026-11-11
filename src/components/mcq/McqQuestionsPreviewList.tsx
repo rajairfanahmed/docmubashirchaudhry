@@ -84,6 +84,20 @@ export function McqQuestionsPreviewList({
 
   useEffect(() => {
     if (!hasHydrated) return;
+
+    const hasServerProvidedPageOne =
+      activePage === 1 &&
+      retryTick === 0 &&
+      (questions.length <= MCQ_DEFAULT_PAGE_SIZE ||
+        (!examId && !subjectId && !topicIdsKey));
+
+    if (hasServerProvidedPageOne) {
+      setRemoteSlice(null);
+      setLoadError(null);
+      setIsLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     const loadSlice = async () => {

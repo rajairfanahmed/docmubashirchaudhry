@@ -14,6 +14,7 @@ export interface CanonicalCountryCardProps {
   regionName?: string;
   onTestInQuiz?: (country: CountryEntity) => void;
   isCurrentQuizTarget?: boolean;
+  priority?: boolean;
   className?: string;
 }
 
@@ -97,6 +98,7 @@ export function CountryCard({
   regionName,
   onTestInQuiz,
   isCurrentQuizTarget = false,
+  priority = false,
   className
 }: CanonicalCountryCardProps) {
   const capitalItems = country.capitals;
@@ -121,7 +123,8 @@ export function CountryCard({
                 width={40}
                 height={27}
                 className="w-full h-full object-contain"
-                loading="lazy"
+                loading={priority ? 'eager' : 'lazy'}
+                fetchPriority={priority ? 'high' : undefined}
                 decoding="async"
               />
             </div>

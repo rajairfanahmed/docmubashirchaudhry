@@ -83,6 +83,33 @@ const nextConfig: NextConfig = {
             value: "nosniff"
           }
         ]
+      },
+      {
+        source: "/images/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400"
+          }
+        ]
+      },
+      {
+        source: "/icon.svg",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400"
+          }
+        ]
+      },
+      {
+        source: "/favicon.svg",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=604800, stale-while-revalidate=86400"
+          }
+        ]
       }
     ];
   }

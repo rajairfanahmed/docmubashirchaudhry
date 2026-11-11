@@ -79,6 +79,7 @@ export function AuthorityExamTiles() {
                 <CommissionBrandBadge
                   examCodeOrSlug={tile.featured ? 'ppsc' : tile.code}
                   size="lg"
+                  priority
                 />
                 {tile.badge && (
                   <span

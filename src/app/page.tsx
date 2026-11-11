@@ -7,6 +7,7 @@ import { StandingTrustNotice } from '@/components/layout/StandingTrustNotice';
 import { HeroSearch } from '@/components/home/HeroSearch';
 import { AuthorityExamTiles } from '@/components/home/AuthorityExamTiles';
 import { McqLauncherWidget } from '@/components/home/McqLauncherWidget';
+import { McqSubjectStrip } from '@/components/home/McqSubjectStrip';
 import { PdfResourceCard } from '@/components/library/PdfResourceCard';
 import { CountryCard } from '@/components/geography/CountryCard';
 import { ScrollReveal } from '@/components/motion/ScrollReveal';
@@ -218,12 +219,20 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <McqLauncherWidget
-              exams={exams}
-              subjects={subjects}
-              topics={topics}
-              questionCountsBySubject={questionCountsBySubject}
-            />
+            <div className="space-y-8">
+              <McqLauncherWidget
+                exams={exams}
+                subjects={subjects}
+                topics={topics}
+                questionCountsBySubject={questionCountsBySubject}
+                hideSubjectStrip
+              />
+              <McqSubjectStrip
+                subjects={subjects}
+                topics={topics}
+                questionCountsBySubject={questionCountsBySubject}
+              />
+            </div>
           </div>
         </ScrollReveal>
       </SectionBand>

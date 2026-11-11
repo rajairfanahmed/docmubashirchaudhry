@@ -115,6 +115,9 @@ export default async function CountryProfilePage({
                   alt={country.flag.alt}
                   width={112}
                   height={84}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                   className="w-full h-full object-contain"
                 />
               </div>

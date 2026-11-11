@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { AlertCircle, Globe, HelpCircle, Loader2, RotateCcw } from 'lucide-react';
 import type { CountryEntity } from '@/lib/schemas';
 import type { GeographyFilterState, GeographyWorkbenchProps } from './types';
@@ -29,7 +30,11 @@ import { createVersionedStorage, STORAGE_KEYS } from '@/lib/storage/persistence'
 import { CountryCard } from './CountryCard';
 import { GeographyFilterBar } from './GeographyFilterBar';
 import { GeographyQuizCard } from './GeographyQuizCard';
-import { GeographyScoreModal } from './GeographyScoreModal';
+
+const GeographyScoreModal = dynamic(
+  () => import('./GeographyScoreModal').then((mod) => mod.GeographyScoreModal),
+  { ssr: false }
+);
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 const OPTION_IDS = ['a', 'b', 'c', 'd'] as const;
@@ -131,6 +136,13 @@ export function GeographyWorkbench({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [answersByIndex, setAnswersByIndex] = useState<Record<number, string>>({});
   const [isScoreModalOpen, setIsScoreModalOpen] = useState<boolean>(false);
+  const [hasOpenedScoreModal, setHasOpenedScoreModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isScoreModalOpen) {
+      setHasOpenedScoreModal(true);
+    }
+  }, [isScoreModalOpen]);
   const [remoteSlice, setRemoteSlice] = useState<{
     queryKey: string;
     items: CountryEntity[];
@@ -673,6 +685,21 @@ export function GeographyWorkbench({
 
   useEffect(() => {
     if (!hasHydrated) return;
+
+    const isDefaultFirstPage =
+      safeCountryPage === 1 &&
+      !filter.continentId &&
+      !filter.regionId &&
+      !filter.letter &&
+      !filter.search.trim();
+
+    if (isDefaultFirstPage && retryTick === 0) {
+      setRemoteSlice(null);
+      setPageError(null);
+      setIsPageLoading(false);
+      return;
+    }
+
     let cancelled = false;
     const delayMs = filter.search.trim() ? 180 : 0;
 
@@ -811,7 +838,7 @@ export function GeographyWorkbench({
                   isPageLoading ? 'opacity-65' : 'opacity-100'
                 }`}
               >
-                {displayedCountries.map((country) => {
+                {displayedCountries.map((country, idx) => {
                   const countryCurrencies = country.currencyIds
                     .map((id) => currenciesById.get(id))
                     .filter((c): c is NonNullable<typeof c> => Boolean(c));
@@ -829,6 +856,7 @@ export function GeographyWorkbench({
                       languages={countryLanguages}
                       continentName={continent?.name}
                       regionName={region?.name}
+                      priority={idx < 3}
                       onTestInQuiz={(c) => launchCountryQuiz(c, { shouldScroll: true })}
                       isCurrentQuizTarget={
                         quizDeck.mode === 'country' && quizDeck.targetCountryId === country.id
@@ -928,22 +956,24 @@ export function GeographyWorkbench({
           </div>
 
           <div id="geography-results-modal-slot">
-            <GeographyScoreModal
-              isOpen={isScoreModalOpen}
-              onClose={() => setIsScoreModalOpen(false)}
-              score={scoreCount}
-              total={quizDeck.entries.length}
-              onRetake={handleRetake}
-              onNextScope={handleNextScope}
-              onClearProgress={handleClearProgress}
-              nextScopeLabel={
-                filter.letter
-                  ? 'Next Alphabet'
-                  : filter.continentId
-                    ? 'Next Continent'
-                    : 'Next Global Batch'
-              }
-            />
+            {hasOpenedScoreModal && (
+              <GeographyScoreModal
+                isOpen={isScoreModalOpen}
+                onClose={() => setIsScoreModalOpen(false)}
+                score={scoreCount}
+                total={quizDeck.entries.length}
+                onRetake={handleRetake}
+                onNextScope={handleNextScope}
+                onClearProgress={handleClearProgress}
+                nextScopeLabel={
+                  filter.letter
+                    ? 'Next Alphabet'
+                    : filter.continentId
+                      ? 'Next Continent'
+                      : 'Next Global Batch'
+                }
+              />
+            )}
           </div>
         </div>
       </SectionBand>
