@@ -240,6 +240,14 @@ describe('Dynamic Sitemap & Robots Configuration', () => {
     const llms = fs.readFileSync(path.join(process.cwd(), 'public/llms.txt'), 'utf8');
     expect(llms).toContain('https://docmubashirchaudhry.vercel.app/');
     expect(llms).not.toContain('https://docmubashirchaudhary.com/');
+    expect(llms.trimStart().startsWith('# ')).toBe(true);
+    expect(llms).toContain('\n> ');
+    const markdownLinks = llms.match(/\[[^\]]+\]\(https:\/\/docmubashirchaudhry\.vercel\.app\/[^)]*\)/g) ?? [];
+    expect(markdownLinks.length).toBeGreaterThanOrEqual(10);
+
+    const homePageSrc = fs.readFileSync(path.join(process.cwd(), 'src/app/page.tsx'), 'utf8');
+    expect(homePageSrc).toContain('<span>Start Geography Quiz</span>');
+    expect(homePageSrc).not.toContain('<span>Start</span>');
 
     const layoutSrc = fs.readFileSync(path.join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
     expect(layoutSrc).toContain("google: 'cyPaDLlCl9e3xk1KzdznBwXvizColXpowGUNSc2M4Ws'");

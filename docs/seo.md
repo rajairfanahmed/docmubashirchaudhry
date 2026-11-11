@@ -67,7 +67,9 @@ Every App Router page MUST implement explicit static `metadata` or dynamic `gene
 - **`src/app/robots.ts` / `public/robots.txt`:**
   - Allows crawling across `/`, `/geography`, `/ppsc`, `/library`, `/topics`, `/data/v1/*.json` while uniformly disallowing `/api/` across wildcard and AI crawler rules; references `Sitemap: https://docmubashirchaudhry.vercel.app/sitemap.xml`.
 - **AI Search Discoverability (`public/llms.txt`):**
-  - Plain markdown manifest at `/llms.txt` summarizing platform scope, explicit commission non-affiliation disclaimer, canonical URL templates (`/geography/{slug}`, `/library/resource/{slug}`, `/ppsc/{slug}`), and links to machine-readable public JSON endpoints under `/data/v1/manifest.json`.
+  - `llmstxt.org`-compliant Markdown manifest at `/llms.txt` (leading H1 title, blockquote summary, H2 sections, and explicit Markdown links `[Title](https://docmubashirchaudhry.vercel.app/...)`) covering hubs, verified PPSC guides, direct PDF downloads, machine-readable `/data/v1/` endpoints, and verification policies.
+- **Descriptive CTA Link Text (`src/app/page.tsx`):**
+  - Replaced generic `"Start"` link copy on the World Geography teaser CTA with `"Start Geography Quiz"` for Lighthouse SEO `link-text` compliance.
 - **Google Search Console Site Verification (`src/app/layout.tsx`):**
   - Root `metadata.verification.google` emits `<meta name="google-site-verification" content="cyPaDLlCl9e3xk1KzdznBwXvizColXpowGUNSc2M4Ws" />` sitewide in `<head>`.
 

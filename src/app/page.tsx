@@ -172,7 +172,7 @@ export default async function HomePage() {
                   href="/geography"
                   className="dmc-press inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 rounded-[var(--dmc-radius-button)] bg-[var(--dmc-accent-gold)] hover:bg-[var(--dmc-accent-gold-hover)] text-[var(--dmc-ink-primary)] text-sm font-bold"
                 >
-                  <span>Start</span>
+                  <span>Start Geography Quiz</span>
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
               </div>

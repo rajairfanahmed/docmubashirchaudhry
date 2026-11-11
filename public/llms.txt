@@ -2,37 +2,46 @@
 
 > Independent, free competitive exam preparation platform and solved study booklet archive curated by Doc Mubashir Chaudhry for PPSC, CSS/PMS, FPSC, and NTS candidates. Not affiliated with PPSC, FPSC, NTS, or any government commission.
 
-## Site Overview
-- Canonical Domain: https://docmubashirchaudhry.vercel.app/
-- Content Model: Open Educational Resource (OER), zero login, zero ads
-- Verification Policy: https://docmubashirchaudhry.vercel.app/methodology
-- Corrections Contact: editorial@docmubashirchaudhary.com (see https://docmubashirchaudhry.vercel.app/corrections)
-- System Manifest & Dataset Integrity: https://docmubashirchaudhry.vercel.app/status
-- Sitemap: https://docmubashirchaudhry.vercel.app/sitemap.xml
-- Robots Policy: https://docmubashirchaudhry.vercel.app/robots.txt
+## Primary Exam Preparation Hubs
 
-## Canonical Routes & Educational Modules
-- World Geography Reference & Quiz (`/geography`): Verified reference guide and interactive quiz covering sovereign countries and territories in the v1 dataset (`250` published records across `6` continents and `25` regions with ISO 3166-1 codes, multi-capital handling, ISO 4217 currencies, and official languages).
-- Continent Breakdowns (`/geography/continent/{slug}`): Regional groupings and linked countries by continent.
-- Individual Country Profiles (`/geography/{slug}`): Sovereign country and territory pages displaying ISO codes, capitals, currencies, official languages, source citations, and last-verified dates.
-- Exams Directory (`/exams`) & PPSC Hub (`/ppsc`): Published Punjab Public Service Commission overview and post-level recruitment hubs.
-- PPSC Post Solved Booklet Guides (`/ppsc/{slug}`): Dedicated post guides including Intelligence Officer (`BS-14`, `/ppsc/intelligent-officer`) and Tehsil Sports Officer (`BS-16`, `/ppsc/tehsil-sports-officer`), pairing direct SHA-256 verified solved PDF booklets with explicit provenance notices.
-- Interactive MCQ Engine (`/mcq` & `/topics/{subject}/{topic}`): Subject and topic-filtered one-paper practice mode with explanations.
-- Open PDF Library (`/library`, `/library/{exam}`, `/library/resource/{slug}`): Direct downloadable study booklets with SHA-256 verification metadata and rights statements.
+- [Homepage Overview](https://docmubashirchaudhry.vercel.app/): Curated study portal entry with quick search, recruitment post highlights, solved booklet cards, and MCQ launcher.
+- [World Geography Reference & Active Quiz](https://docmubashirchaudhry.vercel.app/geography): Verified reference guide and interactive quiz covering 250 sovereign countries and territories across 6 continents and 25 regions with ISO 3166-1 codes, capitals, ISO 4217 currencies, and official languages.
+- [PPSC Recruitment & Past Papers Hub](https://docmubashirchaudhry.vercel.app/ppsc): Punjab Public Service Commission exam posts paired with verified SHA-256 solved PDF booklets and explicit provenance labels.
+- [All Exam Commissions Directory](https://docmubashirchaudhry.vercel.app/exams): Published and upcoming Pakistan competitive examination commission hubs.
+- [Interactive MCQ Practice Launchpad](https://docmubashirchaudhry.vercel.app/mcq): Filterable one-paper MCQ drill builder across 9 canonical subjects and 10 syllabus topics.
+- [Open Solved PDF Library](https://docmubashirchaudhry.vercel.app/library): Direct downloadable solved study booklets with pre-verified byte sizes, SHA-256 hashes, and rights statements.
 
-## Verified Downloadable PDF Booklets (v1)
-- `(Set 01) Intelligence Officer PPSC (BS-14) 500+ MCQS` by Doc Mubashir Chaudhry (`https://docmubashirchaudhry.vercel.app/library/resource/intelligence-officer-bs-14-set-01`): 500+ solved one-liner MCQs, 2.63 MB (2,630,400 bytes), PDF at `/documents/ppsc/intelligent-officer/%28Set%2001%29%20Intelligence%20Officer%20PPSC%20%28BS-14%29%20500%2B%20MCQS%20By%20Doc%20Mubashir%20Chaudhry%20%281%29.pdf`.
-- `TSO PPSC (BS-16) 500+ MCQS By Doc Mubashir Chaudhry` (`https://docmubashirchaudhry.vercel.app/library/resource/tso-ppsc-bs-16-500-mcqs`): 500+ Physical Education, sports rules, and GK solved MCQs, 2.85 MB (2,852,491 bytes), PDF at `/documents/ppsc/intelligent-officer/TSO%20PPSC%20%28BS-16%29%20500%2B%20MCQS%20By%20Doc%20Mubashir%20Chaudhry%20%281%29.pdf`.
+## Verified PPSC Post Guides & Solved Booklets
 
-## Static Verification Data Endpoints
-Machine-readable dataset manifests and provenance records are publicly readable under `/data/v1/`:
-- Dataset Version & Checksums Manifest: `https://docmubashirchaudhry.vercel.app/data/v1/manifest.json`
-- Authority Source Registry: `https://docmubashirchaudhry.vercel.app/data/v1/sources.json`
-- Sovereign Countries Reference Dataset: `https://docmubashirchaudhry.vercel.app/data/v1/geography/countries.json`
-- PDF Resource Metadata Catalog: `https://docmubashirchaudhry.vercel.app/data/v1/resources/pdfs.json`
-- PPSC Post & Blueprint Metadata: `https://docmubashirchaudhry.vercel.app/data/v1/examinations/posts-ppsc.json`, `https://docmubashirchaudhry.vercel.app/data/v1/examinations/blueprints-ppsc.json`
+- [Intelligence Officer (BS-14) PPSC Guide](https://docmubashirchaudhry.vercel.app/ppsc/intelligent-officer): Official provenance notes and downloadable booklet links for PPSC Intelligence Officer screening.
+- [Tehsil Sports Officer (BS-16) PPSC Guide](https://docmubashirchaudhry.vercel.app/ppsc/tehsil-sports-officer): Post preparation details paired with Physical Education and General Knowledge booklet downloads.
+- [Set 01 Intelligence Officer PPSC (BS-14) 500+ MCQs Details](https://docmubashirchaudhry.vercel.app/library/resource/intelligence-officer-bs-14-set-01): Metadata, source citations, and verification details for the 2.63 MB (2,630,400 bytes) PDF resource.
+- [Download Set 01 Intelligence Officer (BS-14) PDF](https://docmubashirchaudhry.vercel.app/documents/ppsc/intelligent-officer/%28Set%2001%29%20Intelligence%20Officer%20PPSC%20%28BS-14%29%20500%2B%20MCQS%20By%20Doc%20Mubashir%20Chaudhry%20%281%29.pdf): Direct PDF booklet (500+ solved one-liner MCQs, 2,630,400 bytes).
+- [TSO PPSC (BS-16) 500+ MCQs Details](https://docmubashirchaudhry.vercel.app/library/resource/tso-ppsc-bs-16-500-mcqs): Metadata, source citations, and verification details for the 2.85 MB (2,852,491 bytes) PDF resource.
+- [Download TSO PPSC (BS-16) PDF](https://docmubashirchaudhry.vercel.app/documents/ppsc/intelligent-officer/TSO%20PPSC%20%28BS-16%29%20500%2B%20MCQS%20By%20Doc%20Mubashir%20Chaudhry%20%281%29.pdf): Direct PDF booklet (500+ Physical Education, sports rules, and GK solved MCQs, 2,852,491 bytes).
 
-## Machine Extraction Notes
-- Legacy path `/countries` permanently redirects (HTTP 308) to `/geography`; legacy `/ppsc/{slug}/blueprint` redirects (HTTP 308) to `/ppsc/{slug}`.
-- Schema.org JSON-LD (`EducationalOrganization`, `WebSite` with `SearchAction`, `BreadcrumbList`, `CollectionPage`, `Country`/`DefinedTermSet`, `DigitalDocument`, `Quiz`, and `LearningResource`) is embedded directly in rendered HTML pages.
-- Unverified commission records are explicitly badged as `unverified` in both visible UI and dataset JSON until an official primary gazette or commission PDF is attached.
+## Machine-Readable Datasets & Feeds
+
+- [Dataset Version & Checksums Manifest](https://docmubashirchaudhry.vercel.app/data/v1/manifest.json): Canonical `datasetVersion`, schema version, record counts, and per-file SHA-256 checksums.
+- [Authority Source Registry](https://docmubashirchaudhry.vercel.app/data/v1/sources.json): Primary official and open geodata references cited across records.
+- [Sovereign Countries Reference JSON](https://docmubashirchaudhry.vercel.app/data/v1/geography/countries.json): All 250 published country and territory records with verification metadata.
+- [PDF Resource Catalog JSON](https://docmubashirchaudhry.vercel.app/data/v1/resources/pdfs.json): Pre-computed byte sizes, SHA-256 digests, rights categories, and post mappings.
+- [PPSC Recruitment Posts JSON](https://docmubashirchaudhry.vercel.app/data/v1/examinations/posts-ppsc.json): Structured post entities separating verified commission records from unverified entries.
+- [PPSC Study Blueprints JSON](https://docmubashirchaudhry.vercel.app/data/v1/examinations/blueprints-ppsc.json): Separated `officialSections` (`officialMarksPct: null` when unspecified) and `editorialTopicWeights`.
+- [XML Sitemap](https://docmubashirchaudhry.vercel.app/sitemap.xml): Canonical indexable HTML URLs with `lastModified` timestamps.
+- [Robots Policy](https://docmubashirchaudhry.vercel.app/robots.txt): Crawl directives allowing content routes and `/data/v1/` while disallowing `/api/`.
+
+## Methodology, Verification & Governance
+
+- [Content Verification Methodology](https://docmubashirchaudhry.vercel.app/methodology): Explains `verified`, `unverified`, `disputed`, and `outdated` badges plus official-vs-editorial rules.
+- [System Manifest & Live Record Counts](https://docmubashirchaudhry.vercel.app/status): Human-readable build telemetry and dataset health overview.
+- [Submit Corrections & Errata](https://docmubashirchaudhry.vercel.app/corrections): Reporting path (`editorial@docmubashirchaudhary.com`) for factual or answer-key fixes.
+- [Copyright, Attribution & Takedowns](https://docmubashirchaudhry.vercel.app/copyright): Licensing rules (`author_original`, `public_domain_official`, `cc_by_4`, `permission_granted`).
+- [About & Academic Leadership](https://docmubashirchaudhry.vercel.app/about): Mission summary and academic profile of Dr. Mubashir Chaudhry.
+
+## Optional
+
+- [Accessibility Conformance](https://docmubashirchaudhry.vercel.app/accessibility): WCAG 2.2 AA standards and keyboard/contrast notes.
+- [Privacy Notice](https://docmubashirchaudhry.vercel.app/privacy): Zero login, zero ad trackers, and local-only quiz persistence disclosure.
+- Legacy paths `/countries` and `/ppsc/{slug}/blueprint` issue HTTP 308 permanent redirects to `/geography` and `/ppsc/{slug}`.
+- Unverified records carry explicit `unverified` labels in both visible UI badges and JSON responses until primary official gazettes or PDFs are attached.
