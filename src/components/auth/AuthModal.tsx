@@ -192,7 +192,7 @@ export function AuthModal({
               <span className="font-bold text-[var(--dmc-ink-primary)]">
                 {verificationEmailSentTo}
               </span>
-              . Open that link to verify your email and return cleanly to this page.
+              . Open that link in this browser to verify your email and sign in automatically.
             </p>
           </div>
           <div className="flex flex-col gap-2.5 pt-2">

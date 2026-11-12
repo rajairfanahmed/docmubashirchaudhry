@@ -13,31 +13,50 @@ const ALLOWED_OTP_TYPES = new Set<EmailOtpType>([
   'email'
 ]);
 
+function buildCallbackRedirectUrl(
+  origin: string,
+  nextPath: string,
+  extraParams: Record<string, string>
+): string {
+  const url = new URL(nextPath, origin);
+  for (const [key, value] of Object.entries(extraParams)) {
+    url.searchParams.set(key, value);
+  }
+  return url.toString();
+}
+
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const origin = resolveRequestOrigin(request);
   const searchParams = request.nextUrl.searchParams;
   const nextPath = sanitizeNextPath(searchParams.get('next'));
-  const code = searchParams.get('code');
-  const tokenHash = searchParams.get('token_hash');
-  const otpType = searchParams.get('type') as EmailOtpType | null;
+  const code = searchParams.get('code')?.trim();
+  const tokenHash = searchParams.get('token_hash')?.trim();
+  const otpType = searchParams.get('type')?.trim() as EmailOtpType | undefined;
   const providerError = searchParams.get('error_description') ?? searchParams.get('error');
 
   if (!parsePublicSupabaseConfig()) {
-    return NextResponse.redirect(`${origin}/?authError=backend_not_configured`, {
-      status: 302,
-      headers: { 'Cache-Control': 'no-store' }
-    });
-  }
-
-  if (providerError) {
     return NextResponse.redirect(
-      `${origin}/?authError=${encodeURIComponent('Authentication cancelled or failed.')}`,
+      buildCallbackRedirectUrl(origin, '/', { authError: 'backend_not_configured' }),
       {
         status: 302,
         headers: { 'Cache-Control': 'no-store' }
       }
     );
   }
+
+  if (providerError) {
+    return NextResponse.redirect(
+      buildCallbackRedirectUrl(origin, '/', {
+        authError: 'Authentication cancelled or link expired.'
+      }),
+      {
+        status: 302,
+        headers: { 'Cache-Control': 'no-store' }
+      }
+    );
+  }
+
+  let failureMessage = 'Authentication link expired or invalid.';
 
   try {
     const { supabase, applyAuthCookies } = await createSupabaseServerClient();
@@ -47,11 +66,19 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       if (!error && data.user) {
         await syncUserProfile(data.user);
         return applyAuthCookies(
-          NextResponse.redirect(`${origin}${nextPath}`, {
-            status: 302,
-            headers: { 'Cache-Control': 'no-store' }
-          })
+          NextResponse.redirect(
+            buildCallbackRedirectUrl(origin, nextPath, { authConfirmed: '1' }),
+            {
+              status: 302,
+              headers: { 'Cache-Control': 'no-store' }
+            }
+          )
         );
+      }
+
+      if (error?.message?.toLowerCase().includes('code verifier')) {
+        failureMessage =
+          'Confirmation link was opened in a different browser session. Try signing in with your email and password.';
       }
     } else if (tokenHash && otpType && ALLOWED_OTP_TYPES.has(otpType)) {
       const { data, error } = await supabase.auth.verifyOtp({
@@ -61,10 +88,13 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       if (!error && data.user) {
         await syncUserProfile(data.user);
         return applyAuthCookies(
-          NextResponse.redirect(`${origin}${nextPath}`, {
-            status: 302,
-            headers: { 'Cache-Control': 'no-store' }
-          })
+          NextResponse.redirect(
+            buildCallbackRedirectUrl(origin, nextPath, { authConfirmed: '1' }),
+            {
+              status: 302,
+              headers: { 'Cache-Control': 'no-store' }
+            }
+          )
         );
       }
     }
@@ -76,11 +106,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   return NextResponse.redirect(
-    `${origin}/?authError=${encodeURIComponent('Authentication link expired or invalid.')}`,
+    buildCallbackRedirectUrl(origin, '/', { authError: failureMessage }),
     {
       status: 302,
       headers: { 'Cache-Control': 'no-store' }
     }
   );
 }
-

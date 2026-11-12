@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import type { User } from '@supabase/supabase-js';
 import { isAdminEmail, parsePublicSupabaseConfig } from '@/lib/env';
+import { resolveSiteUrl } from '@/lib/seo/metadata';
 import {
   createSupabaseServerClient,
   resolveAuthProvider,
@@ -136,14 +137,33 @@ export function sanitizeNextPath(raw?: string | null): string {
   return trimmed;
 }
 
+function isLoopbackHost(host: string): boolean {
+  const bare = host.split(':')[0]?.toLowerCase() ?? '';
+  return bare === 'localhost' || bare === '127.0.0.1' || bare === '::1' || bare === '[::1]';
+}
+
 export function resolveRequestOrigin(request: NextRequest): string {
-  const isLocal = process.env.NODE_ENV !== 'production';
+  const isProduction = process.env.NODE_ENV === 'production';
   const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
   const forwardedProto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim() || 'https';
+  const hostHeader = request.headers.get('host')?.split(',')[0]?.trim();
 
-  if (!isLocal && forwardedHost && /^[a-z0-9.-]+(?::\d+)?$/i.test(forwardedHost)) {
-    return `${forwardedProto}://${forwardedHost}`;
+  if (isProduction) {
+    if (
+      forwardedHost &&
+      /^[a-z0-9.-]+(?::\d+)?$/i.test(forwardedHost) &&
+      !isLoopbackHost(forwardedHost)
+    ) {
+      return `${forwardedProto}://${forwardedHost}`;
+    }
+
+    if (hostHeader && /^[a-z0-9.-]+(?::\d+)?$/i.test(hostHeader) && !isLoopbackHost(hostHeader)) {
+      return `https://${hostHeader}`;
+    }
+
+    return resolveSiteUrl();
   }
+
   return request.nextUrl.origin;
 }
 

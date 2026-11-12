@@ -4,6 +4,7 @@ import React, { createContext, useCallback, useContext, useEffect, useRef, useSt
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter } from 'next/navigation';
 import { sanitizeClientNextPath } from '@/lib/v3/client';
+import { useAuthSession } from '@/components/auth/AuthSessionProvider';
 import { useToast } from '@/components/ui/ToastProvider';
 
 const LazyAuthModal = dynamic(
@@ -32,6 +33,7 @@ const AuthModalContext = createContext<AuthModalContextValue | null>(null);
 export function AuthModalProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname() ?? '/';
+  const { refreshSession } = useAuthSession();
   const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [hasLoadedModal, setHasLoadedModal] = useState(false);
@@ -59,11 +61,43 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const url = new URL(window.location.href);
+
+    // Fallback: if an email verification or OAuth callback landed on a non-callback route,
+    // forward the query parameters cleanly to /api/auth/callback to exchange cookies.
+    const hasCallbackCode = Boolean(url.searchParams.get('code')?.trim());
+    const hasCallbackTokenHash =
+      Boolean(url.searchParams.get('token_hash')?.trim()) &&
+      Boolean(url.searchParams.get('type')?.trim());
+
+    if ((hasCallbackCode || hasCallbackTokenHash) && url.pathname !== '/api/auth/callback') {
+      const callbackUrl = new URL('/api/auth/callback', url.origin);
+      url.searchParams.forEach((value, key) => {
+        callbackUrl.searchParams.set(key, value);
+      });
+      if (!callbackUrl.searchParams.has('next')) {
+        callbackUrl.searchParams.set('next', url.pathname);
+      }
+      window.location.replace(callbackUrl.toString());
+      return;
+    }
+
     const authRequired = url.searchParams.get('auth') === 'required';
     const nextParam = url.searchParams.get('next');
     const authError = url.searchParams.get('authError');
+    const authConfirmed = url.searchParams.get('authConfirmed') === '1';
 
-    if (!authRequired && !authError) return;
+    if (!authRequired && !authError && !authConfirmed) return;
+
+    if (authConfirmed) {
+      void refreshSession();
+      router.refresh();
+      showToast({
+        title: 'Email confirmed & signed in',
+        description:
+          'Your account is active. You can now attempt graded quizzes and download PDFs.',
+        tone: 'success'
+      });
+    }
 
     if (authError) {
       showToast({
@@ -95,9 +129,10 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
     url.searchParams.delete('auth');
     url.searchParams.delete('next');
     url.searchParams.delete('authError');
+    url.searchParams.delete('authConfirmed');
     const cleanTarget = `${url.pathname}${url.search}${url.hash}`;
     window.history.replaceState(null, '', cleanTarget);
-  }, [pathname, openAuthModal, router, showToast]);
+  }, [pathname, openAuthModal, refreshSession, router, showToast]);
 
   const closeAuthModal = useCallback(() => {
     setIsOpen(false);

@@ -602,4 +602,58 @@ describe('v3.0 API Authorization, Gating & Private Signed Download Contracts (Mo
       else process.env.SUPABASE_SECRET_KEY = prevSecret;
     }
   });
+
+  it('intercepts root ?code= and ?token_hash= callbacks in middleware and strips localhost in production resolveRequestOrigin', async () => {
+    const { updateSupabaseSession } = await import('@/lib/supabase/middleware');
+    const { resolveRequestOrigin } = await import('@/lib/auth/guards');
+
+    const codeReq = new NextRequest(
+      'http://localhost:3000/?code=ceb1db9d-6bc3-4f27-a5d0-943c78f1c37f'
+    );
+    const codeRes = await updateSupabaseSession(codeReq);
+    expect(codeRes.status).toBe(302);
+    const codeLocation = new URL(codeRes.headers.get('location') ?? '');
+    expect(codeLocation.pathname).toBe('/api/auth/callback');
+    expect(codeLocation.searchParams.get('code')).toBe('ceb1db9d-6bc3-4f27-a5d0-943c78f1c37f');
+    expect(codeLocation.searchParams.get('next')).toBe('/');
+
+    const otpReq = new NextRequest(
+      'https://docmubashirchaudhry.vercel.app/quiz?token_hash=abc123&type=signup&foo=bar'
+    );
+    const otpRes = await updateSupabaseSession(otpReq);
+    expect(otpRes.status).toBe(302);
+    const otpLocation = new URL(otpRes.headers.get('location') ?? '');
+    expect(otpLocation.pathname).toBe('/api/auth/callback');
+    expect(otpLocation.searchParams.get('token_hash')).toBe('abc123');
+    expect(otpLocation.searchParams.get('type')).toBe('signup');
+    expect(otpLocation.searchParams.get('next')).toBe('/quiz?foo=bar');
+
+    const prevEnv = process.env.NODE_ENV;
+    const prevSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    try {
+      (process.env as Record<string, string | undefined>).NODE_ENV = 'production';
+      process.env.NEXT_PUBLIC_SITE_URL = 'https://docmubashirchaudhry.vercel.app';
+
+      const localhostInProdReq = new NextRequest('http://localhost:3000/api/auth/signup', {
+        headers: { host: 'localhost:3000' }
+      });
+      expect(resolveRequestOrigin(localhostInProdReq)).toBe(
+        'https://docmubashirchaudhry.vercel.app'
+      );
+
+      const forwardedHostReq = new NextRequest('http://localhost:3000/api/auth/signup', {
+        headers: {
+          'x-forwarded-host': 'docmubashirchaudhry.vercel.app',
+          'x-forwarded-proto': 'https'
+        }
+      });
+      expect(resolveRequestOrigin(forwardedHostReq)).toBe(
+        'https://docmubashirchaudhry.vercel.app'
+      );
+    } finally {
+      (process.env as Record<string, string | undefined>).NODE_ENV = prevEnv;
+      if (prevSiteUrl === undefined) delete process.env.NEXT_PUBLIC_SITE_URL;
+      else process.env.NEXT_PUBLIC_SITE_URL = prevSiteUrl;
+    }
+  });
 });

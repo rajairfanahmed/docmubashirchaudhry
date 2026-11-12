@@ -1,7 +1,57 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { isAdminEmail, parsePublicSupabaseConfig } from '@/lib/env';
+import { sanitizeNextPath } from '@/lib/auth/guards';
 import { buildSecureAuthCookieOptions } from './server';
+
+const SUPABASE_AUTH_CALLBACK_KEYS = [
+  'code',
+  'token_hash',
+  'type',
+  'error',
+  'error_code',
+  'error_description'
+] as const;
+
+function buildAuthCallbackRedirect(request: NextRequest): NextResponse | null {
+  if (request.method !== 'GET') return null;
+
+  const { pathname, searchParams } = request.nextUrl;
+  if (pathname.startsWith('/api/')) return null;
+
+  const hasCode = Boolean(searchParams.get('code')?.trim());
+  const hasTokenHash =
+    Boolean(searchParams.get('token_hash')?.trim()) && Boolean(searchParams.get('type')?.trim());
+  const hasAuthProviderError =
+    Boolean(searchParams.get('error_code')?.trim()) &&
+    Boolean(searchParams.get('error_description') || searchParams.get('error'));
+
+  if (!hasCode && !hasTokenHash && !hasAuthProviderError) {
+    return null;
+  }
+
+  const callbackUrl = new URL('/api/auth/callback', request.url);
+  for (const key of ['code', 'token_hash', 'type', 'error', 'error_description'] as const) {
+    const val = searchParams.get(key);
+    if (val) callbackUrl.searchParams.set(key, val);
+  }
+
+  const explicitNext = searchParams.get('next');
+  const nextSearchParams = new URLSearchParams(searchParams);
+  for (const key of SUPABASE_AUTH_CALLBACK_KEYS) {
+    nextSearchParams.delete(key);
+  }
+  nextSearchParams.delete('next');
+
+  const remainingQuery = nextSearchParams.toString();
+  const fallbackNext = remainingQuery ? `${pathname}?${remainingQuery}` : pathname;
+  callbackUrl.searchParams.set('next', sanitizeNextPath(explicitNext ?? fallbackNext));
+
+  return NextResponse.redirect(callbackUrl, {
+    status: 302,
+    headers: { 'Cache-Control': 'no-store' }
+  });
+}
 
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   return request.cookies
@@ -19,6 +69,11 @@ function isAdminPath(pathname: string): boolean {
 }
 
 export async function updateSupabaseSession(request: NextRequest): Promise<NextResponse> {
+  const authCallbackRedirect = buildAuthCallbackRedirect(request);
+  if (authCallbackRedirect) {
+    return authCallbackRedirect;
+  }
+
   const requestHeaders = new Headers(request.headers);
   // Strip any client-supplied internal headers to avoid spoofing downstream
   requestHeaders.delete('x-dmc-user-id');
