@@ -205,6 +205,7 @@ export function HeroSearch({
             animate={{ opacity: 1, y: 0 }}
             exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
             transition={{ duration: prefersReduced ? 0.08 : 0.17, ease: [0.22, 1, 0.36, 1] }}
+            data-lenis-prevent
             className="absolute left-0 right-0 top-full mt-2 z-30 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] elevation-3 p-2 text-left max-h-[min(20rem,60dvh)] overflow-y-auto overscroll-contain"
           >
           {isLoading && hits.length === 0 ? (
@@ -283,7 +284,7 @@ export function HeroSearch({
             <Link
               key={term}
               href={`/search?q=${encodeURIComponent(term)}`}
-              className="inline-flex items-center min-h-[44px] sm:min-h-[34px] px-3 py-1 rounded-full bg-[var(--color-surface-soft)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand-deep)] text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] transition-colors"
+              className="dmc-chip-interactive inline-flex items-center min-h-[44px] sm:min-h-[34px] px-3 py-1 rounded-full bg-[var(--color-surface-soft)] hover:bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand-deep)] text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)]"
             >
               {term}
             </Link>

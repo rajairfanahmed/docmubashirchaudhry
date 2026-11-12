@@ -123,6 +123,7 @@ export function Modal({
             role="dialog"
             aria-modal="true"
             aria-labelledby={labelledBy}
+            data-lenis-prevent
             initial={prefersReduced ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}

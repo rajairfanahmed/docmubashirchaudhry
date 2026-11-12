@@ -20,7 +20,7 @@ export function SubjectCards() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
         {/* Pillar 1: World Countries Module */}
-        <article className="flex flex-col justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-6 sm:p-8 elevation-1">
+        <article className="track-card flex flex-col justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-6 sm:p-8 elevation-1">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="w-12 h-12 rounded-[var(--radius-control)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] text-[var(--color-brand-deep)] flex items-center justify-center">
@@ -59,16 +59,19 @@ export function SubjectCards() {
           <div className="pt-6 mt-auto">
             <Link
               href="/geography"
-              className="dmc-press inline-flex items-center justify-center gap-2 w-full min-h-[44px] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] font-semibold text-sm py-3 px-4 rounded-[var(--radius-control)] elevation-1 cursor-pointer"
+              className="dmc-press group inline-flex items-center justify-center gap-2 w-full min-h-[44px] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] font-semibold text-sm py-3 px-4 rounded-[var(--radius-control)] elevation-1 cursor-pointer"
             >
               <span>Open Geography Module</span>
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              <ArrowRight
+                className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transform-none"
+                aria-hidden="true"
+              />
             </Link>
           </div>
         </article>
 
         {/* Pillar 2: PPSC Exam Preparation */}
-        <article className="flex flex-col justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-6 sm:p-8 elevation-1">
+        <article className="track-card flex flex-col justify-between bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-6 sm:p-8 elevation-1">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <CommissionBrandBadge examCodeOrSlug="ppsc" size="lg" />
@@ -105,10 +108,13 @@ export function SubjectCards() {
           <div className="pt-6 mt-auto">
             <Link
               href="/ppsc"
-              className="dmc-press inline-flex items-center justify-center gap-2 w-full min-h-[44px] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] border border-[var(--color-border-strong)] hover:border-[var(--color-brand-deep)] text-[var(--color-ink)] font-semibold text-sm py-3 px-4 rounded-[var(--radius-control)] cursor-pointer"
+              className="dmc-press group inline-flex items-center justify-center gap-2 w-full min-h-[44px] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] border border-[var(--color-border-strong)] hover:border-[var(--color-brand-deep)] text-[var(--color-ink)] font-semibold text-sm py-3 px-4 rounded-[var(--radius-control)] cursor-pointer"
             >
               <span>Explore PPSC Posts &amp; Booklets</span>
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              <ArrowRight
+                className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transform-none"
+                aria-hidden="true"
+              />
             </Link>
           </div>
         </article>

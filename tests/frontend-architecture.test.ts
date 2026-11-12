@@ -29,24 +29,31 @@ function collectSourceFiles(dir: string): string[] {
 }
 
 describe('Step 1 Frontend Architecture Foundation', () => {
-  it('retires lenis and canvas-confetti from providers, components, styles, and dependencies', () => {
+  it('configures lazy Lenis smooth scroll cleanly and keeps canvas-confetti retired', () => {
     const srcFiles = collectSourceFiles(path.join(PROJECT_ROOT, 'src'));
     for (const file of srcFiles) {
       const contents = fs.readFileSync(file, 'utf8');
-      expect(contents, `${file} should not reference lenis`).not.toMatch(/lenis/i);
-      expect(contents, `${file} should not reference SmoothScroll`).not.toContain('SmoothScroll');
       expect(contents, `${file} should not import canvas-confetti`).not.toContain('canvas-confetti');
     }
 
-    expect(
-      fs.existsSync(path.join(PROJECT_ROOT, 'src', 'components', 'motion', 'SmoothScrollProvider.tsx'))
-    ).toBe(false);
+    const smoothScrollPath = path.join(
+      PROJECT_ROOT,
+      'src',
+      'components',
+      'motion',
+      'SmoothScrollProvider.tsx'
+    );
+    expect(fs.existsSync(smoothScrollPath)).toBe(true);
+    const smoothScroll = fs.readFileSync(smoothScrollPath, 'utf8');
+    expect(smoothScroll).toContain("import('lenis')");
+    expect(smoothScroll).toContain('respectReducedMotion: true');
+    expect(smoothScroll).toContain('data-lenis-prevent');
 
     const pkg = JSON.parse(readProjectFile('package.json')) as {
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
     };
-    expect(pkg.dependencies?.lenis).toBeUndefined();
+    expect(pkg.dependencies?.lenis).toBeDefined();
     expect(pkg.dependencies?.['canvas-confetti']).toBeUndefined();
     expect(pkg.devDependencies?.['@types/canvas-confetti']).toBeUndefined();
   });

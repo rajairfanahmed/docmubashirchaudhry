@@ -219,7 +219,7 @@ export function Navbar() {
                     onClick={() => notifyNavigationStart()}
                     aria-current={link.isActive ? 'page' : undefined}
                     className={cn(
-                      'dmc-press relative px-2.5 xl:px-3 py-2 rounded-[var(--radius-control)] text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors',
+                      'dmc-press group relative px-2.5 xl:px-3 py-2 rounded-[var(--radius-control)] text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors',
                       link.isActive
                         ? 'text-[var(--color-ink)] font-semibold bg-[var(--color-surface-soft)] border border-[var(--color-border)]'
                         : 'text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]/70 border border-transparent'
@@ -227,12 +227,21 @@ export function Navbar() {
                   >
                     <Icon
                       className={cn(
-                        'w-4 h-4 shrink-0',
+                        'w-4 h-4 shrink-0 transition-transform duration-150 ease-out group-hover:-translate-y-0.5 motion-reduce:transform-none',
                         link.isActive ? 'text-[var(--color-brand-deep)]' : 'text-[var(--color-ink-muted)]'
                       )}
                       aria-hidden="true"
                     />
                     <span>{link.label}</span>
+                    {link.isActive && (
+                      <m.span
+                        aria-hidden="true"
+                        initial={prefersReduced ? { opacity: 1 } : { opacity: 0, scaleX: 0.4 }}
+                        animate={{ opacity: 1, scaleX: 1 }}
+                        transition={{ duration: prefersReduced ? 0.05 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+                        className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-[var(--color-brand-deep)] origin-center"
+                      />
+                    )}
                   </Link>
                 );
               })}
@@ -409,6 +418,7 @@ export function Navbar() {
               ref={mobileDrawerRef}
               id="mobile-nav-drawer"
               aria-label="Mobile Navigation"
+              data-lenis-prevent
               initial={prefersReduced ? { opacity: 0 } : { opacity: 0, x: 28 }}
               animate={{ opacity: 1, x: 0 }}
               exit={prefersReduced ? { opacity: 0 } : { opacity: 0, x: 28 }}

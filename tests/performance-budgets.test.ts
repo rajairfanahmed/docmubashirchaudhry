@@ -34,11 +34,12 @@ describe('Step 10 Performance Budgets, Code Splitting & Asset Optimization', () 
     expect(heroSearch).toContain("import('@/lib/search')");
   });
 
-  it('lazy-loads heavy modals and quiz summary, avoids Lenis scroll hijacking, and splits homepage Subject Strip to RSC', () => {
+  it('lazy-loads heavy modals, Lenis smooth scroll, and quiz summary while splitting Subject Strip to RSC', () => {
     const geoWorkbench = readProjectFile('src', 'components', 'geography', 'GeographyWorkbench.tsx');
     const mcqRunner = readProjectFile('src', 'components', 'mcq', 'McqPracticeRunner.tsx');
     const mcqPreview = readProjectFile('src', 'components', 'mcq', 'McqQuestionsPreviewList.tsx');
     const authModalProvider = readProjectFile('src', 'components', 'auth', 'AuthModalProvider.tsx');
+    const smoothScroll = readProjectFile('src', 'components', 'motion', 'SmoothScrollProvider.tsx');
     const providers = readProjectFile('src', 'app', 'providers.tsx');
     const geoScoreModal = readProjectFile('src', 'components', 'geography', 'GeographyScoreModal.tsx');
     const homePage = readProjectFile('src', 'app', 'page.tsx');
@@ -50,13 +51,16 @@ describe('Step 10 Performance Budgets, Code Splitting & Asset Optimization', () 
     expect(authModalProvider).toContain("from 'next/dynamic'");
     expect(authModalProvider).toContain("import('@/components/auth/AuthModal')");
 
+    expect(smoothScroll).toContain("import('lenis')");
+    expect(smoothScroll).toContain('respectReducedMotion: true');
+
     expect(mcqRunner).toContain("from 'next/dynamic'");
     expect(mcqRunner).toContain("import('./McqSessionSummary')");
 
     expect(mcqPreview).toContain('hasServerProvidedPageOne');
 
     expect(providers).not.toContain('QueryClientProvider');
-    expect(providers).not.toContain('SmoothScrollProvider');
+    expect(providers).toContain('SmoothScrollProvider');
     expect(geoScoreModal).not.toContain('canvas-confetti');
 
     expect(homePage).toContain('McqSubjectStrip');

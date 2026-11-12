@@ -29,7 +29,7 @@ export function QuizCatalogCard({ quiz }: QuizCatalogCardProps) {
       : 'English';
 
   return (
-    <article className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-5 sm:p-6 elevation-1 flex flex-col justify-between gap-5 min-w-0">
+    <article className="track-card bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-5 sm:p-6 elevation-1 flex flex-col justify-between gap-5 min-w-0">
       <div className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
           <span
@@ -105,10 +105,13 @@ export function QuizCatalogCard({ quiz }: QuizCatalogCardProps) {
 
         <Link
           href={`/quizzes/${quiz.slug}`}
-          className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap"
+          className="dmc-press group inline-flex items-center gap-1.5 min-h-[44px] px-4 py-2 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap"
         >
           <span>{isMock ? 'Take Mock Exam' : 'Start Quiz'}</span>
-          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+          <ArrowRight
+            className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transform-none"
+            aria-hidden="true"
+          />
         </Link>
       </div>
     </article>

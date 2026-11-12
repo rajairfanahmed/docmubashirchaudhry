@@ -16,7 +16,7 @@ export function PdfResourceCard({ pdf, subjectLabel }: PdfResourceCardProps) {
   const isArchived = pdf.status === 'archived';
 
   return (
-    <article className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-4 sm:p-5 lg:p-6 elevation-1 flex flex-col justify-between space-y-5 min-w-0">
+    <article className="track-card bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-4 sm:p-5 lg:p-6 elevation-1 flex flex-col justify-between space-y-5 min-w-0">
       <div className="space-y-3">
         {isArchived && (
           <div className="bg-[var(--color-surface-soft)] border border-[var(--color-border-strong)] rounded-[var(--radius-control)] px-3 py-1.5 flex items-center gap-2 text-xs font-semibold text-[var(--color-ink-secondary)]">
@@ -61,13 +61,16 @@ export function PdfResourceCard({ pdf, subjectLabel }: PdfResourceCardProps) {
       <div className="pt-3 border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-2 sm:gap-3">
         <Link
           href={`/library/resource/${pdf.slug}`}
-          className="inline-flex items-center gap-1 min-h-[44px] text-xs font-semibold text-[var(--color-brand-deep)] hover:underline"
+          className="group inline-flex items-center gap-1 min-h-[44px] text-xs font-semibold text-[var(--color-brand-deep)] hover:underline"
         >
           <span>
             Details &amp; SHA-256
             <span className="sr-only"> for {pdf.title}</span>
           </span>
-          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+          <ArrowRight
+            className="w-3.5 h-3.5 transition-transform duration-150 group-hover:translate-x-0.5 motion-reduce:transform-none"
+            aria-hidden="true"
+          />
         </Link>
 
         <GatedPdfDownloadButton

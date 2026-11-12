@@ -105,7 +105,7 @@ export function CountryCard({
   return (
     <article
       className={cn(
-        'bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-4 sm:p-5 elevation-1 flex flex-col justify-between space-y-4 min-w-0 overflow-hidden',
+        'bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:elevation-2 transition-[border-color,box-shadow] duration-150 rounded-[var(--radius-panel)] p-4 sm:p-5 elevation-1 flex flex-col justify-between space-y-4 min-w-0 overflow-hidden',
         isCurrentQuizTarget && 'ring-2 ring-[var(--color-brand-deep)]/25 border-[var(--color-brand-deep)]',
         className
       )}

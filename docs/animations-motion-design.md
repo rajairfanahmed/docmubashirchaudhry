@@ -8,9 +8,8 @@
 
 - **Installed Package Inspection (`package.json`):** The project already installs `"motion": "^14.12.0"` (`motion/react` with `<MotionConfig reducedMotion="user">` + `<LazyMotion features={domAnimation}>` in `src/app/providers.tsx`). Retain `motion` and never install a competing React animation runtime.
 - **Native CSS First for Simple Hover/Focus:** Use lightweight CSS `transition-colors` / `transition-transform` (`120-180ms`) for button, link, border, and option focus/hover states instead of wrapping static UI in React motion components.
-- **Remove Legacy Scroll/Celebration Anti-Patterns:**
-  - Retire `lenis` (`SmoothScrollProvider.tsx` & `lenis` CSS overrides) - native OS scrolling stays immediate and predictable for browser back navigation and `#hash` jumps.
-  - Retire `canvas-confetti` and any bouncing post-answer option animations; use calm transitions and clear score/feedback cards instead.
+- **Smooth Scroll (`lenis` via `SmoothScrollProvider.tsx`):** Dynamically imported on the client (`import('lenis')`) with `respectReducedMotion: true`, sticky-header offset (`-76px`), and `[data-lenis-prevent]` isolation inside dialogs and drawers so modals scroll cleanly without blocking SSR or harming reduced-motion users.
+- **Celebrate Without Confetti:** Retire `canvas-confetti` and any bouncing post-answer option animations; use calm spring-free cubic-bezier transitions, interactive tactile hover/tap feedback (`whileHover`, `whileTap`, `.track-card`, `.dmc-press`), and clear score/feedback cards instead.
 
 ---
 
@@ -52,7 +51,7 @@
 
 ### Explicit Forbidden Patterns
 - **Never** add large parallax scrolling effects.
-- **Never** hijack browser scrolling or force smooth scrolling (`lenis`).
+- **Never** bypass `respectReducedMotion` or `[data-lenis-prevent]` modal isolation on smooth scroll.
 - **Never** mount autoplay carousels or rotating hero banners.
 - **Never** use large page-wide zooms, 3D flips, or spinning transitions.
 - **Never** animate every homepage section sequentially into view (`whileInView` chains that lag scrolling).

@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -58,6 +59,7 @@ export function QuizSessionRunner({ slug, initialMetadata }: QuizSessionRunnerPr
   const { openAuthModal } = useAuthModal();
   const { showToast } = useToast();
   const headingId = useId();
+  const prefersReduced = useReducedMotion();
 
   const [quizSession, setQuizSession] = useState<QuizStartResponse | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(false);
@@ -524,125 +526,153 @@ export function QuizSessionRunner({ slug, initialMetadata }: QuizSessionRunnerPr
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_170px] lg:items-center lg:gap-10 gap-6">
-          <div key={currentQ.id} className="dmc-question-enter space-y-4 sm:space-y-5 min-w-0">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-semibold text-[var(--color-ink-secondary)] tabular-nums">
-                Question {currentIndex + 1} of {totalCount}
-              </span>
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] px-2.5 py-0.5 rounded-full">
-                {currentQ.difficulty}
-              </span>
-            </div>
-
-            <BilingualQuestionStem
-              language={currentQ.language}
-              textEn={currentQ.textEn}
-              textUr={currentQ.textUr}
-            />
-
-            {/* Options Grid (Matches SingleQuestionCard Clean Typography) */}
-            <div
-              role="group"
-              aria-label="Answer options"
-              className="grid grid-cols-1 md:grid-cols-2 gap-3"
+          <AnimatePresence mode="wait" initial={false}>
+            <m.div
+              key={currentQ.id}
+              initial={prefersReduced ? { opacity: 0 } : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              transition={{ duration: prefersReduced ? 0.06 : 0.16, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-4 sm:space-y-5 min-w-0"
             >
-              {currentQ.options.map((opt) => {
-                const isSelected = selectedKey === opt.key;
-                const isCheckedCorrect = checkedResult && opt.key === checkedResult.correctOption;
-                const isCheckedWrong =
-                  checkedResult && isSelected && opt.key !== checkedResult.correctOption;
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-semibold text-[var(--color-ink-secondary)] tabular-nums">
+                  Question {currentIndex + 1} of {totalCount}
+                </span>
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] px-2.5 py-0.5 rounded-full">
+                  {currentQ.difficulty}
+                </span>
+              </div>
 
-                let cardStyle =
-                  'border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] text-[var(--color-ink)] cursor-pointer active:scale-[0.988]';
-                let letterStyle = 'text-[var(--color-ink)]';
+              <BilingualQuestionStem
+                language={currentQ.language}
+                textEn={currentQ.textEn}
+                textUr={currentQ.textUr}
+              />
 
-                if (checkedResult) {
-                  if (isCheckedCorrect && isSelected) {
+              {/* Options Grid (Matches SingleQuestionCard Clean Typography) */}
+              <div
+                role="group"
+                aria-label="Answer options"
+                className="grid grid-cols-1 md:grid-cols-2 gap-3"
+              >
+                {currentQ.options.map((opt) => {
+                  const isSelected = selectedKey === opt.key;
+                  const isCheckedCorrect = checkedResult && opt.key === checkedResult.correctOption;
+                  const isCheckedWrong =
+                    checkedResult && isSelected && opt.key !== checkedResult.correctOption;
+                  const isOptionInteractive =
+                    !checkedResult && checkingQuestionId !== currentQ.id;
+
+                  let cardStyle =
+                    'border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] text-[var(--color-ink)] cursor-pointer';
+                  let letterStyle = 'text-[var(--color-ink)]';
+
+                  if (checkedResult) {
+                    if (isCheckedCorrect && isSelected) {
+                      cardStyle =
+                        'border-2 border-[var(--color-success-border)] bg-[var(--color-success-bg)] text-[var(--color-success-ink)] cursor-default';
+                      letterStyle = 'text-[var(--color-success-ink)]';
+                    } else if (isCheckedCorrect) {
+                      cardStyle =
+                        'border-2 border-[var(--color-warning-border)] bg-[var(--dmc-highlight-bg)] text-[var(--dmc-highlight-ink)] cursor-default';
+                      letterStyle = 'text-[var(--dmc-highlight-ink)]';
+                    } else if (isCheckedWrong) {
+                      cardStyle =
+                        'border-2 border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] text-[var(--color-danger-ink)] cursor-default';
+                      letterStyle = 'text-[var(--color-danger-ink)]';
+                    } else {
+                      cardStyle =
+                        'border-[var(--color-border)] bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] cursor-default';
+                      letterStyle = 'text-[var(--color-ink-secondary)]';
+                    }
+                  } else if (isSelected) {
                     cardStyle =
-                      'border-2 border-[var(--color-success-border)] bg-[var(--color-success-bg)] text-[var(--color-success-ink)] cursor-default';
-                    letterStyle = 'text-[var(--color-success-ink)]';
-                  } else if (isCheckedCorrect) {
-                    cardStyle =
-                      'border-2 border-[var(--color-warning-border)] bg-[var(--dmc-highlight-bg)] text-[var(--dmc-highlight-ink)] cursor-default';
-                    letterStyle = 'text-[var(--dmc-highlight-ink)]';
-                  } else if (isCheckedWrong) {
-                    cardStyle =
-                      'border-2 border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] text-[var(--color-danger-ink)] cursor-default';
-                    letterStyle = 'text-[var(--color-danger-ink)]';
-                  } else {
-                    cardStyle =
-                      'border-[var(--color-border)] bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] cursor-default';
-                    letterStyle = 'text-[var(--color-ink-secondary)]';
+                      'border-2 border-[var(--color-brand-deep)] bg-[var(--color-success-bg)] text-[var(--color-ink)]';
+                    letterStyle = 'text-[var(--color-brand-deep)]';
                   }
-                } else if (isSelected) {
-                  cardStyle =
-                    'border-2 border-[var(--color-brand-deep)] bg-[var(--color-success-bg)] text-[var(--color-ink)]';
-                  letterStyle = 'text-[var(--color-brand-deep)]';
-                }
 
-                const showOptEn = Boolean(
-                  opt.textEn && (currentQ.language !== 'ur' || !opt.textUr)
-                );
-                const showOptUr = Boolean(
-                  opt.textUr && (currentQ.language !== 'en' || !opt.textEn)
-                );
+                  const showOptEn = Boolean(
+                    opt.textEn && (currentQ.language !== 'ur' || !opt.textUr)
+                  );
+                  const showOptUr = Boolean(
+                    opt.textUr && (currentQ.language !== 'en' || !opt.textEn)
+                  );
 
-                return (
-                  <button
-                    key={opt.key}
-                    type="button"
-                    onClick={() => void handleOptionSelect(currentQ.id, opt.key)}
-                    aria-disabled={Boolean(checkedResult) || checkingQuestionId === currentQ.id || undefined}
-                    aria-pressed={isSelected}
-                    className={cn(
-                      'w-full min-h-[52px] text-left rounded-lg border px-4 py-3 flex items-center justify-between gap-2.5 text-sm font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out motion-reduce:transform-none',
-                      'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]',
-                      cardStyle
-                    )}
-                  >
-                    <div className="flex items-start gap-3 min-w-0 flex-1">
-                      <span
-                        dir="ltr"
-                        className={cn('font-bold uppercase shrink-0 min-w-[20px]', letterStyle)}
-                      >
-                        {opt.key.toUpperCase()}.
-                      </span>
+                  return (
+                    <m.button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => void handleOptionSelect(currentQ.id, opt.key)}
+                      aria-disabled={Boolean(checkedResult) || checkingQuestionId === currentQ.id || undefined}
+                      aria-pressed={isSelected}
+                      whileHover={isOptionInteractive && !prefersReduced ? { y: -1 } : undefined}
+                      whileTap={isOptionInteractive && !prefersReduced ? { scale: 0.986 } : undefined}
+                      transition={{ duration: 0.13, ease: [0.22, 1, 0.36, 1] }}
+                      className={cn(
+                        'w-full min-h-[52px] text-left rounded-lg border px-4 py-3 flex items-center justify-between gap-2.5 text-sm font-medium transition-colors duration-150 ease-out',
+                        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]',
+                        cardStyle
+                      )}
+                    >
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <span
+                          dir="ltr"
+                          className={cn('font-bold uppercase shrink-0 min-w-[20px]', letterStyle)}
+                        >
+                          {opt.key.toUpperCase()}.
+                        </span>
 
-                      <div className="min-w-0 flex-1 space-y-1">
-                        {showOptEn && opt.textEn && (
-                          <span dir="ltr" className="block leading-snug break-words">
-                            {opt.textEn}
-                          </span>
-                        )}
-                        {showOptUr && opt.textUr && (
-                          <span
-                            dir="rtl"
-                            lang="ur"
-                            className="type-urdu block text-right leading-[1.8]"
-                          >
-                            {opt.textUr}
-                          </span>
-                        )}
+                        <div className="min-w-0 flex-1 space-y-1">
+                          {showOptEn && opt.textEn && (
+                            <span dir="ltr" className="block leading-snug break-words">
+                              {opt.textEn}
+                            </span>
+                          )}
+                          {showOptUr && opt.textUr && (
+                            <span
+                              dir="rtl"
+                              lang="ur"
+                              className="type-urdu block text-right leading-[1.8]"
+                            >
+                              {opt.textUr}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {isCheckedCorrect && (
-                      <CheckCircle2
-                        className="w-4 h-4 text-[var(--color-success-ink)] shrink-0"
-                        aria-hidden="true"
-                      />
-                    )}
-                    {isCheckedWrong && (
-                      <XCircle
-                        className="w-4 h-4 text-[var(--color-danger-ink)] shrink-0"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+                      {isCheckedCorrect && (
+                        <m.span
+                          initial={prefersReduced ? { opacity: 1 } : { opacity: 0, scale: 0.75 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                          className="shrink-0"
+                        >
+                          <CheckCircle2
+                            className="w-4 h-4 text-[var(--color-success-ink)]"
+                            aria-hidden="true"
+                          />
+                        </m.span>
+                      )}
+                      {isCheckedWrong && (
+                        <m.span
+                          initial={prefersReduced ? { opacity: 1 } : { opacity: 0, scale: 0.75 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
+                          className="shrink-0"
+                        >
+                          <XCircle
+                            className="w-4 h-4 text-[var(--color-danger-ink)]"
+                            aria-hidden="true"
+                          />
+                        </m.span>
+                      )}
+                    </m.button>
+                  );
+                })}
+              </div>
+            </m.div>
+          </AnimatePresence>
 
           {/* Right Zone (>= lg): Circular Progress Ring */}
           <div className="hidden lg:flex items-center justify-center shrink-0">
@@ -651,34 +681,41 @@ export function QuizSessionRunner({ slug, initialMetadata }: QuizSessionRunnerPr
         </div>
 
         {/* Practice Mode Immediate Feedback + Golden Answer Highlight */}
-        {checkedResult && (
-          <div
-            aria-live="polite"
-            className="dmc-reveal border-t border-[var(--color-border)] pt-5 space-y-3.5"
-          >
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <span
-                className={
-                  checkedResult.isCorrect
-                    ? 'font-bold text-[var(--color-success-ink)]'
-                    : 'font-bold text-[var(--color-danger-ink)]'
-                }
-              >
-                {checkedResult.isCorrect ? 'Correct pick:' : 'Correct option:'}
-              </span>
+        <AnimatePresence initial={false}>
+          {checkedResult && (
+            <m.div
+              key={`quiz-explain-${currentQ.id}`}
+              aria-live="polite"
+              initial={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: prefersReduced ? 0.06 : 0.19, ease: [0.22, 1, 0.36, 1] }}
+              className="border-t border-[var(--color-border)] pt-5 space-y-3.5"
+            >
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span
+                  className={
+                    checkedResult.isCorrect
+                      ? 'font-bold text-[var(--color-success-ink)]'
+                      : 'font-bold text-[var(--color-danger-ink)]'
+                  }
+                >
+                  {checkedResult.isCorrect ? 'Correct pick:' : 'Correct option:'}
+                </span>
 
-              <AnswerHighlight className="uppercase">
-                Option {checkedResult.correctOption.toUpperCase()}
-              </AnswerHighlight>
-            </div>
-
-            {checkedResult.explanation && (
-              <div className="bg-[var(--color-surface-soft)] border border-[var(--color-border)] rounded-[var(--radius-control)] p-4 text-xs sm:text-sm text-[var(--color-ink-secondary)] leading-relaxed">
-                {checkedResult.explanation}
+                <AnswerHighlight className="uppercase">
+                  Option {checkedResult.correctOption.toUpperCase()}
+                </AnswerHighlight>
               </div>
-            )}
-          </div>
-        )}
+
+              {checkedResult.explanation && (
+                <div className="bg-[var(--color-surface-soft)] border border-[var(--color-border)] rounded-[var(--radius-control)] p-4 text-xs sm:text-sm text-[var(--color-ink-secondary)] leading-relaxed">
+                  {checkedResult.explanation}
+                </div>
+              )}
+            </m.div>
+          )}
+        </AnimatePresence>
 
         {/* Card Footer Pagination Strip (Prev | 1..N | Next) */}
         <div className="pt-2 border-t border-[var(--color-border)]/80">
