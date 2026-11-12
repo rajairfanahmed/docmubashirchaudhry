@@ -4,23 +4,27 @@ import type { VerificationStatus } from '@/lib/schemas';
 import { cn } from '@/lib/utils';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'prepare' | 'feature' | 'verified' | 'success' | 'error' | 'neutral';
+  variant?: 'prepare' | 'feature' | 'verified' | 'success' | 'warning' | 'error' | 'info' | 'neutral';
   icon?: React.ReactNode;
 }
 
 const BADGE_CLASSES: Record<NonNullable<BadgeProps['variant']>, string> = {
   prepare:
-    'bg-amber-100 text-amber-900 text-xs font-bold tracking-wider uppercase px-3.5 py-1',
+    'bg-[var(--color-warning-bg)] text-[var(--color-warning-ink)] border border-[var(--color-warning-border)] text-xs font-semibold tracking-wider uppercase px-3 py-1',
   feature:
-    'bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)] border border-[var(--dmc-status-verified-border)]/40 text-xs sm:text-sm px-3.5 py-1.5',
+    'bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border border-[var(--color-success-border)] text-xs sm:text-sm px-3 py-1',
   verified:
-    'bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)] border border-[var(--dmc-status-verified-border)]/40 text-[11px] font-bold px-2.5 py-0.5 rounded-md',
+    'bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border border-[var(--color-success-border)] text-[11px] font-semibold px-2.5 py-0.5 rounded-md',
   success:
-    'bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)] border border-[var(--dmc-status-verified-border)] text-xs font-bold px-2.5 py-0.5',
+    'bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border border-[var(--color-success-border)] text-xs font-semibold px-2.5 py-0.5',
+  warning:
+    'bg-[var(--color-warning-bg)] text-[var(--color-warning-ink)] border border-[var(--color-warning-border)] text-xs font-semibold px-2.5 py-0.5',
   error:
-    'bg-[var(--dmc-status-error-bg)] text-[var(--dmc-status-error-ink)] border border-[var(--dmc-status-error-border)] text-xs font-bold px-2.5 py-0.5',
+    'bg-[var(--color-danger-bg)] text-[var(--color-danger-ink)] border border-[var(--color-danger-border)] text-xs font-semibold px-2.5 py-0.5',
+  info:
+    'bg-[var(--color-info-bg)] text-[var(--color-info-ink)] border border-[var(--color-info-border)] text-xs font-semibold px-2.5 py-0.5',
   neutral:
-    'bg-slate-100 text-[var(--dmc-ink-secondary)] border border-[var(--dmc-border-subtle)] text-xs px-2.5 py-1'
+    'bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] border border-[var(--color-border)] text-xs px-2.5 py-1'
 };
 
 export function Badge({
@@ -65,47 +69,47 @@ const EPISTEMIC_STYLES: Record<
   { bg: string; defaultLabel: string; Icon: React.ComponentType<{ className?: string }> }
 > = {
   verified: {
-    bg: 'bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)] border-[var(--dmc-status-verified-border)]/50',
+    bg: 'bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border-[var(--color-success-border)]',
     defaultLabel: 'Verified',
     Icon: ShieldCheck
   },
   unverified: {
-    bg: 'bg-[var(--dmc-status-unverified-bg)] text-[var(--dmc-status-unverified-ink)] border-[var(--dmc-status-unverified-border)]/60',
+    bg: 'bg-[var(--color-warning-bg)] text-[var(--color-warning-ink)] border-[var(--color-warning-border)]',
     defaultLabel: 'Unverified - Pending Official Check',
     Icon: AlertTriangle
   },
   disputed: {
-    bg: 'bg-[var(--dmc-status-disputed-bg)] text-[var(--dmc-status-disputed-ink)] border-[var(--dmc-status-disputed-border)]/50',
+    bg: 'bg-[var(--color-warning-bg)] text-[var(--color-warning-ink)] border-[var(--color-warning-border)]',
     defaultLabel: 'Disputed Field',
     Icon: AlertTriangle
   },
   outdated: {
-    bg: 'bg-[var(--dmc-status-archived-bg)] text-[var(--dmc-status-archived-ink)] border-[var(--dmc-status-archived-border)]',
+    bg: 'bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] border-[var(--color-border-strong)]',
     defaultLabel: 'Outdated Notice',
     Icon: Clock
   },
   archived: {
-    bg: 'bg-[var(--dmc-status-archived-bg)] text-[var(--dmc-status-archived-ink)] border-[var(--dmc-status-archived-border)]',
+    bg: 'bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] border-[var(--color-border-strong)]',
     defaultLabel: 'Archived',
     Icon: Archive
   },
   editorial: {
-    bg: 'bg-[var(--dmc-status-editorial-bg)] text-[var(--dmc-status-editorial-ink)] border-[var(--dmc-status-editorial-border)]',
+    bg: 'bg-[var(--color-info-bg)] text-[var(--color-info-ink)] border-[var(--color-info-border)]',
     defaultLabel: 'Platform recommendation, not official',
     Icon: Info
   },
   open: {
-    bg: 'bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)] border-[var(--dmc-status-verified-border)]/50',
+    bg: 'bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border-[var(--color-success-border)]',
     defaultLabel: 'Open',
     Icon: Calendar
   },
   closed: {
-    bg: 'bg-slate-100 text-slate-700 border-slate-300',
+    bg: 'bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] border-[var(--color-border-strong)]',
     defaultLabel: 'Closed',
     Icon: Clock
   },
   upcoming: {
-    bg: 'bg-sky-50 text-sky-900 border-sky-200',
+    bg: 'bg-[var(--color-info-bg)] text-[var(--color-info-ink)] border-[var(--color-info-border)]',
     defaultLabel: 'Upcoming',
     Icon: Calendar
   }

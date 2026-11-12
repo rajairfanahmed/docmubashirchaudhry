@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { RotateCcw, Trash2 } from 'lucide-react';
 import type { OptionId, Question } from '@/lib/schemas';
 import { createVersionedStorage, STORAGE_KEYS } from '@/lib/storage/persistence';
-import { useSmoothScroll } from '@/components/motion/SmoothScrollProvider';
+import { scrollToElementWithOffset } from '@/lib/motion/scroll';
 import { EmptyStateCard } from '@/components/ui/EmptyStateCard';
 import { useToast } from '@/components/ui/ToastProvider';
 import { SingleQuestionCard } from './SingleQuestionCard';
@@ -114,13 +114,11 @@ export function McqPracticeRunner({
     });
   };
 
-  const { scrollToTarget } = useSmoothScroll();
-
   const scrollToStage = () => {
     if (!stageTopRef.current || typeof window === 'undefined') return;
     const rect = stageTopRef.current.getBoundingClientRect();
     if (rect.top < 64 || rect.top > window.innerHeight * 0.45) {
-      scrollToTarget(stageTopRef.current, { offset: -76 });
+      scrollToElementWithOffset(stageTopRef.current, { offset: -76 });
     }
   };
 

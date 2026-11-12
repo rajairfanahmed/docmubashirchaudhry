@@ -1,7 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ShieldAlert, Sparkles } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ShieldCheck } from 'lucide-react';
 import { PageContainer } from '@/components/layout/PageContainer';
 
 export interface StandingTrustNoticeProps {
@@ -10,34 +9,45 @@ export interface StandingTrustNoticeProps {
 }
 
 /**
- * Persistent standing platform disclosure required across all routes:
- * independent status (non-affiliated) + 100% free, zero ads, zero login.
+ * Mandatory independence and open-reference transparency statement.
+ * `bar` sits cleanly beneath the sticky Navbar; `band` anchors the bottom content zone.
  */
 export function StandingTrustNotice({
   variant = 'bar',
-  className
+  className = ''
 }: StandingTrustNoticeProps) {
   if (variant === 'bar') {
     return (
       <div
         role="region"
-        aria-label="Standing Platform Notice"
-        data-dmc-surface="dark"
-        className={cn(
-          'bg-[var(--dmc-brand-dark)] text-emerald-50 border-b border-[var(--dmc-brand-emerald)]/40 text-xs',
-          className
-        )}
+        aria-label="Independence and open-access notice"
+        className={`bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] border-b border-[var(--color-border)] ${className}`}
       >
-        <PageContainer className="py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
-          <p className="flex items-center gap-2 leading-snug">
-            <ShieldAlert className="w-3.5 h-3.5 text-[var(--dmc-accent-gold)] shrink-0" aria-hidden="true" />
+        <PageContainer className="py-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4 text-xs">
+          <p className="flex items-center gap-2 font-medium text-[var(--color-ink-secondary)] leading-snug">
+            <ShieldCheck className="w-4 h-4 text-[var(--color-brand-deep)] shrink-0" aria-hidden="true" />
             <span>
-              <strong className="font-semibold text-white">Independent Educational Portal:</strong> Not affiliated with PPSC, FPSC, NTS, CSS/PMS, or any government commission.
+              Independent educational platform &middot; not affiliated with PPSC, FPSC, NTS, or
+              any commission. Always verify official test updates.
             </span>
           </p>
-          <p className="font-semibold text-[var(--dmc-accent-gold)] sm:shrink-0">
-            100% Free &middot; No Ads &middot; No Login
-          </p>
+          <div className="flex items-center gap-3 text-xs font-medium text-[var(--color-ink-secondary)] shrink-0">
+            <span>
+              Open Reference Guides &middot; Free Sign-In for Quizzes &amp; PDFs
+            </span>
+            <Link
+              href="/methodology"
+              className="font-semibold text-[var(--color-brand-deep)] underline-offset-2 hover:underline whitespace-nowrap"
+            >
+              Methodology
+            </Link>
+            <Link
+              href="/privacy"
+              className="font-semibold text-[var(--color-brand-deep)] underline-offset-2 hover:underline whitespace-nowrap"
+            >
+              Privacy
+            </Link>
+          </div>
         </PageContainer>
       </div>
     );
@@ -45,39 +55,45 @@ export function StandingTrustNotice({
 
   return (
     <section
-      aria-label="Free Access and Independence Notice"
-      className={cn(
-        'bg-[var(--dmc-status-verified-bg)] border-y border-[var(--dmc-status-verified-border)]/40 py-8',
-        className
-      )}
+      aria-labelledby="standing-trust-heading"
+      data-dmc-surface="dark"
+      className={`bg-[var(--color-dark-surface-raised)] text-[var(--color-dark-ink)] py-10 sm:py-12 border-t border-[var(--color-dark-border)] ${className}`}
     >
       <PageContainer>
-        <div className="rounded-2xl bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] p-4 sm:p-6 elevation-1 grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-center">
-          <div className="lg:col-span-8 space-y-2 min-w-0">
-            <div className="inline-flex items-center gap-1.5 type-label-micro text-[var(--dmc-status-verified-ink)] bg-[var(--dmc-status-verified-bg)] px-3 py-1 rounded-full">
-              <Sparkles className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-              <span>Free, No Ads, No Signup</span>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-2 text-xs font-semibold tracking-wide text-[var(--color-accent)]">
+              <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span>Open Reference Guides &middot; Free Student Account for Quizzes &amp; PDFs</span>
             </div>
-            <h2 className="type-section-heading text-[var(--dmc-ink-primary)] [overflow-wrap:anywhere]">
-              Open Educational Resource Without Gatekeeping
+            <h2 id="standing-trust-heading" className="type-card-title text-[var(--color-dark-ink)]">
+              Transparent Preparation Without Advertising Clutter
             </h2>
-            <p className="type-body-sm text-[var(--dmc-ink-secondary)] [overflow-wrap:anywhere]">
-              Every quiz deck, syllabus breakdown, and verified PDF compilation is free to study and download without accounts, popups, or subscriptions.{' '}
-              <strong className="break-words">docmubashirchaudhry is strictly independent and unaffiliated with any public service commission or testing body.</strong>
+            <p className="text-sm text-[var(--color-dark-ink-secondary)] leading-relaxed">
+              Country profiles, World Geography references, and exam hub guides stay openly readable
+              to everyone. Starting a timed quiz or downloading a watermarked study PDF prompts a
+              quick free student sign-in so scores and booklets stay personal. This is an independent
+              academic portal and has no official link to any commission.
             </p>
           </div>
-          <div className="lg:col-span-4 flex flex-wrap lg:justify-end gap-3 min-w-0">
+          <div className="flex flex-wrap gap-3 shrink-0">
             <Link
-              href="/methodology"
-              className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-lg border border-[var(--dmc-border-strong)] bg-white text-sm font-semibold text-[var(--dmc-ink-primary)]"
+              href="/quizzes"
+              className="px-4 py-2.5 rounded-[var(--radius-control)] bg-[var(--color-accent)] text-[var(--color-accent-ink)] hover:opacity-95 font-semibold text-xs sm:text-sm transition-opacity"
             >
-              Verification Methodology
+              Browse Quizzes
             </Link>
             <Link
-              href="/corrections"
-              className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 rounded-lg bg-[var(--dmc-brand-forest)] text-sm font-semibold text-white"
+              href="/methodology"
+              className="px-4 py-2.5 rounded-[var(--radius-control)] border border-[var(--color-dark-ink-secondary)]/40 text-[var(--color-dark-ink)] hover:bg-white/10 font-semibold text-xs sm:text-sm transition-colors"
             >
-              Report Correction
+              Read Methodology
+            </Link>
+            <Link
+              href="/privacy"
+              className="px-4 py-2.5 rounded-[var(--radius-control)] border border-[var(--color-dark-ink-secondary)]/40 text-[var(--color-dark-ink)] hover:bg-white/10 font-semibold text-xs sm:text-sm transition-colors"
+            >
+              Privacy Notice
             </Link>
           </div>
         </div>
@@ -85,4 +101,3 @@ export function StandingTrustNotice({
     </section>
   );
 }
-

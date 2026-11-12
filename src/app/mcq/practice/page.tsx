@@ -81,20 +81,20 @@ export default async function McqPracticePage({
             currentPath="/mcq/practice"
           />
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--dmc-border-subtle)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--color-border)]">
             <div>
-              <h1 id="practice-heading" className="type-page-title text-[var(--dmc-mcq-heading)]">
+              <h1 id="practice-heading" className="type-page-title text-[var(--color-ink)]">
                 Interactive MCQ Practice
               </h1>
-              <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-[var(--dmc-ink-secondary)]">
-                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 font-semibold">
+              <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-[var(--color-ink-secondary)]">
+                <span className="px-2.5 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)] font-medium">
                   Exam: {exam?.bodyCode ?? 'All Exams'}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full bg-slate-100 font-semibold">
+                <span className="px-2.5 py-0.5 rounded-md bg-[var(--color-surface)] border border-[var(--color-border)] font-medium">
                   Subject: {subject?.name ?? 'All Subjects'}
                 </span>
                 {topic && (
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-[var(--dmc-brand-emerald)] font-semibold border border-emerald-200">
+                  <span className="px-2.5 py-0.5 rounded-md bg-[var(--color-success-bg)] text-[var(--color-success-ink)] font-semibold border border-[var(--color-success-border)]">
                     Topic: {topic.name}
                   </span>
                 )}
@@ -103,7 +103,7 @@ export default async function McqPracticePage({
 
             <Link
               href="/mcq"
-              className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-bold text-[var(--dmc-brand-emerald)] hover:underline shrink-0"
+              className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold text-[var(--color-brand-deep)] hover:underline shrink-0"
             >
               <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Change Filters</span>
@@ -119,24 +119,8 @@ export default async function McqPracticePage({
         ariaLabel="Interactive MCQ Question Workspace"
         className="pb-12 sm:pb-16"
       >
-        <div className="mcq-sheet-surface rounded-[20px] sm:rounded-[32px] border border-[var(--dmc-brand-forest)]/10 p-3 sm:p-8 lg:p-12 relative overflow-hidden">
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 360 360"
-            fill="none"
-            className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 sm:w-96 sm:h-96 text-[var(--dmc-mcq-sheet-arc)]"
-          >
-            <circle cx="220" cy="140" r="140" stroke="currentColor" strokeWidth="48" />
-          </svg>
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 360 360"
-            fill="none"
-            className="pointer-events-none hidden sm:block absolute -bottom-24 -left-24 w-72 h-72 text-[var(--dmc-mcq-sheet-arc)]"
-          >
-            <circle cx="140" cy="220" r="120" stroke="currentColor" strokeWidth="40" />
-          </svg>
-          <div className="max-w-3xl mx-auto relative z-10">
+        <div className="bg-[var(--color-surface-soft)] rounded-[var(--radius-sheet)] border border-[var(--color-border)] p-3 sm:p-8 lg:p-10">
+          <div className="max-w-3xl mx-auto">
             <McqPracticeRunner
               questions={questions}
               sessionKey={sessionKey}

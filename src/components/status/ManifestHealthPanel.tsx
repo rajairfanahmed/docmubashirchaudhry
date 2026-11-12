@@ -28,15 +28,15 @@ export function ManifestHealthPanel() {
   }, [loadManifest]);
 
   return (
-    <div className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-[var(--dmc-radius-card)] p-4 sm:p-5 elevation-1 space-y-3 text-xs">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-4 sm:p-5 shadow-xs space-y-3 text-xs">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="font-bold uppercase tracking-wider text-[var(--dmc-ink-muted)]">
+        <div className="font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">
           Live Endpoint Probe (GET /data/v1/manifest.json)
         </div>
         <button
           type="button"
           onClick={() => void loadManifest(true)}
-          className="inline-flex items-center gap-1 min-h-[44px] sm:min-h-0 px-1 font-bold text-[var(--dmc-brand-forest)] hover:underline cursor-pointer"
+          className="inline-flex items-center gap-1 min-h-[44px] sm:min-h-[36px] px-1 font-semibold text-[var(--color-brand-deep)] hover:underline cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
           <span>Re-check Now</span>
@@ -44,20 +44,20 @@ export function ManifestHealthPanel() {
       </div>
 
       {status === 'loading' && (
-        <div className="flex items-center gap-2 text-[var(--dmc-ink-secondary)]">
-          <Loader2 className="w-4 h-4 animate-spin text-[var(--dmc-brand-forest)]" aria-hidden="true" />
+        <div className="flex items-center gap-2 text-[var(--color-ink-secondary)]">
+          <Loader2 className="w-4 h-4 animate-spin text-[var(--color-brand-deep)]" aria-hidden="true" />
           <span>Checking live static data manifest...</span>
         </div>
       )}
 
       {status === 'ok' && manifest && (
-        <div className="flex flex-wrap items-center gap-3 text-[var(--dmc-ink-primary)]">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)] font-bold">
+        <div className="flex flex-wrap items-center gap-3 text-[var(--color-ink)]">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--color-success-bg)] border border-[var(--color-success-border)] text-[var(--color-success-ink)] font-semibold">
             <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
             <span>HTTP 200 OK</span>
           </span>
           <span className="font-mono font-bold">Dataset: {manifest.datasetVersion}</span>
-          <span className="text-[var(--dmc-ink-muted)]">
+          <span className="text-[var(--color-ink-muted)]">
             Generated: {new Date(manifest.generatedAt).toUTCString()}
           </span>
         </div>
@@ -66,7 +66,7 @@ export function ManifestHealthPanel() {
       {status === 'error' && (
         <div
           role="alert"
-          className="flex flex-wrap items-center justify-between gap-2 bg-[var(--dmc-status-error-bg)] border border-[var(--dmc-status-error-border)] rounded-xl p-3 text-[var(--dmc-status-error-ink)]"
+          className="flex flex-wrap items-center justify-between gap-2 bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-[var(--radius-control)] p-3 text-[var(--color-danger-ink)]"
         >
           <div className="flex items-center gap-2 font-semibold">
             <XCircle className="w-4 h-4 shrink-0" aria-hidden="true" />

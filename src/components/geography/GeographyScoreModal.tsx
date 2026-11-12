@@ -1,9 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import confetti from 'canvas-confetti';
+import React from 'react';
 import { ArrowRight, Award, RotateCcw, Trash2, Trophy } from 'lucide-react';
-import { useReducedMotion } from '@/lib/motion/useReducedMotion';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 
@@ -30,42 +28,6 @@ export function GeographyScoreModal({
 }: GeographyScoreModalProps) {
   const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
   const passedThreshold = percentage >= 70;
-  const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (!isOpen || !passedThreshold || prefersReducedMotion) return;
-
-    try {
-      confetti({
-        particleCount: 28,
-        spread: 60,
-        startVelocity: 30,
-        ticks: 140,
-        origin: { y: 0.6 },
-        colors: ['#10B981', '#0D4A28', '#F0B938', '#FEF08A'],
-        disableForReducedMotion: true
-      });
-    } catch {
-      // Ignore confetti failures in non-canvas environments
-    }
-
-    const stopTimer = window.setTimeout(() => {
-      try {
-        confetti.reset();
-      } catch {
-        // Ignore cleanup failures
-      }
-    }, 1400);
-
-    return () => {
-      window.clearTimeout(stopTimer);
-      try {
-        confetti.reset();
-      } catch {
-        // Ignore cleanup failures
-      }
-    };
-  }, [isOpen, passedThreshold, prefersReducedMotion]);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Geography Quiz Results">
@@ -73,8 +35,8 @@ export function GeographyScoreModal({
         <div
           className={`w-16 h-16 rounded-2xl mx-auto flex items-center justify-center border ${
             passedThreshold
-              ? 'bg-[var(--dmc-highlight-bg)] text-[var(--dmc-highlight-ink)] border-[var(--dmc-highlight-border)]'
-              : 'bg-[var(--dmc-surface-muted)] text-[var(--dmc-brand-forest)] border-[var(--dmc-border-subtle)]'
+              ? 'bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border-[var(--color-success-border)]'
+              : 'bg-[var(--color-surface-soft)] text-[var(--color-brand-deep)] border-[var(--color-border)]'
           }`}
         >
           {passedThreshold ? (
@@ -86,15 +48,15 @@ export function GeographyScoreModal({
 
         <div className="space-y-2">
           {passedThreshold && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--dmc-highlight-bg)] border border-[var(--dmc-accent-gold)] text-[var(--dmc-highlight-ink)] text-xs font-extrabold">
-              <span>{prefersReducedMotion ? '70%+ Mastery Achieved' : 'Milestone Achieved! (70%+ Score)'}</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--color-success-bg)] border border-[var(--color-success-border)] text-[var(--color-success-ink)] text-xs font-semibold">
+              <span>Milestone Achieved (70%+ Score)</span>
             </div>
           )}
 
-          <div className="text-3xl font-extrabold text-[var(--dmc-ink-primary)] tabular-nums">
+          <div className="text-3xl font-extrabold text-[var(--color-ink)] tabular-nums">
             {score} / {total} ({percentage}%)
           </div>
-          <p className="type-body-sm text-[var(--dmc-ink-secondary)]">
+          <p className="type-body-sm text-[var(--color-ink-secondary)]">
             {passedThreshold
               ? 'Strong mastery of sovereign capitals, currencies, and languages. Advance to the next region or review weak spots.'
               : 'Review the reference cards above and retake this set to cross the 70% mastery mark.'}
@@ -102,22 +64,22 @@ export function GeographyScoreModal({
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-1">
-          <Button variant="forest" size="md" onClick={onNextScope}>
+          <Button variant="primary" size="md" onClick={onNextScope}>
             <span>{nextScopeLabel}</span>
             <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </Button>
-          <Button variant="gold" size="md" onClick={onRetake}>
+          <Button variant="secondary" size="md" onClick={onRetake}>
             <RotateCcw className="w-4 h-4" aria-hidden="true" />
             <span>Retake</span>
           </Button>
         </div>
 
         {onClearProgress && (
-          <div className="pt-3 border-t border-[var(--dmc-border-subtle)] flex justify-center">
+          <div className="pt-3 border-t border-[var(--color-border)] flex justify-center">
             <button
               type="button"
               onClick={onClearProgress}
-              className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] px-3 text-xs font-semibold text-[var(--dmc-status-error-ink)] hover:underline cursor-pointer"
+              className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] px-3 text-xs font-semibold text-[var(--color-danger-ink)] hover:underline cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
               <span>Clear my saved quiz progress</span>

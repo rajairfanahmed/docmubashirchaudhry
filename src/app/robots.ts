@@ -6,8 +6,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/geography', '/ppsc', '/library', '/topics', '/data/v1/'],
-        disallow: ['/api/']
+        allow: ['/', '/geography', '/ppsc', '/quizzes', '/exams', '/library', '/topics', '/data/v1/'],
+        disallow: ['/api/', '/admin/', '/my-attempts', '/my-downloads']
       },
       {
         userAgent: [
@@ -18,8 +18,8 @@ export default function robots(): MetadataRoute.Robots {
           'ClaudeBot',
           'anthropic-ai'
         ],
-        allow: ['/', '/geography', '/ppsc', '/library', '/topics', '/data/v1/'],
-        disallow: ['/api/']
+        allow: ['/', '/geography', '/ppsc', '/quizzes', '/exams', '/library', '/topics', '/data/v1/'],
+        disallow: ['/api/', '/admin/', '/my-attempts', '/my-downloads']
       }
     ],
     sitemap: buildCanonicalUrl('/sitemap.xml')

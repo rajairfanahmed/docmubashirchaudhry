@@ -6,30 +6,40 @@ import { PageContainer } from '@/components/layout/PageContainer';
 export function PreFooterCta() {
   return (
     <section
-      aria-label="Start Free Practice Call to Action"
+      aria-labelledby="prefooter-cta-heading"
       data-dmc-surface="dark"
-      className="bg-[var(--dmc-brand-dark)] text-white py-12 border-t border-[var(--dmc-brand-emerald)]/50"
+      className="bg-[var(--color-dark-surface-raised)] text-[var(--color-dark-ink)] py-12 sm:py-14 border-t border-[var(--color-dark-border)]"
     >
-      <PageContainer size="reading" className="text-center space-y-4">
-        <h2 className="type-section-heading text-white">
-          Start practicing now: free, no ads, no login
+      <PageContainer size="reading" className="text-center space-y-5">
+        <div className="text-xs font-semibold tracking-wide text-[var(--color-accent)]">
+          Open Reference Guides &amp; Saved Student Quizzes
+        </div>
+        <h2 id="prefooter-cta-heading" className="type-section-heading text-[var(--color-dark-ink)]">
+          Test Your Recall Under Real Exam Discipline
         </h2>
-        <p className="text-xs sm:text-sm text-emerald-100/85 max-w-xl mx-auto leading-relaxed">
-          Master sovereign capitals, currencies, languages, and competitive MCQ tracks across PPSC, CSS, PMS, FPSC, and NTS on docmubashirchaudhry.
+        <p className="text-sm sm:text-base text-[var(--color-dark-ink-secondary)] max-w-xl mx-auto">
+          Practice bilingual subject quizzes or full timed PPSC &amp; FPSC mocks with saved
+          attempt history, plus solved watermarked PDFs in one place.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
           <Link
-            href="/geography#quiz-module"
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 bg-[var(--dmc-accent-gold)] text-[var(--dmc-ink-primary)] font-bold text-sm rounded-lg"
+            href="/quizzes"
+            className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-[var(--radius-control)] bg-[var(--color-accent)] text-[var(--color-accent-ink)] hover:opacity-95 font-semibold text-sm transition-opacity"
           >
-            <span>Geography Interactive Quiz</span>
+            <span>Explore Quizzes &amp; Mocks</span>
             <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </Link>
           <Link
-            href="/mcq"
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-2.5 border border-emerald-400/50 text-white font-semibold text-sm rounded-lg"
+            href="/geography#quiz-module"
+            className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-[var(--radius-control)] text-[var(--color-dark-ink)] hover:bg-white/10 border border-[var(--color-dark-ink-secondary)]/35 font-semibold text-sm transition-colors"
           >
-            <span>Browse MCQ Practice</span>
+            <span>Geography Practice</span>
+          </Link>
+          <Link
+            href="/library"
+            className="inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-[var(--radius-control)] text-[var(--color-dark-ink)] hover:bg-white/10 border border-[var(--color-dark-ink-secondary)]/35 font-semibold text-sm transition-colors"
+          >
+            <span>Browse PDF Library</span>
           </Link>
         </div>
       </PageContainer>

@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button';
 export interface McqLauncherWidgetProps {
   exams: Exam[];
   subjects: Subject[];
-  topics: Topic[];
+  topics?: Topic[];
   questionCountsBySubject?: Record<string, number>;
   hideSubjectStrip?: boolean;
 }
@@ -43,13 +43,13 @@ export function McqLauncherWidget({
         action="/mcq/practice"
         method="GET"
         onSubmit={handleLaunch}
-        className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-[var(--dmc-radius-card)] p-5 sm:p-6 elevation-1"
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-5 sm:p-6 shadow-xs"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
           <div>
             <label
               htmlFor="home-mcq-exam"
-              className="block text-xs font-bold text-[var(--dmc-ink-secondary)] mb-1.5"
+              className="block text-xs font-semibold text-[var(--color-ink-secondary)] mb-1.5"
             >
               Exam Authority
             </label>
@@ -58,7 +58,7 @@ export function McqLauncherWidget({
               name="exam"
               value={selectedExam}
               onChange={(e) => setSelectedExam(e.target.value)}
-              className="w-full h-11 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] px-3 text-sm text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+              className="w-full h-11 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
             >
               <option value="">All Exams (General Screening)</option>
               {exams.map((exam) => (
@@ -72,7 +72,7 @@ export function McqLauncherWidget({
           <div className="lg:col-span-2">
             <label
               htmlFor="home-mcq-subject"
-              className="block text-xs font-bold text-[var(--dmc-ink-secondary)] mb-1.5"
+              className="block text-xs font-semibold text-[var(--color-ink-secondary)] mb-1.5"
             >
               Subject Focus
             </label>
@@ -81,7 +81,7 @@ export function McqLauncherWidget({
               name="subject"
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="w-full h-11 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] px-3 text-sm text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+              className="w-full h-11 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-3 text-sm text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
             >
               <option value="">All Subjects</option>
               {subjects.map((subject) => (
@@ -92,7 +92,7 @@ export function McqLauncherWidget({
             </select>
           </div>
 
-          <Button type="submit" variant="forest" size="md" className="w-full">
+          <Button type="submit" variant="primary" size="md" className="w-full">
             <PlayCircle className="w-4 h-4" aria-hidden="true" />
             <span>Start Practice</span>
           </Button>

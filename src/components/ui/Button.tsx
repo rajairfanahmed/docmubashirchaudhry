@@ -7,10 +7,14 @@ import { cn } from '@/lib/utils';
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?:
     | 'primary'
+    | 'secondary'
+    | 'tertiary'
+    | 'quiet'
+    | 'destructive'
+    | 'accent'
     | 'forest'
     | 'gold'
     | 'amber'
-    | 'secondary'
     | 'outline'
     | 'ghost'
     | 'danger';
@@ -19,28 +23,36 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 const SIZE_CLASSES: Record<NonNullable<ButtonProps['size']>, string> = {
-  sm: 'min-h-[44px] sm:min-h-[36px] px-3 py-2 sm:py-1.5 text-xs gap-1.5',
-  md: 'min-h-[44px] px-5 py-2 text-xs sm:text-sm gap-2',
-  lg: 'min-h-[48px] px-7 py-2.5 text-sm sm:text-base gap-2.5'
+  sm: 'min-h-[44px] sm:min-h-[38px] px-3.5 py-2 sm:py-1.5 text-xs gap-1.5',
+  md: 'min-h-[44px] px-5 py-2.5 text-xs sm:text-sm gap-2',
+  lg: 'min-h-[48px] px-7 py-3 text-sm sm:text-base gap-2.5'
 };
 
 const VARIANT_CLASSES: Record<NonNullable<ButtonProps['variant']>, string> = {
   primary:
-    'bg-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-brand-emerald)] active:bg-[var(--dmc-brand-dark)] text-white shadow-xs',
+    'bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] active:bg-[var(--color-action)] text-[var(--color-action-ink)] shadow-xs',
   forest:
-    'bg-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-brand-emerald)] active:bg-[var(--dmc-brand-dark)] text-white shadow-xs',
-  gold:
-    'bg-[var(--dmc-accent-gold)] hover:bg-[var(--dmc-accent-gold-hover)] text-[var(--dmc-ink-primary)] shadow-xs',
-  amber:
-    'bg-[var(--dmc-accent-gold)] hover:bg-[var(--dmc-accent-gold-hover)] text-[var(--dmc-ink-primary)] shadow-xs',
+    'bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] active:bg-[var(--color-action)] text-[var(--color-action-ink)] shadow-xs',
   secondary:
-    'bg-[var(--dmc-status-verified-bg)] hover:bg-emerald-100 text-[var(--dmc-status-verified-ink)] border border-[var(--dmc-status-verified-border)]/40',
+    'bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] text-[var(--color-ink)] border border-[var(--color-border-strong)] hover:border-[var(--color-brand-deep)]',
   outline:
-    'bg-[var(--dmc-surface-card)] hover:bg-[var(--dmc-surface-muted)] text-[var(--dmc-ink-primary)] border border-[var(--dmc-border-strong)] hover:border-[var(--dmc-brand-forest)]',
+    'bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] text-[var(--color-ink)] border border-[var(--color-border-strong)] hover:border-[var(--color-brand-deep)]',
+  tertiary:
+    'bg-transparent hover:bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)]',
+  quiet:
+    'bg-transparent hover:bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)]',
   ghost:
-    'bg-transparent hover:bg-slate-100 text-[var(--dmc-ink-secondary)] hover:text-[var(--dmc-ink-primary)]',
+    'bg-transparent hover:bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)]',
+  destructive:
+    'bg-[var(--color-danger-bg)] hover:bg-red-100 text-[var(--color-danger-ink)] border border-[var(--color-danger-border)]',
   danger:
-    'bg-[var(--dmc-status-error-bg)] hover:bg-red-100 text-[var(--dmc-status-error-ink)] border border-[var(--dmc-status-error-border)]/50'
+    'bg-[var(--color-danger-bg)] hover:bg-red-100 text-[var(--color-danger-ink)] border border-[var(--color-danger-border)]',
+  accent:
+    'bg-[var(--color-accent)] hover:brightness-95 text-[var(--color-accent-ink)] shadow-xs',
+  gold:
+    'bg-[var(--color-accent)] hover:brightness-95 text-[var(--color-accent-ink)] shadow-xs',
+  amber:
+    'bg-[var(--color-accent)] hover:brightness-95 text-[var(--color-accent-ink)] shadow-xs'
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
@@ -63,8 +75,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled || isLoading}
       aria-busy={isLoading || undefined}
       className={cn(
-        'inline-flex items-center justify-center font-bold rounded-[var(--dmc-radius-button)] transition-[transform,background-color,border-color,color,box-shadow] duration-150 ease-out active:scale-[0.985] motion-reduce:transition-none motion-reduce:transform-none cursor-pointer select-none',
-        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]',
+        'inline-flex items-center justify-center font-semibold rounded-[var(--radius-control)] transition-[transform,background-color,border-color,color,box-shadow,filter] duration-150 ease-out active:scale-[0.985] motion-reduce:transition-none motion-reduce:transform-none cursor-pointer select-none',
+        'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]',
         'disabled:opacity-50 disabled:pointer-events-none',
         SIZE_CLASSES[size],
         VARIANT_CLASSES[variant],

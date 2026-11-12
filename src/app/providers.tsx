@@ -1,16 +1,27 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { SmoothScrollProvider } from '@/components/motion/SmoothScrollProvider';
+import { domAnimation, LazyMotion, MotionConfig } from 'motion/react';
+import { VisitTracker } from '@/components/analytics/VisitTracker';
+import { AuthModalProvider, AuthSessionProvider } from '@/components/auth';
 import { TopLoadingBar } from '@/components/motion/TopLoadingBar';
 import { ToastProvider } from '@/components/ui/ToastProvider';
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <SmoothScrollProvider>
-      <TopLoadingBar />
-      <ToastProvider>{children}</ToastProvider>
-    </SmoothScrollProvider>
+    <MotionConfig reducedMotion="user">
+      <LazyMotion features={domAnimation}>
+        <AuthSessionProvider>
+          <ToastProvider>
+            <AuthModalProvider>
+              <VisitTracker />
+              <TopLoadingBar />
+              {children}
+            </AuthModalProvider>
+          </ToastProvider>
+        </AuthSessionProvider>
+      </LazyMotion>
+    </MotionConfig>
   );
 }
 

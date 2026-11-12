@@ -39,8 +39,8 @@ export function SingleQuestionCard({
   const selectedOpt = question.options.find((opt) => opt.id === selectedOptionId);
 
   return (
-    <article className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-2xl p-4 sm:p-8 lg:p-10 elevation-2 space-y-5 sm:space-y-6">
-      {/* Mobile (< md) Centered Progress Ring Matching mcqs-design.png */}
+    <article className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-sheet)] p-4 sm:p-8 lg:p-10 elevation-1 space-y-5 sm:space-y-6">
+      {/* Mobile (< md) Centered Progress Ring */}
       <div className="flex justify-center md:hidden">
         <CircularProgressRing
           answeredCount={answeredCount}
@@ -53,7 +53,7 @@ export function SingleQuestionCard({
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] md:items-center gap-6 md:gap-10">
         <div key={question.id} className="dmc-question-enter space-y-4 sm:space-y-5 min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-[var(--dmc-ink-secondary)] tabular-nums">
+            <span className="text-xs font-semibold text-[var(--color-ink-secondary)] tabular-nums">
               Question {questionIndex + 1} of {totalQuestions}
             </span>
             {question.verification.status !== 'verified' && (
@@ -61,7 +61,7 @@ export function SingleQuestionCard({
             )}
           </div>
 
-          <h3 id={stemId} className="text-base sm:text-lg lg:text-xl font-bold text-[var(--dmc-mcq-heading)] leading-snug">
+          <h3 id={stemId} className="text-base sm:text-lg lg:text-xl font-bold text-[var(--color-ink)] leading-snug">
             {question.stem}
           </h3>
 
@@ -75,26 +75,26 @@ export function SingleQuestionCard({
               const isThisCorrect = opt.id === question.correctOptionId;
 
               let containerStyle =
-                'border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-card)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] text-[var(--dmc-mcq-heading)] cursor-pointer active:scale-[0.988]';
-              let letterStyle = 'text-[var(--dmc-mcq-heading)]';
+                'border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] text-[var(--color-ink)] cursor-pointer active:scale-[0.988]';
+              let letterStyle = 'text-[var(--color-ink)]';
 
               if (isLocked) {
                 if (isThisCorrect && isThisSelected) {
                   containerStyle =
-                    'border-2 border-[var(--dmc-status-verified-border)] bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)] cursor-default';
-                  letterStyle = 'text-[var(--dmc-status-verified-ink)]';
+                    'border-2 border-[var(--color-success-border)] bg-[var(--color-success-bg)] text-[var(--color-success-ink)] cursor-default';
+                  letterStyle = 'text-[var(--color-success-ink)]';
                 } else if (isThisCorrect && !isThisSelected) {
                   containerStyle =
-                    'border-2 border-[var(--dmc-accent-gold)] bg-[var(--dmc-highlight-bg)] text-[var(--dmc-highlight-ink)] cursor-default';
+                    'border-2 border-[var(--color-warning-border)] bg-[var(--dmc-highlight-bg)] text-[var(--dmc-highlight-ink)] cursor-default';
                   letterStyle = 'text-[var(--dmc-highlight-ink)]';
                 } else if (isThisSelected && !isThisCorrect) {
                   containerStyle =
-                    'border-2 border-[var(--dmc-status-error-border)] bg-[var(--dmc-status-error-bg)] text-[var(--dmc-status-error-ink)] cursor-default';
-                  letterStyle = 'text-[var(--dmc-status-error-ink)]';
+                    'border-2 border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] text-[var(--color-danger-ink)] cursor-default';
+                  letterStyle = 'text-[var(--color-danger-ink)]';
                 } else {
                   containerStyle =
-                    'border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-muted)] text-[var(--dmc-ink-secondary)] cursor-default';
-                  letterStyle = 'text-[var(--dmc-ink-secondary)]';
+                    'border-[var(--color-border)] bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] cursor-default';
+                  letterStyle = 'text-[var(--color-ink-secondary)]';
                 }
               }
 
@@ -109,7 +109,7 @@ export function SingleQuestionCard({
                   }}
                   className={cn(
                     'w-full min-h-[52px] text-left rounded-lg border px-4 py-3 flex items-center justify-between gap-2.5 text-sm font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out motion-reduce:transform-none',
-                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]',
                     containerStyle
                   )}
                 >
@@ -128,13 +128,13 @@ export function SingleQuestionCard({
 
                   {isLocked && isThisCorrect && (
                     <CheckCircle2
-                      className="w-4 h-4 text-[var(--dmc-status-verified-icon)] shrink-0"
+                      className="w-4 h-4 text-[var(--color-success-ink)] shrink-0"
                       aria-hidden="true"
                     />
                   )}
                   {isLocked && isThisSelected && !isThisCorrect && (
                     <XCircle
-                      className="w-4 h-4 text-[var(--dmc-status-error-icon)] shrink-0"
+                      className="w-4 h-4 text-[var(--color-danger-ink)] shrink-0"
                       aria-hidden="true"
                     />
                   )}
@@ -157,7 +157,7 @@ export function SingleQuestionCard({
       {isLocked && (
         <div
           aria-live="polite"
-          className="dmc-reveal border-t border-[var(--dmc-border-subtle)] pt-5 space-y-3.5"
+          className="dmc-reveal border-t border-[var(--color-border)] pt-5 space-y-3.5"
         >
           <span className="sr-only">
             {isCorrect
@@ -166,7 +166,7 @@ export function SingleQuestionCard({
           </span>
 
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="font-bold text-[var(--dmc-ink-primary)]">
+            <span className="font-semibold text-[var(--color-ink)]">
               {isCorrect ? 'Correct pick:' : 'Correct option:'}
             </span>
             <AnswerHighlight className="uppercase">
@@ -174,20 +174,20 @@ export function SingleQuestionCard({
             </AnswerHighlight>
           </div>
 
-          <div className="bg-[var(--dmc-surface-muted)] border border-[var(--dmc-border-subtle)] rounded-xl p-4 text-xs sm:text-sm text-[var(--dmc-ink-secondary)] leading-relaxed flex items-start gap-2.5">
-            <Info className="w-4 h-4 text-[var(--dmc-brand-forest)] shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="bg-[var(--color-surface-soft)] border border-[var(--color-border)] rounded-[var(--radius-control)] p-4 text-xs sm:text-sm text-[var(--color-ink-secondary)] leading-relaxed flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-[var(--color-brand-deep)] shrink-0 mt-0.5" aria-hidden="true" />
             <p>{question.explanation}</p>
           </div>
         </div>
       )}
 
       {footer ? (
-        <div className="pt-2 border-t border-[var(--dmc-border-subtle)]/70">{footer}</div>
+        <div className="pt-2 border-t border-[var(--color-border)]/80">{footer}</div>
       ) : (
         isLocked &&
         onNext && (
           <div className="flex justify-end">
-            <Button variant="forest" size="md" className="w-full sm:w-auto" onClick={onNext}>
+            <Button variant="primary" size="md" className="w-full sm:w-auto" onClick={onNext}>
               <span>{nextLabel}</span>
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Button>

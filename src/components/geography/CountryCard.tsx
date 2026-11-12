@@ -2,7 +2,6 @@ import React from 'react';
 import Link from 'next/link';
 import { HelpCircle } from 'lucide-react';
 import type { CountryEntity, Currency, Language } from '@/lib/schemas';
-import { AnswerHighlight } from '@/components/ui/AnswerHighlight';
 import { VerificationBadge } from '@/components/ui/Badge';
 import { cn } from '@/lib/utils';
 
@@ -51,31 +50,29 @@ function FactChipRow({
       className={cn(
         'min-w-0',
         stackRow
-          ? 'flex flex-col items-start gap-1.5'
-          : 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2'
+          ? 'flex flex-col items-start gap-1'
+          : 'flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-3'
       )}
     >
-      <dt className="text-[var(--dmc-ink-secondary)] font-medium shrink-0">{label}</dt>
+      <dt className="text-[var(--color-ink-secondary)] font-medium shrink-0">{label}</dt>
       <dd
         className={cn(
-          'flex flex-wrap items-center gap-1.5 m-0 min-w-0',
-          stackRow ? 'w-full justify-start' : 'w-full sm:w-auto sm:justify-end'
+          'flex flex-wrap items-center gap-x-2 gap-y-1 m-0 min-w-0 text-[var(--color-ink)] font-semibold',
+          stackRow ? 'w-full justify-start' : 'w-full sm:w-auto sm:justify-end sm:text-right'
         )}
       >
         {visibleItems.length > 0 ? (
-          visibleItems.map((text, idx) => (
-            <AnswerHighlight key={`${text}-${idx}`} shape="chip">
-              {text}
-            </AnswerHighlight>
-          ))
+          <span className="break-words [overflow-wrap:anywhere]">
+            {visibleItems.join(', ')}
+          </span>
         ) : (
-          <AnswerHighlight shape="chip">{fallbackText}</AnswerHighlight>
+          <span className="text-[var(--color-ink-muted)] font-medium">{fallbackText}</span>
         )}
 
         {remainingCount > 0 && (
           <Link
             href={`/geography/${countrySlug}`}
-            className="inline-flex items-center rounded-lg border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] hover:border-[var(--dmc-brand-forest)] hover:text-[var(--dmc-brand-forest)] px-2.5 py-1 min-h-[44px] sm:min-h-[36px] text-[11px] font-bold text-[var(--dmc-ink-secondary)] transition-colors"
+            className="inline-flex items-center rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] hover:border-[var(--color-brand-deep)] hover:text-[var(--color-brand-deep)] px-2 py-0.5 text-[11px] font-semibold text-[var(--color-ink-secondary)] transition-colors"
           >
             +{remainingCount} more
             <span className="sr-only">
@@ -108,15 +105,15 @@ export function CountryCard({
   return (
     <article
       className={cn(
-        'track-card bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] border-l-4 border-l-[var(--dmc-accent-gold)] rounded-[var(--dmc-radius-card)] p-4 sm:p-5 elevation-1 flex flex-col justify-between space-y-4 min-w-0 overflow-hidden',
-        isCurrentQuizTarget && 'ring-2 ring-[var(--dmc-brand-forest)]/30 border-[var(--dmc-brand-forest)]',
+        'bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-4 sm:p-5 elevation-1 flex flex-col justify-between space-y-4 min-w-0 overflow-hidden',
+        isCurrentQuizTarget && 'ring-2 ring-[var(--color-brand-deep)]/25 border-[var(--color-brand-deep)]',
         className
       )}
     >
       <div className="space-y-3.5 min-w-0">
-        <div className="flex items-start justify-between gap-2.5 pb-3 border-b border-[var(--dmc-border-subtle)] min-w-0">
+        <div className="flex items-start justify-between gap-2.5 pb-3 border-b border-[var(--color-border)] min-w-0">
           <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-10 aspect-[3/2] rounded border border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-muted)] overflow-hidden shrink-0 flex items-center justify-center">
+            <div className="w-10 aspect-[3/2] rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] overflow-hidden shrink-0 flex items-center justify-center">
               <img
                 src={country.flag.svgPath}
                 alt={country.flag.alt}
@@ -130,15 +127,15 @@ export function CountryCard({
             </div>
 
             <div className="min-w-0">
-              <h3 className="text-base font-bold text-[var(--dmc-ink-primary)] leading-tight line-clamp-2 sm:truncate">
+              <h3 className="text-base font-bold text-[var(--color-ink)] leading-tight line-clamp-2 sm:truncate">
                 <Link
                   href={`/geography/${country.slug}`}
-                  className="hover:text-[var(--dmc-brand-forest)] hover:underline"
+                  className="hover:text-[var(--color-brand-deep)] hover:underline"
                 >
                   {country.nameCommon}
                 </Link>
               </h3>
-              <div className="text-[11px] text-[var(--dmc-ink-muted)] truncate mt-0.5">
+              <div className="text-[11px] text-[var(--color-ink-muted)] truncate mt-0.5 tabular-nums">
                 {continentName ?? 'World'}
                 {regionName ? ` · ${regionName}` : ''} · {country.isoAlpha3}
               </div>
@@ -148,7 +145,7 @@ export function CountryCard({
           <VerificationBadge status={country.verification.status} className="shrink-0" />
         </div>
 
-        <dl className="space-y-2.5 text-xs min-w-0">
+        <dl className="space-y-2 text-xs min-w-0">
           <FactChipRow
             label={capitalItems.length > 1 ? 'Capitals' : 'Capital'}
             items={capitalItems}
@@ -181,10 +178,10 @@ export function CountryCard({
         </dl>
       </div>
 
-      <div className="pt-2 border-t border-[var(--dmc-border-subtle)] flex flex-wrap items-center justify-between gap-2 text-xs">
+      <div className="pt-2 border-t border-[var(--color-border)] flex flex-wrap items-center justify-between gap-2 text-xs">
         <Link
           href={`/geography/${country.slug}`}
-          className="inline-flex items-center min-h-[44px] font-semibold text-[var(--dmc-ink-secondary)] hover:text-[var(--dmc-brand-forest)] hover:underline"
+          className="inline-flex items-center min-h-[44px] font-semibold text-[var(--color-ink-secondary)] hover:text-[var(--color-brand-deep)] hover:underline"
         >
           Country Profile
           <span className="sr-only"> for {country.nameCommon}</span>
@@ -194,7 +191,7 @@ export function CountryCard({
           <button
             type="button"
             onClick={() => onTestInQuiz(country)}
-            className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-lg bg-[var(--dmc-status-verified-bg)] hover:bg-emerald-100 text-[var(--dmc-brand-forest)] font-bold cursor-pointer"
+            className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] px-3 py-1.5 rounded-[var(--radius-control)] bg-[var(--color-surface-soft)] hover:bg-[var(--color-success-bg)] text-[var(--color-brand-deep)] border border-[var(--color-border)] font-semibold cursor-pointer"
           >
             <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
             <span>
@@ -205,7 +202,7 @@ export function CountryCard({
         ) : (
           <Link
             href={`/geography?country=${country.slug}#quiz-module`}
-            className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] px-2 font-bold text-[var(--dmc-brand-forest)] hover:underline"
+            className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] px-2 font-semibold text-[var(--color-brand-deep)] hover:underline"
           >
             <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
             <span>

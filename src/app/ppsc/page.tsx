@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
-import { ProvenanceBox } from '@/components/ui/ProvenanceBox';
 import { PostFilterBar } from '@/components/exams/PostFilterBar';
 import { CommissionBrandBadge } from '@/components/branding/CommissionBrandBadge';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -35,8 +34,6 @@ export default async function PPSCPage() {
     repo.getPdfResources({ includeDrafts: false }),
     repo.getQuestions({ includeDrafts: false })
   ]);
-
-  const examSources = ppscExam ? await repo.getSources(ppscExam.verification.sourceIds) : [];
 
   const pdfByPost: Record<string, number> = {};
   for (const pdf of pdfs) {
@@ -70,8 +67,8 @@ export default async function PPSCPage() {
           />
 
           <div className="space-y-3 pb-4 border-b border-[var(--dmc-border-subtle)]">
-            <span className="pill-badge bg-amber-50 text-amber-800 border border-amber-200">
-              <Sparkles className="w-3 h-3 mr-1 text-amber-700" aria-hidden="true" />
+            <span className="pill-badge bg-[var(--color-brand-tint)] text-[var(--color-brand-deep)] border border-[var(--color-border-strong)]">
+              <Sparkles className="w-3 h-3 mr-1 text-[var(--color-brand-deep)]" aria-hidden="true" />
               OPEN-ACCESS PPSC PREPARATION REPOSITORY
             </span>
             <div className="flex items-center gap-3.5">
@@ -81,19 +78,9 @@ export default async function PPSCPage() {
               </h1>
             </div>
             <p className="type-body-base text-[var(--dmc-ink-secondary)] max-w-3xl">
-              {ppscExam?.summary} Filter recruitment posts by Open/Closed status, verify primary commission citations, and download solved MCQ booklets.
+              {ppscExam?.summary} Filter recruitment posts by Open/Closed status and download solved MCQ booklets.
             </p>
           </div>
-
-          {ppscExam && (
-            <ProvenanceBox
-              officialUrl={ppscExam.officialPortalUrl}
-              officialLabel="ppsc.gop.pk (Official Commission)"
-              verification={ppscExam.verification}
-              sources={examSources}
-              title="Commission Portal Provenance"
-            />
-          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-2xl p-5 elevation-1 space-y-1">

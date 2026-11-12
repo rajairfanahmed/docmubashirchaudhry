@@ -1,36 +1,33 @@
-# Backend Testing Strategy
+# Backend Testing Strategy (v2.0 + v3.0)
 
-> Status: Executed & Passing (47/47 Vitest Tests across 7 Suites + CLI Validation + Next Build)  
-> Last updated: 2026-11-11
+> Status: Executed & Passing (13 Vitest Suites, 84/84 Tests + Dataset Validation + TypeScript Check)  
+> Last updated: 2026-11-12
 
 ## 1. Quality goals
-Verify zero-regression data integrity across all JSON entities, strict separation of official vs editorial claims, deterministic Geography quiz distractor and accepted-answer correctness, resilient browser storage when `localStorage` fails, fast typo-tolerant client search, and zero exposed credentials.
+Verify zero regression across the preserved v2.0 static catalog (`250` countries, Geography quiz, SEO/A11y/performance invariants) while validating every v3.0 security boundary, signed URL TTL clamp, quiz negative-marking scorer, CSV bank parser, analytics aggregator, fail-closed middleware behavior, and route-level authorization (`401`/`403`/`400`/`429`).
 
-## 2. Test environment
-- **Test runner:** Vitest running in Node/jsdom-safe pure TypeScript tests (`npm test`).
-- **Fixtures:** Isolated synthetic negative test fixtures inside unit tests for testing validator failure cases without mutating canonical `src/data/*.json`.
-- **No external network calls in unit tests:** `ContentRepository`, validator, quiz engine, storage wrapper, and search engine run deterministically offline.
+## 2. Test environment & mocking boundaries
+- **Runner:** Vitest (`npm test`) running offline in Node without mutating `src/data/` or hitting live Supabase/Cloudflare R2 APIs.
+- **v3.0 Route Contract Mocks (`tests/v3-route-auth-and-contracts.test.ts`):** Mocks `@/lib/auth/guards`, `@/lib/r2/client`, and `@/lib/supabase/server` (`createSupabaseAdminClient`) using synthetic in-memory state (`mockState`) so every route handler executes real Zod validation, rate limits, cookie application, grading logic, and response shapes deterministically offline.
 
-## 3. Test layers
-| Layer | Tools | Scope | Run command |
+## 3. Verification layers
+| Layer | Tools | Scope | Command |
 |---|---|---|---|
-| Data & PDF Integrity CLI | `tsx` + Zod + Node crypto | All 15 PRD Section 8.6 rules on production `src/data/` + PDF SHA-256 & `%PDF-` bytes | `npm run validate` |
-| Static Artifact Build | `tsx` + MiniSearch | Builds `/public/data/v1/` bundles, `manifest.json`, and serialized search index | `npm run data:build` |
-| Unit & Integration Suite | `vitest` | Schemas, 15 validator negative cases (+ duplicate hash & unsafe PDF path), `JsonContentRepository` pagination, `/api/countries` & `/api/questions` route handlers, Logo.dev/subject branding catalogs, `lib/quiz`, `lib/storage`, `lib/search`, `mailto:` builder | `npm test` |
-| Type Safety | `tsc` | Full codebase static type check (`strict: true`) | `npm run typecheck` |
-| Production Bundle | `next build` | Next.js build verifying server/static compilation with wired data layer | `npm run build` |
+| Data & PDF Integrity CLI | `tsx` + Zod + crypto | All 15 v2.0 data integrity rules on `src/data/` and `public/documents/` | `npm run validate` |
+| Static Artifact Build | `tsx` + MiniSearch | Builds `/public/data/v1/` bundles, `manifest.json`, and search index | `npm run data:build` |
+| Unit & Route Contract Suite | `vitest` | `11` v2.0 suites (`68` tests) + `v3-backend.test.ts` (`9` tests) + `v3-route-auth-and-contracts.test.ts` (`7` tests) = `84` tests | `npm test` |
+| Type Safety | `tsc` | Full Next.js + Supabase + R2 backend type check (`strict: true`) | `npm run typecheck` |
+| Production Bundle | `next build` | Compiles all static pages plus all v2.0 & v3.0 API routes cleanly | `NEXT_DIST_DIR=".next-verify" npm run build` |
 
-## 4. Critical acceptance scenarios
-1. Multi-capital country (South Africa: Pretoria, Cape Town, Bloemfontein) accepts any valid capital case-insensitively and never renders another valid capital as a distractor.
-2. Shared currency (Eurozone EUR across Germany/France/etc.) excludes countries sharing EUR when generating currency distractors.
-3. Country with `disputed.capital = true` or `verification.status !== 'verified'` is excluded from generating verified capital MCQs.
-4. Validator rejects published record with `verification.status: 'unverified'`, mismatched `correctOptionId`, broken foreign key, missing PDF file, or corrupted SHA-256.
-5. `storage` falls back transparently to in-memory storage when `localStorage` throws or is undefined, and resets when `datasetVersion` changes.
-6. `ContentRepository` cleanly separates `officialSections` from `editorialTopicWeights` on PPSC blueprints.
-7. Validator enforces `R10_PDF_NO_DUPLICATE_HASH` on disk inside `public/documents/` and `R12_SAFE_PDF_PATH` allows spaces/parentheses only within normalized `/documents/*.pdf` paths while rejecting `..` or query params.
-8. Pagination helpers and Next.js Route Handlers (`/api/countries`, `/api/questions`) return clamped `PaginatedResult<T>` metadata with `200` on valid filters and `400` on invalid bounds/enum parameters.
-9. Branding catalog exposes deterministic Logo.dev CDN URLs for live domains (`ppsc.gop.pk`, `fpsc.gov.pk`, `nts.org.pk`, `spsc.gos.pk`), `logoUrl: null` monogram fallback for 404 domains (`kppsc.gov.pk`, `bpsc.gob.pk`), and icon/badge metadata across all 9 canonical subjects.
+## 4. Key v3.0 scenarios verified in automated tests
+- **Environment & Fail-Closed Admin Allow-List (`tests/v3-backend.test.ts`):** Clamping `CLOUDFLARE_R2_SIGNED_URL_TTL_SECONDS` into `[120, 300]`, fail-closed `isAdminEmail` on blank/malformed/case-mismatched lists, safe R2 key validation (`pdfs/...`), and open-redirect sanitization (`sanitizeNextPath` rejecting `//evil.com`, `https://evil.com`).
+- **Quiz Engine, CSV Parser & Analytics (`tests/v3-backend.test.ts`):** `stripQuestionSecrets()` removing `correct_option` & `explanation`, fractional negative marking (`-0.25` deduct per incorrect answer), RFC-4180 CSV question parsing (including commas inside quotes), 30-day UTC visit series, and quiz/PDF analytics ranking.
+- **Auth Gating & Mock Sealing (`tests/v3-route-auth-and-contracts.test.ts`):**
+  - Anonymous requests receive `401` on `/api/pdfs/[id]/download`, `/api/quizzes/[id]/start`, `/api/quizzes/[id]/submit`, `/api/me/attempts`, `/api/admin/pdfs/upload-url`, and `/api/admin/analytics/overview`.
+  - Logged-in student requests receive `403` on `/api/admin/pdfs/upload-url`, `/api/admin/analytics/overview`, and `/api/quizzes/[id]/check-answer` when quiz `type === 'mock'`.
+  - Private signed R2 URL (`X-Amz-Expires=180`) + `pdf_access_log` write + `Cache-Control: private, no-store` + `429` burst rate limiting.
+  - Admin upload verification rejecting missing R2 objects (`400`) and non-PDF `Content-Type` (`400 INVALID_FILE_TYPE`), CSV bulk import (`201`), analytics prune RPC invocation (`200`), and fail-closed middleware (`503` on unconfigured `/api/admin/*` vs `200` on public `/geography`).
 
-## 5. Known limitations
-- `npm run lint` (`next lint`) requires interactive setup because no ESLint config file exists in the repository root; static verification relies on `tsc --noEmit`, `vitest`, `validate.ts`, and `next build`.
-- `scripts/check-links.ts` makes outbound HTTP `HEAD`/`GET` checks and is exercised separately from offline unit tests.
+## 5. Known verification boundaries
+- Live end-to-end tests against real Supabase Auth (Google OAuth + email verification OTP), real Supabase Postgres RLS queries, and real Cloudflare R2 S3 presigned URLs are **not** executed until `NEXT_PUBLIC_SUPABASE_URL` and `ADMIN_EMAILS` are supplied in `.env.local` and `0001_v3_initial_schema.sql` is applied in Supabase.
+- `npm run lint` (`next lint`) prompts for interactive ESLint config because the repository has no root `.eslintrc` file; static checking uses `tsc --noEmit`, `vitest`, `validate.ts`, and `next build`.

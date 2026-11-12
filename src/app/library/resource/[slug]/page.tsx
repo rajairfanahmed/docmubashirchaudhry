@@ -90,6 +90,7 @@ export default async function PdfResourceDetailPage({
 
       <StickyMobileDownloadBar
         title={pdf.title}
+        pdfSlug={pdf.slug}
         filePath={pdf.filePath}
         fileSizeBytes={pdf.fileSizeBytes}
         pageCount={pdf.pageCount}

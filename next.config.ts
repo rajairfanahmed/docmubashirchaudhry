@@ -6,7 +6,7 @@ const CONTENT_SECURITY_POLICY = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https://flagcdn.com https://upload.wikimedia.org https://img.logo.dev",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  "connect-src 'self' https://*.supabase.co https://*.r2.cloudflarestorage.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
@@ -23,7 +23,11 @@ const nextConfig: NextConfig = {
     "/status": ["./public/data/v1/manifest.json"],
     "/sitemap.xml": ["./public/data/v1/manifest.json"]
   },
+  experimental: {
+    optimizePackageImports: ["lucide-react", "motion"]
+  },
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",

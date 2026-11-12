@@ -36,6 +36,7 @@ export function buildRootSchema(): Record<string, unknown> {
         '@type': 'EducationalOrganization',
         '@id': `${SITE_URL}/#organization`,
         name: SITE_NAME,
+        alternateName: 'DocMubashir Exam Portal',
         url: `${SITE_URL}/`,
         logo: `${SITE_URL}/icon.svg`,
         email: 'editorial@docmubashirchaudhary.com',
@@ -48,6 +49,7 @@ export function buildRootSchema(): Record<string, unknown> {
         '@id': `${SITE_URL}/#website`,
         url: `${SITE_URL}/`,
         name: SITE_NAME,
+        alternateName: 'DocMubashir Exam Portal',
         publisher: {
           '@id': `${SITE_URL}/#organization`
         },

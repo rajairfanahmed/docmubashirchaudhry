@@ -9,7 +9,8 @@ import {
 } from '@/lib/seo/metadata';
 import {
   buildBreadcrumbListSchema,
-  buildPdfDigitalDocumentSchema
+  buildPdfDigitalDocumentSchema,
+  buildRootSchema
 } from '@/lib/seo/structured-data';
 import sitemap from '@/app/sitemap';
 import robots from '@/app/robots';
@@ -108,6 +109,7 @@ describe('Dynamic Sitemap & Robots Configuration', () => {
     expect(urls.has(`${SITE_URL}/`)).toBe(true);
     expect(urls.has(`${SITE_URL}/geography`)).toBe(true);
     expect(urls.has(`${SITE_URL}/ppsc`)).toBe(true);
+    expect(urls.has(`${SITE_URL}/quizzes`)).toBe(true);
     expect(urls.has(`${SITE_URL}/ppsc/intelligent-officer`)).toBe(true);
     expect(urls.has(`${SITE_URL}/geography/pakistan`)).toBe(true);
     expect(urls.has(`${SITE_URL}/library/resource/intelligence-officer-bs-14-set-01`)).toBe(true);
@@ -130,7 +132,19 @@ describe('Dynamic Sitemap & Robots Configuration', () => {
     const rules = Array.isArray(config.rules) ? config.rules : [config.rules];
     const wildcard = rules.find((r) => r.userAgent === '*');
     expect(wildcard?.allow).toEqual(
-      expect.arrayContaining(['/', '/geography', '/ppsc', '/library', '/topics', '/data/v1/'])
+      expect.arrayContaining([
+        '/',
+        '/geography',
+        '/ppsc',
+        '/quizzes',
+        '/exams',
+        '/library',
+        '/topics',
+        '/data/v1/'
+      ])
+    );
+    expect(wildcard?.disallow).toEqual(
+      expect.arrayContaining(['/api/', '/admin/', '/my-attempts', '/my-downloads'])
     );
   });
 
@@ -247,7 +261,12 @@ describe('Dynamic Sitemap & Robots Configuration', () => {
 
     const homePageSrc = fs.readFileSync(path.join(process.cwd(), 'src/app/page.tsx'), 'utf8');
     expect(homePageSrc).toContain('<span>Start Geography Quiz</span>');
+    expect(homePageSrc).toContain("path: '/'");
     expect(homePageSrc).not.toContain('<span>Start</span>');
+
+    const rootSchema = buildRootSchema() as { '@graph': Array<Record<string, unknown>> };
+    expect(rootSchema['@graph'][0]?.alternateName).toBe('DocMubashir Exam Portal');
+    expect(rootSchema['@graph'][1]?.alternateName).toBe('DocMubashir Exam Portal');
 
     const layoutSrc = fs.readFileSync(path.join(process.cwd(), 'src/app/layout.tsx'), 'utf8');
     expect(layoutSrc).toContain("google: 'cyPaDLlCl9e3xk1KzdznBwXvizColXpowGUNSc2M4Ws'");

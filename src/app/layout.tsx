@@ -3,16 +3,16 @@ import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 import { Navbar } from '@/components/layout/Navbar';
-import { StandingTrustNotice } from '@/components/layout/StandingTrustNotice';
 import { PreFooterCta } from '@/components/layout/PreFooterCta';
 import { Footer } from '@/components/layout/Footer';
+import { RouteChromeGate } from '@/components/layout/RouteChromeGate';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { DEFAULT_OG_IMAGE_PATH, SITE_NAME, SITE_URL } from '@/lib/seo/metadata';
 import { buildRootSchema } from '@/lib/seo/structured-data';
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['600', '700', '800'],
+  weight: ['600', '700'],
   variable: '--font-jakarta',
   display: 'swap',
   adjustFontFallback: true
@@ -20,7 +20,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-inter',
   display: 'swap',
   adjustFontFallback: true
@@ -29,7 +29,7 @@ const inter = Inter({
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0D4A28'
+  themeColor: '#F7F8F5'
 };
 
 export const metadata: Metadata = {
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`
   },
   description:
-    'Independent, free competitive exam preparation portal for PPSC, CSS/PMS, FPSC, and NTS aspirants. Practice World Geography, browse verified post blueprints, and download solved MCQ booklets.',
+    'Notes, MCQs, quizzes, practice material and other useful resources, all in one place for PPSC and FPSC aspirants.',
   keywords: [
     'docmubashirchaudhry',
     'Doc Mubashir Chaudhry',
@@ -60,8 +60,11 @@ export const metadata: Metadata = {
     google: 'cyPaDLlCl9e3xk1KzdznBwXvizColXpowGUNSc2M4Ws'
   },
   icons: {
-    icon: '/icon.svg',
-    shortcut: '/icon.svg',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.svg', type: 'image/svg+xml' }
+    ],
+    shortcut: '/favicon.svg',
     apple: '/icon.svg'
   },
   openGraph: {
@@ -113,16 +116,21 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://flagcdn.com" />
         <JsonLd data={buildRootSchema()} />
       </head>
-      <body className="bg-[var(--dmc-surface-ground)] text-[var(--dmc-ink-primary)] antialiased min-h-screen flex flex-col justify-between overflow-x-clip selection:bg-emerald-100 selection:text-emerald-900">
+      <body className="bg-[var(--color-page)] text-[var(--color-ink)] antialiased min-h-screen flex flex-col justify-between overflow-x-clip selection:bg-[var(--color-accent)] selection:text-[var(--color-accent-ink)]">
         <Providers>
           <div id="dmc-app-shell" className="flex-1 flex flex-col justify-between min-h-screen">
-            <Navbar />
-            <StandingTrustNotice variant="bar" />
+            <RouteChromeGate>
+              <Navbar />
+            </RouteChromeGate>
             <main id="main-content" role="main" className="flex-1 w-full">
               {children}
             </main>
-            <PreFooterCta />
-            <Footer />
+            <RouteChromeGate hideOnPractice>
+              <PreFooterCta />
+            </RouteChromeGate>
+            <RouteChromeGate>
+              <Footer />
+            </RouteChromeGate>
           </div>
         </Providers>
       </body>

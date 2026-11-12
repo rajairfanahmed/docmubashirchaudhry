@@ -9,6 +9,7 @@
 - [PPSC Recruitment & Past Papers Hub](https://docmubashirchaudhry.vercel.app/ppsc): Punjab Public Service Commission exam posts paired with verified SHA-256 solved PDF booklets and explicit provenance labels.
 - [All Exam Commissions Directory](https://docmubashirchaudhry.vercel.app/exams): Published and upcoming Pakistan competitive examination commission hubs.
 - [Interactive MCQ Practice Launchpad](https://docmubashirchaudhry.vercel.app/mcq): Filterable one-paper MCQ drill builder across 9 canonical subjects and 10 syllabus topics.
+- [Quizzes & Full-Length Mock Exams](https://docmubashirchaudhry.vercel.app/quizzes): Bilingual English and Urdu subject drills plus timed PPSC/FPSC mock exams with negative marking.
 - [Open Solved PDF Library](https://docmubashirchaudhry.vercel.app/library): Direct downloadable solved study booklets with pre-verified byte sizes, SHA-256 hashes, and rights statements.
 
 ## Verified PPSC Post Guides & Solved Booklets
@@ -42,6 +43,6 @@
 ## Optional
 
 - [Accessibility Conformance](https://docmubashirchaudhry.vercel.app/accessibility): WCAG 2.2 AA standards and keyboard/contrast notes.
-- [Privacy Notice](https://docmubashirchaudhry.vercel.app/privacy): Zero login, zero ad trackers, and local-only quiz persistence disclosure.
+- [Privacy Notice](https://docmubashirchaudhry.vercel.app/privacy): Open reference guides, optional free student sign-in for timed mocks and watermarked PDFs, and zero third-party ad trackers.
 - Legacy paths `/countries` and `/ppsc/{slug}/blueprint` issue HTTP 308 permanent redirects to `/geography` and `/ppsc/{slug}`.
 - Unverified records carry explicit `unverified` labels in both visible UI badges and JSON responses until primary official gazettes or PDFs are attached.

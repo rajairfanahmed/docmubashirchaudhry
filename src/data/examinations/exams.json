@@ -39,8 +39,7 @@
         "status": "unverified",
         "sourceIds": ["src-doc-mubashir-editorial"],
         "lastCheckedAt": "2026-11-11",
-        "reviewIntervalDays": 90,
-        "notes": "Scheduled for Sprint S7 dedicated exam hub expansion."
+        "reviewIntervalDays": 90
       }
     }
   ]

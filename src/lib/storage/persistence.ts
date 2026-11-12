@@ -3,6 +3,8 @@ export const STORAGE_KEYS = {
   MCQ_SESSION: 'dmc:v1:mcq'
 } as const;
 
+export const QUIZ_DRAFT_PREFIX = 'dmc:v3:quiz-draft:' as const;
+
 export const STORAGE_SCHEMA_VERSION = 1 as const;
 
 export interface StorageEnvelope<T> {
@@ -168,6 +170,35 @@ export function clearAllPortalProgress(backend?: StorageBackend): void {
       datasetVersion: 'clear',
       backend
     }).clear();
+  });
+}
+
+export interface V3QuizDraftPayload {
+  quizId: string;
+  startedAt: string;
+  answers: Record<string, string | null>;
+}
+
+/**
+ * Local answer draft buffer providing resilience during active /quizzes/[slug] sessions
+ * before permanent server-side submission to /api/quizzes/[id]/submit.
+ */
+export function createQuizDraftStorage(
+  quizId: string,
+  backend?: StorageBackend
+): VersionedStorageClient<V3QuizDraftPayload> {
+  return createVersionedStorage<V3QuizDraftPayload>({
+    key: `${QUIZ_DRAFT_PREFIX}${quizId}`,
+    datasetVersion: `v3:${quizId}`,
+    validate: (payload): payload is V3QuizDraftPayload =>
+      Boolean(
+        payload &&
+          typeof payload === 'object' &&
+          'quizId' in payload &&
+          'answers' in payload &&
+          typeof (payload as V3QuizDraftPayload).answers === 'object'
+      ),
+    backend
   });
 }
 

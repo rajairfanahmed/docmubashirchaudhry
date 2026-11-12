@@ -12,12 +12,12 @@ export interface PageContainerProps {
 const SIZE_CLASSES: Record<ContainerSize, string> = {
   narrow: 'max-w-3xl',
   reading: 'max-w-4xl',
-  wide: 'max-w-6xl'
+  wide: 'max-w-7xl'
 };
 
 /**
- * Base responsive container wrapper established in Step 1.
- * Structural widths follow docs/structural-layout.md; responsive gutters are finalized in Steps 3 and 6.
+ * Shared container shell aligning every page, header, and footer
+ * on the same vertical grid and responsive horizontal gutters.
  */
 export function PageContainer({
   size = 'wide',
@@ -30,4 +30,3 @@ export function PageContainer({
     </div>
   );
 }
-

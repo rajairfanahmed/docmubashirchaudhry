@@ -76,6 +76,7 @@ describe('Step 9 WCAG 2.2 AA Accessibility Audit', () => {
     const band = readProjectFile('src', 'components', 'layout', 'SectionBand.tsx');
     const preFooter = readProjectFile('src', 'components', 'layout', 'PreFooterCta.tsx');
     const trustNotice = readProjectFile('src', 'components', 'layout', 'StandingTrustNotice.tsx');
+    const adminShell = readProjectFile('src', 'components', 'admin', 'AdminShell.tsx');
 
     expect(layout).toContain('id="dmc-app-shell"');
     expect(layout).toContain('<main id="main-content" role="main"');
@@ -84,8 +85,14 @@ describe('Step 9 WCAG 2.2 AA Accessibility Audit', () => {
     expect(navbar).toContain('Skip to main content');
     expect(navbar).toContain('usePathname');
     expect(navbar).toContain('setIsMobileMenuOpen(false)');
+    expect(navbar).toContain('mobileDrawerRef');
+    expect(navbar).toContain('mobileCloseBtnRef');
+
+    expect(adminShell).toContain('href="#main-content"');
+    expect(adminShell).toContain('Skip to main content');
 
     expect(footer).toContain('data-dmc-surface="dark"');
+    expect(footer).toContain('id="footer-heading"');
     expect(footer).not.toContain('text-slate-400');
     expect(band).toContain('data-dmc-surface');
     expect(preFooter).toContain('data-dmc-surface="dark"');

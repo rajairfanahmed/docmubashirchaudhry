@@ -41,7 +41,7 @@ export function CircularProgressRing({
           cy={sizePx / 2}
           r={radius}
           fill="none"
-          stroke="var(--dmc-ring-track)"
+          stroke="var(--color-border)"
           strokeWidth={resolvedStroke}
         />
         <circle
@@ -49,7 +49,7 @@ export function CircularProgressRing({
           cy={sizePx / 2}
           r={radius}
           fill="none"
-          stroke="var(--dmc-mcq-heading)"
+          stroke="var(--color-action)"
           strokeWidth={resolvedStroke}
           strokeDasharray={circumference}
           strokeDashoffset={dashOffset}
@@ -59,7 +59,7 @@ export function CircularProgressRing({
       </svg>
       <span
         className={cn(
-          'absolute font-extrabold tabular-nums text-[var(--dmc-mcq-heading)] tracking-tight select-none',
+          'absolute font-extrabold tabular-nums text-[var(--color-ink)] tracking-tight select-none',
           isCompact ? 'text-xs' : 'text-lg sm:text-xl'
         )}
       >

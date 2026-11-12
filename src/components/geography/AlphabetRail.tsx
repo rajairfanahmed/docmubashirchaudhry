@@ -19,18 +19,18 @@ export function AlphabetRail({
   return (
     <nav
       aria-label="Filter countries by starting letter"
-      className="flex flex-wrap justify-center sm:justify-start items-center gap-2 pt-3 border-t border-[var(--dmc-border-subtle)]"
+      className="flex flex-wrap justify-center sm:justify-start items-center gap-2 pt-3 border-t border-[var(--color-border)]"
     >
       <button
         type="button"
         aria-pressed={selectedLetter === ''}
         onClick={() => onSelectLetter('')}
         className={cn(
-          'dmc-press min-w-[44px] min-h-[44px] px-3 py-2 rounded-lg text-xs font-bold cursor-pointer inline-flex items-center justify-center',
-          'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--dmc-brand-forest)]',
+          'dmc-press min-w-[44px] min-h-[44px] px-3 py-2 rounded-[var(--radius-control)] text-xs font-semibold cursor-pointer inline-flex items-center justify-center',
+          'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-brand-deep)]',
           selectedLetter === ''
-            ? 'bg-[var(--dmc-brand-forest)] text-white'
-            : 'bg-slate-100 text-[var(--dmc-ink-secondary)] hover:bg-slate-200 hover:text-[var(--dmc-ink-primary)]'
+            ? 'bg-[var(--color-action)] text-[var(--color-action-ink)]'
+            : 'bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] hover:bg-[var(--color-border)] hover:text-[var(--color-ink)]'
         )}
       >
         All
@@ -53,13 +53,13 @@ export function AlphabetRail({
             }
             onClick={() => onSelectLetter(letter)}
             className={cn(
-              'dmc-press min-w-[44px] min-h-[44px] px-2 py-2 rounded-lg text-xs font-bold cursor-pointer tabular-nums inline-flex items-center justify-center',
-              'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--dmc-brand-forest)]',
+              'dmc-press min-w-[44px] min-h-[44px] px-2 py-2 rounded-[var(--radius-control)] text-xs font-semibold cursor-pointer tabular-nums inline-flex items-center justify-center',
+              'focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-brand-deep)]',
               isSelected
-                ? 'bg-[var(--dmc-brand-forest)] text-white'
+                ? 'bg-[var(--color-action)] text-[var(--color-action-ink)]'
                 : isEmpty
-                  ? 'bg-[var(--dmc-surface-muted)] border border-dashed border-[var(--dmc-border-subtle)] text-[var(--dmc-ink-secondary)] hover:border-[var(--dmc-brand-forest)]'
-                  : 'bg-slate-100 text-[var(--dmc-ink-primary)] hover:bg-emerald-50 hover:text-[var(--dmc-brand-forest)]'
+                  ? 'bg-[var(--color-surface-soft)] border border-dashed border-[var(--color-border)] text-[var(--color-ink-muted)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]'
+                  : 'bg-[var(--color-surface-soft)] text-[var(--color-ink)] hover:bg-[var(--color-border)] hover:text-[var(--color-brand-deep)]'
             )}
           >
             {letter}

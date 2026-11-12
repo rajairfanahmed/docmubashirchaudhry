@@ -148,8 +148,8 @@ function TopLoadingBarInner() {
         style={{
           transform: `scaleX(${progress})`,
           background:
-            'linear-gradient(90deg, var(--dmc-brand-forest) 0%, var(--dmc-brand-emerald) 55%, var(--dmc-accent-gold) 100%)',
-          boxShadow: visible ? '0 0 8px rgba(240, 185, 56, 0.45)' : 'none',
+            'linear-gradient(90deg, var(--color-highlight-border) 0%, var(--color-accent-gold) 65%, var(--color-highlight-bg) 100%)',
+          boxShadow: visible ? '0 0 8px rgba(240, 185, 56, 0.55)' : 'none',
           transition: prefersReducedMotion
             ? 'none'
             : 'transform 200ms cubic-bezier(0.22, 1, 0.36, 1)'

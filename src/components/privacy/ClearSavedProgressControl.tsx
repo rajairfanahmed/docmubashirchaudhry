@@ -30,7 +30,7 @@ export function ClearSavedProgressControl() {
       {cleared && (
         <span
           role="status"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--dmc-status-verified-ink)]"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-success-ink)]"
         >
           <CheckCircle2 className="w-4 h-4" aria-hidden="true" />
           <span>Local quiz progress cleared on this browser.</span>

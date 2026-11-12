@@ -6,10 +6,11 @@ import { AlertCircle, Globe, HelpCircle, Loader2, RotateCcw } from 'lucide-react
 import type { CountryEntity } from '@/lib/schemas';
 import type { GeographyFilterState, GeographyWorkbenchProps } from './types';
 import { SectionBand } from '@/components/layout/SectionBand';
+import { McqPaginationStrip } from '@/components/mcq/McqPaginationStrip';
 import { EmptyStateCard } from '@/components/ui/EmptyStateCard';
 import { PaginationBar } from '@/components/ui/PaginationBar';
 import { useToast } from '@/components/ui/ToastProvider';
-import { useSmoothScroll } from '@/components/motion/SmoothScrollProvider';
+import { scrollToElementWithOffset } from '@/lib/motion/scroll';
 import { isReducedMotionPreferred } from '@/lib/motion/useReducedMotion';
 import { fetchCountriesPage } from '@/lib/api';
 import {
@@ -200,16 +201,14 @@ export function GeographyWorkbench({
     buildSelectionDeck(countries, 'All Verified Nations', 1)
   );
 
-  const { scrollToTarget } = useSmoothScroll();
-
   const scrollAndFocusQuiz = useCallback(() => {
     if (typeof window === 'undefined' || !quizSectionRef.current) return;
     const reduced = isReducedMotionPreferred();
-    scrollToTarget(quizSectionRef.current, { offset: -72, immediate: reduced });
+    scrollToElementWithOffset(quizSectionRef.current, { offset: -72, immediate: reduced });
     window.setTimeout(() => {
       quizHeadingRef.current?.focus({ preventScroll: true });
     }, reduced ? 0 : 250);
-  }, [scrollToTarget]);
+  }, []);
 
   const launchCountryQuiz = useCallback(
     (country: CountryEntity, options: { shouldScroll?: boolean; seed?: number } = {}) => {
@@ -760,7 +759,7 @@ export function GeographyWorkbench({
     syncTier1Url(filter, bounded);
     if (typeof window !== 'undefined' && refGuideRef.current) {
       const reduced = isReducedMotionPreferred();
-      scrollToTarget(refGuideRef.current, { offset: -72, immediate: reduced });
+      scrollToElementWithOffset(refGuideRef.current, { offset: -72, immediate: reduced });
     }
   };
 
@@ -880,20 +879,20 @@ export function GeographyWorkbench({
       </SectionBand>
       </div>
 
-      {/* Full-Width Emerald Mode Divider Bar (#0D4A28) */}
+      {/* Calm Section Header Bar Transitioning to Geography Recall */}
       <div ref={quizSectionRef} id="quiz-divider" className="scroll-mt-16">
-        <SectionBand surface="emerald" density="compact" labelledBy="quiz-divider-heading">
+        <SectionBand surface="card" density="compact" labelledBy="quiz-divider-heading">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
             <div className="space-y-1">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center justify-center sm:justify-start gap-1.5">
+              <div className="text-xs font-semibold tracking-wide text-[var(--color-brand-deep)] flex items-center justify-center sm:justify-start gap-1.5">
                 <HelpCircle className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>TIER 2 ACTIVE RECALL ENGINE &middot; {quizDeck.label}</span>
+                <span>Active Recall Stage &middot; {quizDeck.label}</span>
               </div>
               <h2
                 ref={quizHeadingRef}
                 tabIndex={-1}
                 id="quiz-divider-heading"
-                className="text-lg sm:text-xl font-extrabold text-white focus:outline-none"
+                className="type-section-heading text-[var(--color-ink)] focus:outline-none"
               >
                 Interactive World Geography Quiz
               </h2>
@@ -902,14 +901,14 @@ export function GeographyWorkbench({
             <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2.5 text-xs">
               <span
                 aria-live="polite"
-                className="inline-flex items-center min-h-[44px] bg-white/10 border border-white/25 rounded-full px-3.5 font-bold text-white tabular-nums"
+                className="inline-flex items-center min-h-[40px] bg-[var(--color-surface-soft)] border border-[var(--color-border)] rounded-md px-3.5 font-semibold text-[var(--color-ink)] tabular-nums"
               >
                 Live Score: {scoreCount} / {quizDeck.entries.length}
               </span>
               <button
                 type="button"
                 onClick={handleClearProgress}
-                className="dmc-press inline-flex items-center gap-1.5 min-h-[44px] bg-white/15 hover:bg-white/25 border border-white/25 rounded-xl px-4 py-2 font-semibold text-emerald-50 cursor-pointer"
+                className="dmc-press inline-flex items-center gap-1.5 min-h-[40px] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] border border-[var(--color-border-strong)] rounded-[var(--radius-control)] px-3.5 py-2 font-semibold text-[var(--color-ink)] cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Clear my progress</span>
@@ -920,60 +919,118 @@ export function GeographyWorkbench({
       </div>
 
       {/* Tier 2: Interactive Quiz Module (#quiz-module) */}
-      <SectionBand id="quiz-module" surface="ground" size="reading" density="standard" labelledBy="quiz-stage-title">
-        <div className="space-y-6">
-          <h2 id="quiz-stage-title" className="sr-only">
-            Interactive Country Recall Quiz Stage
-          </h2>
+      <SectionBand id="quiz-module" surface="ground" size="wide" density="standard" labelledBy="quiz-stage-title">
+        <div className="bg-[var(--color-surface-soft)] rounded-[var(--radius-sheet)] border border-[var(--color-border)] p-3 sm:p-8 lg:p-10">
+          <div className="max-w-3xl mx-auto space-y-4">
+            <h2 id="quiz-stage-title" className="sr-only">
+              Interactive Country Recall Quiz Stage
+            </h2>
 
-          <div id="geography-quiz-slot">
-            {activeEntry ? (
-              <GeographyQuizCard
-                questionIndex={currentIndex}
-                totalQuestions={quizDeck.entries.length}
-                prompt={activeEntry.question.prompt}
-                subLabel={`${activeEntry.question.countryName} (${activeEntry.question.factType.toUpperCase()})`}
-                options={activeEntry.options}
-                correctOptionId={activeEntry.correctOptionId}
-                selectedOptionId={answersByIndex[currentIndex] ?? null}
-                explanation={activeEntry.question.explanation}
-                subStepperSteps={subStepperSteps}
-                activeSubStepKey={activeSubStepKey}
-                onSelectOption={handleSelectOption}
-                onNext={handleNextQuestion}
-              />
-            ) : (
-              <EmptyStateCard
-                icon={Globe}
-                title="No Verified Quiz Items Loaded"
-                description="Select verified countries above or reset filters to generate an A-D geography recall quiz."
-                primaryAction={{
-                  label: 'Load All Verified Countries',
-                  onClick: handleClearProgress
-                }}
-              />
-            )}
-          </div>
+            {activeEntry && (
+              <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
+                <span
+                  aria-live="polite"
+                  className="inline-flex items-center px-3 py-1 rounded-full bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] font-bold text-[var(--dmc-mcq-heading)] tabular-nums elevation-1"
+                >
+                  Score: {scoreCount} / {quizDeck.entries.length}
+                </span>
 
-          <div id="geography-results-modal-slot">
-            {hasOpenedScoreModal && (
-              <GeographyScoreModal
-                isOpen={isScoreModalOpen}
-                onClose={() => setIsScoreModalOpen(false)}
-                score={scoreCount}
-                total={quizDeck.entries.length}
-                onRetake={handleRetake}
-                onNextScope={handleNextScope}
-                onClearProgress={handleClearProgress}
-                nextScopeLabel={
-                  filter.letter
-                    ? 'Next Alphabet'
-                    : filter.continentId
-                      ? 'Next Continent'
-                      : 'Next Global Batch'
-                }
-              />
+                <span className="text-xs font-semibold text-[var(--dmc-brand-forest)]">
+                  {quizDeck.label}
+                </span>
+              </div>
             )}
+
+            <div id="geography-quiz-slot">
+              {activeEntry ? (
+                (() => {
+                  const answeredCount = Object.keys(answersByIndex).length;
+                  const geoQuestionIds = quizDeck.entries.map((_, i) => `geo-q-${i}`);
+                  const geoAnsweredMap: Record<string, string> = {};
+                  for (const [idxKey, val] of Object.entries(answersByIndex)) {
+                    geoAnsweredMap[`geo-q-${idxKey}`] = val;
+                  }
+
+                  return (
+                    <GeographyQuizCard
+                      questionIndex={currentIndex}
+                      totalQuestions={quizDeck.entries.length}
+                      answeredCount={answeredCount}
+                      prompt={activeEntry.question.prompt}
+                      subLabel={`${activeEntry.question.countryName} (${activeEntry.question.factType.toUpperCase()})`}
+                      options={activeEntry.options}
+                      correctOptionId={activeEntry.correctOptionId}
+                      selectedOptionId={answersByIndex[currentIndex] ?? null}
+                      explanation={activeEntry.question.explanation}
+                      subStepperSteps={subStepperSteps}
+                      activeSubStepKey={activeSubStepKey}
+                      onSelectOption={handleSelectOption}
+                      onNext={handleNextQuestion}
+                      footer={
+                        <McqPaginationStrip
+                          page={1}
+                          totalPages={1}
+                          pageSize={Math.max(1, quizDeck.entries.length)}
+                          questionIds={geoQuestionIds}
+                          answeredByQuestionId={geoAnsweredMap}
+                          activeIndex={currentIndex}
+                          onSelectQuestion={(idx) => {
+                            const safeIdx = Math.min(Math.max(0, idx), quizDeck.entries.length - 1);
+                            setCurrentIndex(safeIdx);
+                            persistSnapshot(safeIdx, answersByIndex);
+                          }}
+                          onPageChange={() => {}}
+                          canPrev={currentIndex > 0}
+                          canNext={currentIndex < quizDeck.entries.length}
+                          onPrev={() => {
+                            if (currentIndex > 0) {
+                              const prevIdx = currentIndex - 1;
+                              setCurrentIndex(prevIdx);
+                              persistSnapshot(prevIdx, answersByIndex);
+                            }
+                          }}
+                          onNext={handleNextQuestion}
+                          nextLabel={
+                            currentIndex + 1 === quizDeck.entries.length ? 'View Results' : 'Next'
+                          }
+                        />
+                      }
+                    />
+                  );
+                })()
+              ) : (
+                <EmptyStateCard
+                  icon={Globe}
+                  title="No Verified Quiz Items Loaded"
+                  description="Select verified countries above or reset filters to generate an A-D geography recall quiz."
+                  primaryAction={{
+                    label: 'Load All Verified Countries',
+                    onClick: handleClearProgress
+                  }}
+                />
+              )}
+            </div>
+
+            <div id="geography-results-modal-slot">
+              {hasOpenedScoreModal && (
+                <GeographyScoreModal
+                  isOpen={isScoreModalOpen}
+                  onClose={() => setIsScoreModalOpen(false)}
+                  score={scoreCount}
+                  total={quizDeck.entries.length}
+                  onRetake={handleRetake}
+                  onNextScope={handleNextScope}
+                  onClearProgress={handleClearProgress}
+                  nextScopeLabel={
+                    filter.letter
+                      ? 'Next Alphabet'
+                      : filter.continentId
+                        ? 'Next Continent'
+                        : 'Next Global Batch'
+                  }
+                />
+              )}
+            </div>
           </div>
         </div>
       </SectionBand>

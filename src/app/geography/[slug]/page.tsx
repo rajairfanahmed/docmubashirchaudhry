@@ -11,7 +11,6 @@ import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
 import { AnswerHighlight } from '@/components/ui/AnswerHighlight';
 import { VerificationBadge } from '@/components/ui/Badge';
-import { ProvenanceBox } from '@/components/ui/ProvenanceBox';
 import { CorrectionTrigger } from '@/components/feedback/CorrectionTrigger';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
@@ -288,14 +287,30 @@ export default async function CountryProfilePage({
             )}
           </div>
 
-          {/* Right 5 Cols: Provenance Citations & Correction Link */}
+          {/* Right 5 Cols: Dataset Citations & Correction Link */}
           <aside className="lg:col-span-5 space-y-4">
-            <ProvenanceBox
-              title="Sources & Verification"
-              verification={country.verification}
-              sources={sources}
-              summary={`Verified geographic profile for ${country.nameCommon} (${country.isoAlpha3}).`}
-            />
+            <div className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-[var(--dmc-radius-card)] p-5 elevation-1 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-brand-deep)]">
+                  Reference Sources
+                </span>
+                <span className="text-[11px] font-medium text-[var(--dmc-ink-muted)] tabular-nums">
+                  Checked {country.verification.lastCheckedAt}
+                </span>
+              </div>
+              <p className="text-xs text-[var(--dmc-ink-secondary)] leading-relaxed">
+                Verified geographic profile for {country.nameCommon} ({country.isoAlpha3}).
+              </p>
+              {sources.length > 0 && (
+                <ul className="space-y-1.5 pt-2 border-t border-[var(--dmc-border-subtle)] text-xs text-[var(--dmc-ink-secondary)]">
+                  {sources.map((src) => (
+                    <li key={src.id} className="font-medium text-[var(--dmc-ink-primary)]">
+                      {src.title}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
 
             <div className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-[var(--dmc-radius-card)] p-5 elevation-1 space-y-2">
               <p className="text-xs text-[var(--dmc-ink-secondary)] leading-relaxed">

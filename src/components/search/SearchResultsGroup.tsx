@@ -65,8 +65,8 @@ export function SearchResultsGroup({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--dmc-border-subtle)]">
-        <h2 id="search-results-heading" className="type-section-heading text-[var(--dmc-ink-primary)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--color-border)]">
+        <h2 id="search-results-heading" className="type-section-heading text-[var(--color-ink)]">
           Results for &ldquo;{query}&rdquo; ({totalCount})
         </h2>
 
@@ -96,10 +96,10 @@ export function SearchResultsGroup({
                     document.getElementById(`search-tab-${nextTab.key}`)?.focus();
                   }
                 }}
-                className={`min-h-[44px] px-3.5 py-2 rounded-full text-xs font-bold border transition-colors cursor-pointer tabular-nums ${
+                className={`min-h-[44px] px-3.5 py-2 rounded-full text-xs font-semibold border transition-colors cursor-pointer tabular-nums focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)] ${
                   active
-                    ? 'bg-[var(--dmc-brand-forest)] text-white border-[var(--dmc-brand-forest)]'
-                    : 'bg-[var(--dmc-surface-card)] text-[var(--dmc-ink-secondary)] border-[var(--dmc-border-subtle)] hover:border-[var(--dmc-brand-forest)]'
+                    ? 'bg-[var(--color-action)] text-[var(--color-action-ink)] border-[var(--color-action)]'
+                    : 'bg-[var(--color-surface)] text-[var(--color-ink-secondary)] border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)]'
                 }`}
               >
                 {tab.label} ({tab.count})
@@ -121,11 +121,11 @@ export function SearchResultsGroup({
           aria-label="Jump to search result sections"
           className="flex flex-wrap items-center gap-2 text-xs"
         >
-          <span className="font-bold text-[var(--dmc-ink-muted)] mr-1">Jump to:</span>
+          <span className="font-bold text-[var(--color-ink-muted)] mr-1">Jump to:</span>
           {grouped.pdfs.length > 0 && (
             <a
               href="#group-pdfs"
-              className="inline-flex items-center min-h-[44px] sm:min-h-0 px-3 py-1.5 rounded-full bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] text-[var(--dmc-ink-secondary)] hover:text-[var(--dmc-brand-forest)] hover:border-[var(--dmc-brand-forest)] font-semibold"
+              className="inline-flex items-center min-h-[44px] sm:min-h-[36px] px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink-secondary)] hover:text-[var(--color-brand-deep)] hover:border-[var(--color-border-strong)] font-semibold"
             >
               PDFs ({grouped.pdfs.length})
             </a>
@@ -133,7 +133,7 @@ export function SearchResultsGroup({
           {grouped.countries.length > 0 && (
             <a
               href="#group-countries"
-              className="inline-flex items-center min-h-[44px] sm:min-h-0 px-3 py-1.5 rounded-full bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] text-[var(--dmc-ink-secondary)] hover:text-[var(--dmc-brand-forest)] hover:border-[var(--dmc-brand-forest)] font-semibold"
+              className="inline-flex items-center min-h-[44px] sm:min-h-[36px] px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink-secondary)] hover:text-[var(--color-brand-deep)] hover:border-[var(--color-border-strong)] font-semibold"
             >
               Countries ({grouped.countries.length})
             </a>
@@ -141,7 +141,7 @@ export function SearchResultsGroup({
           {grouped.exams.length > 0 && (
             <a
               href="#group-exams"
-              className="inline-flex items-center min-h-[44px] sm:min-h-0 px-3 py-1.5 rounded-full bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] text-[var(--dmc-ink-secondary)] hover:text-[var(--dmc-brand-forest)] hover:border-[var(--dmc-brand-forest)] font-semibold"
+              className="inline-flex items-center min-h-[44px] sm:min-h-[36px] px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink-secondary)] hover:text-[var(--color-brand-deep)] hover:border-[var(--color-border-strong)] font-semibold"
             >
               Exams &amp; Posts ({grouped.exams.length})
             </a>
@@ -149,7 +149,7 @@ export function SearchResultsGroup({
           {(topicHits.length > 0 || grouped.questions.length > 0) && (
             <a
               href="#group-topics"
-              className="inline-flex items-center min-h-[44px] sm:min-h-0 px-3 py-1.5 rounded-full bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] text-[var(--dmc-ink-secondary)] hover:text-[var(--dmc-brand-forest)] hover:border-[var(--dmc-brand-forest)] font-semibold"
+              className="inline-flex items-center min-h-[44px] sm:min-h-[36px] px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-ink-secondary)] hover:text-[var(--color-brand-deep)] hover:border-[var(--color-border-strong)] font-semibold"
             >
               Topics &amp; MCQs ({topicHits.length + grouped.questions.length})
             </a>
@@ -162,9 +162,9 @@ export function SearchResultsGroup({
           <section aria-labelledby="group-pdfs" className="space-y-3">
             <h3
               id="group-pdfs"
-              className="scroll-mt-24 text-xs font-bold uppercase tracking-wider text-[var(--dmc-ink-muted)] flex items-center gap-2"
+              className="scroll-mt-24 text-xs font-bold uppercase tracking-wider text-[var(--color-ink-muted)] flex items-center gap-2"
             >
-              <FileText className="w-4 h-4 text-[var(--dmc-accent-gold-hover)]" aria-hidden="true" />
+              <FileText className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
               <span>PDF Booklets ({grouped.pdfs.length})</span>
             </h3>
             <div className="space-y-2.5">
@@ -172,13 +172,13 @@ export function SearchResultsGroup({
                 <Link
                   key={hit.id}
                   href={hit.url}
-                  className="flex items-center justify-between gap-3 bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] hover:border-[var(--dmc-brand-forest)] rounded-xl p-4 elevation-1"
+                  className="track-card flex items-center justify-between gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] rounded-[var(--radius-panel)] p-4 shadow-xs"
                 >
                   <div>
-                    <div className="font-bold text-sm text-[var(--dmc-ink-primary)]">{hit.title}</div>
-                    <div className="text-xs text-[var(--dmc-ink-secondary)] mt-0.5">{hit.subtitle}</div>
+                    <div className="font-bold text-sm text-[var(--color-ink)]">{hit.title}</div>
+                    <div className="text-xs text-[var(--color-ink-secondary)] mt-0.5">{hit.subtitle}</div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[var(--dmc-ink-muted)] shrink-0" aria-hidden="true" />
+                  <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)] shrink-0" aria-hidden="true" />
                 </Link>
               ))}
             </div>
@@ -189,9 +189,9 @@ export function SearchResultsGroup({
           <section aria-labelledby="group-countries" className="space-y-3">
             <h3
               id="group-countries"
-              className="scroll-mt-24 text-xs font-bold uppercase tracking-wider text-[var(--dmc-ink-muted)] flex items-center gap-2"
+              className="scroll-mt-24 text-xs font-bold uppercase tracking-wider text-[var(--color-ink-muted)] flex items-center gap-2"
             >
-              <Globe className="w-4 h-4 text-[var(--dmc-brand-emerald)]" aria-hidden="true" />
+              <Globe className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
               <span>Countries ({grouped.countries.length})</span>
             </h3>
             <div className="space-y-2.5">
@@ -199,13 +199,13 @@ export function SearchResultsGroup({
                 <Link
                   key={hit.id}
                   href={hit.url}
-                  className="flex items-center justify-between gap-3 bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] hover:border-[var(--dmc-brand-forest)] rounded-xl p-4 elevation-1"
+                  className="track-card flex items-center justify-between gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] rounded-[var(--radius-panel)] p-4 shadow-xs"
                 >
                   <div>
-                    <div className="font-bold text-sm text-[var(--dmc-ink-primary)]">{hit.title}</div>
-                    <div className="text-xs text-[var(--dmc-ink-secondary)] mt-0.5">{hit.subtitle}</div>
+                    <div className="font-bold text-sm text-[var(--color-ink)]">{hit.title}</div>
+                    <div className="text-xs text-[var(--color-ink-secondary)] mt-0.5">{hit.subtitle}</div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[var(--dmc-ink-muted)] shrink-0" aria-hidden="true" />
+                  <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)] shrink-0" aria-hidden="true" />
                 </Link>
               ))}
             </div>
@@ -216,9 +216,9 @@ export function SearchResultsGroup({
           <section aria-labelledby="group-exams" className="space-y-3">
             <h3
               id="group-exams"
-              className="scroll-mt-24 text-xs font-bold uppercase tracking-wider text-[var(--dmc-ink-muted)] flex items-center gap-2"
+              className="scroll-mt-24 text-xs font-bold uppercase tracking-wider text-[var(--color-ink-muted)] flex items-center gap-2"
             >
-              <BookOpen className="w-4 h-4 text-[var(--dmc-brand-forest)]" aria-hidden="true" />
+              <BookOpen className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
               <span>Exams &amp; Recruitment Posts ({grouped.exams.length})</span>
             </h3>
             <div className="space-y-2.5">
@@ -226,13 +226,13 @@ export function SearchResultsGroup({
                 <Link
                   key={hit.id}
                   href={hit.url}
-                  className="flex items-center justify-between gap-3 bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] hover:border-[var(--dmc-brand-forest)] rounded-xl p-4 elevation-1"
+                  className="track-card flex items-center justify-between gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] rounded-[var(--radius-panel)] p-4 shadow-xs"
                 >
                   <div>
-                    <div className="font-bold text-sm text-[var(--dmc-ink-primary)]">{hit.title}</div>
-                    <div className="text-xs text-[var(--dmc-ink-secondary)] mt-0.5">{hit.subtitle}</div>
+                    <div className="font-bold text-sm text-[var(--color-ink)]">{hit.title}</div>
+                    <div className="text-xs text-[var(--color-ink-secondary)] mt-0.5">{hit.subtitle}</div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-[var(--dmc-ink-muted)] shrink-0" aria-hidden="true" />
+                  <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)] shrink-0" aria-hidden="true" />
                 </Link>
               ))}
             </div>
@@ -244,9 +244,9 @@ export function SearchResultsGroup({
             <section aria-labelledby="group-topics" className="space-y-3">
               <h3
                 id="group-topics"
-                className="scroll-mt-24 text-xs font-bold uppercase tracking-wider text-[var(--dmc-ink-muted)] flex items-center gap-2"
+                className="scroll-mt-24 text-xs font-bold uppercase tracking-wider text-[var(--color-ink-muted)] flex items-center gap-2"
               >
-                <Layers className="w-4 h-4 text-purple-700" aria-hidden="true" />
+                <Layers className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
                 <span>Topics &amp; Questions ({topicHits.length + grouped.questions.length})</span>
               </h3>
               <div className="space-y-2.5">
@@ -254,26 +254,26 @@ export function SearchResultsGroup({
                   <Link
                     key={t.id}
                     href={t.url}
-                    className="flex items-center justify-between gap-3 bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] hover:border-[var(--dmc-brand-forest)] rounded-xl p-4 elevation-1"
+                    className="track-card flex items-center justify-between gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] rounded-[var(--radius-panel)] p-4 shadow-xs"
                   >
                     <div>
-                      <div className="font-bold text-sm text-[var(--dmc-ink-primary)]">{t.title}</div>
-                      <div className="text-xs text-[var(--dmc-ink-secondary)] mt-0.5">{t.subtitle}</div>
+                      <div className="font-bold text-sm text-[var(--color-ink)]">{t.title}</div>
+                      <div className="text-xs text-[var(--color-ink-secondary)] mt-0.5">{t.subtitle}</div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-[var(--dmc-ink-muted)] shrink-0" aria-hidden="true" />
+                    <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)] shrink-0" aria-hidden="true" />
                   </Link>
                 ))}
                 {grouped.questions.map((hit) => (
                   <Link
                     key={hit.id}
                     href={hit.url}
-                    className="flex items-center justify-between gap-3 bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] hover:border-[var(--dmc-brand-forest)] rounded-xl p-4 elevation-1"
+                    className="track-card flex items-center justify-between gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] rounded-[var(--radius-panel)] p-4 shadow-xs"
                   >
                     <div>
-                      <div className="font-bold text-sm text-[var(--dmc-ink-primary)]">{hit.title}</div>
-                      <div className="text-xs text-[var(--dmc-ink-secondary)] mt-0.5">{hit.subtitle}</div>
+                      <div className="font-bold text-sm text-[var(--color-ink)]">{hit.title}</div>
+                      <div className="text-xs text-[var(--color-ink-secondary)] mt-0.5">{hit.subtitle}</div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-[var(--dmc-ink-muted)] shrink-0" aria-hidden="true" />
+                    <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)] shrink-0" aria-hidden="true" />
                   </Link>
                 ))}
               </div>

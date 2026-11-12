@@ -3,6 +3,7 @@
 @theme inline {
   --font-sans: var(--font-inter, 'Inter'), var(--font-jakarta, 'Plus Jakarta Sans'), system-ui, -apple-system, sans-serif;
   --font-display: var(--font-jakarta, 'Plus Jakarta Sans'), var(--font-inter, 'Inter'), system-ui, -apple-system, sans-serif;
+  --font-urdu: var(--font-urdu, 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', serif);
 
   /* Brand & Surface Colors */
   --color-brand-forest: var(--dmc-brand-forest);
@@ -13,6 +14,7 @@
   --color-brand-footer: var(--dmc-brand-footer);
   --color-brand-flag: var(--dmc-brand-flag);
   --color-brand-primary: var(--dmc-brand-forest);
+  --color-brand-ink: var(--dmc-brand-ink);
   --color-brand-hover: var(--dmc-brand-emerald);
   --color-brand-amber: var(--dmc-accent-gold-hover);
   --color-brand-gold: var(--dmc-accent-gold);
@@ -21,10 +23,18 @@
   --color-brand-accent: var(--dmc-accent-sand);
   --color-footer-base: var(--dmc-brand-footer);
 
-  /* Surfaces & Ink */
+  /* Surfaces, M3 Tonal Mint & Ink */
   --color-surface-ground: var(--dmc-surface-ground);
   --color-surface-card: var(--dmc-surface-card);
   --color-surface-muted: var(--dmc-surface-muted);
+  --color-surface-mint-wash: var(--dmc-surface-mint-wash);
+  --color-surface-mint-tonal: var(--dmc-surface-mint-tonal);
+  --color-surface-mint-border: var(--dmc-surface-mint-border);
+  --color-surface-overlay: var(--dmc-surface-overlay);
+  --color-emerald-accent: var(--dmc-emerald-accent);
+  --color-emerald-accent-hover: var(--dmc-emerald-accent-hover);
+  --color-emerald-accent-dark: var(--dmc-emerald-accent-dark);
+  --color-emerald-accent-ink: var(--dmc-emerald-accent-ink);
   --color-surface-mcq-sheet: var(--dmc-surface-mcq-sheet);
   --color-surface-mcq-sheet-tint: var(--dmc-surface-mcq-sheet-tint);
   --color-mcq-sheet-arc: var(--dmc-mcq-sheet-arc);
@@ -40,6 +50,7 @@
   /* Accents & Golden Highlighter Pills (#FEF08A / #78350F AAA) */
   --color-accent-gold: var(--dmc-accent-gold);
   --color-accent-gold-hover: var(--dmc-accent-gold-hover);
+  --color-accent-gold-ink: var(--dmc-accent-gold-ink);
   --color-accent-amber: var(--dmc-accent-gold-dark);
   --color-accent-surface: var(--dmc-status-unverified-bg);
   --color-accent-highlight: var(--dmc-highlight-bg);
@@ -73,6 +84,25 @@
   --color-status-editorial-bg: var(--dmc-status-editorial-bg);
   --color-status-editorial-border: var(--dmc-status-editorial-border);
   --color-status-editorial-ink: var(--dmc-status-editorial-ink);
+  --color-status-locked-bg: var(--dmc-status-locked-bg);
+  --color-status-locked-border: var(--dmc-status-locked-border);
+  --color-status-locked-ink: var(--dmc-status-locked-ink);
+
+  /* Mock Exam Timer & Admin Telemetry Series */
+  --color-timer-safe-bg: var(--dmc-timer-safe-bg);
+  --color-timer-safe-border: var(--dmc-timer-safe-border);
+  --color-timer-safe-ink: var(--dmc-timer-safe-ink);
+  --color-timer-warn-bg: var(--dmc-timer-warn-bg);
+  --color-timer-warn-border: var(--dmc-timer-warn-border);
+  --color-timer-warn-ink: var(--dmc-timer-warn-ink);
+  --color-timer-danger-bg: var(--dmc-timer-danger-bg);
+  --color-timer-danger-border: var(--dmc-timer-danger-border);
+  --color-timer-danger-ink: var(--dmc-timer-danger-ink);
+  --color-chart-visits: var(--dmc-chart-visits);
+  --color-chart-attempts: var(--dmc-chart-attempts);
+  --color-chart-downloads: var(--dmc-chart-downloads);
+  --color-chart-grid: var(--dmc-chart-grid);
+  --color-chart-axis-ink: var(--dmc-chart-axis-ink);
 
   /* Spacing Scale */
   --spacing-dmc-1: var(--dmc-space-1);
@@ -121,6 +151,48 @@
   --color-error-base: var(--dmc-status-error-icon);
   --color-error-surface: var(--dmc-status-error-bg);
   --color-error-text: var(--dmc-status-error-ink);
+
+  /* Editorial Redesign Token Slots (Playbook Foundation) */
+  --color-page: var(--dmc-ed-page);
+  --color-surface: var(--dmc-ed-surface);
+  --color-surface-soft: var(--dmc-ed-surface-soft);
+  --color-surface-raised: var(--dmc-ed-surface-raised);
+  --color-ink: var(--dmc-ed-ink);
+  --color-ink-secondary: var(--dmc-ed-ink-secondary);
+  --color-ink-muted: var(--dmc-ed-ink-muted);
+  --color-border: var(--dmc-ed-border);
+  --color-border-strong: var(--dmc-ed-border-strong);
+  --color-brand-deep: var(--dmc-ed-brand-deep);
+  --color-brand-deep-hover: var(--dmc-ed-brand-deep-hover);
+  --color-accent: var(--dmc-ed-accent);
+  --color-accent-ink: var(--dmc-ed-accent-ink);
+  --color-action: var(--dmc-ed-action);
+  --color-action-hover: var(--dmc-ed-action-hover);
+  --color-action-ink: var(--dmc-ed-action-ink);
+  --color-success-bg: var(--dmc-ed-success-bg);
+  --color-success-ink: var(--dmc-ed-success-ink);
+  --color-success-border: var(--dmc-ed-success-border);
+  --color-warning-bg: var(--dmc-ed-warning-bg);
+  --color-warning-ink: var(--dmc-ed-warning-ink);
+  --color-warning-border: var(--dmc-ed-warning-border);
+  --color-danger-bg: var(--dmc-ed-danger-bg);
+  --color-danger-ink: var(--dmc-ed-danger-ink);
+  --color-danger-border: var(--dmc-ed-danger-border);
+  --color-info-bg: var(--dmc-ed-info-bg);
+  --color-info-ink: var(--dmc-ed-info-ink);
+  --color-info-border: var(--dmc-ed-info-border);
+  --color-dark-surface: var(--dmc-ed-dark-surface);
+  --color-dark-surface-raised: var(--dmc-ed-dark-surface-raised);
+  --color-dark-ink: var(--dmc-ed-dark-ink);
+  --color-dark-ink-secondary: var(--dmc-ed-dark-ink-secondary);
+  --color-dark-border: var(--dmc-ed-dark-border);
+  --radius-control: var(--dmc-ed-radius-control);
+  --radius-panel: var(--dmc-ed-radius-panel);
+  --radius-sheet: var(--dmc-ed-radius-sheet);
+  --shadow-editorial-0: var(--dmc-ed-shadow-0);
+  --shadow-editorial-1: var(--dmc-ed-shadow-1);
+  --shadow-editorial-2: var(--dmc-ed-shadow-2);
+  --shadow-editorial-3: var(--dmc-ed-shadow-3);
 }
 
 /**
@@ -130,7 +202,7 @@
  */
 
 :root {
-  /* 1. Brand & Core Surfaces */
+  /* 1. Brand & Core Surfaces (Light theme only with fixed dark brand bands) */
   --dmc-brand-forest: #0d4a28;
   --dmc-brand-dark: #08331b;
   --dmc-brand-emerald: #116135;
@@ -138,11 +210,13 @@
   --dmc-brand-surface-dark: var(--dmc-brand-surface);
   --dmc-brand-footer: #051c0e;
   --dmc-brand-flag: #01411c;
+  --dmc-brand-ink: #14281d;
 
-  /* 2. Accents & Exact Golden Highlight Pill (#FEF08A / #78350F = 10.2:1 AAA) */
+  /* 2. Accents & Exact Golden Highlight Pill (#FEF08A / #78350F = 7.80:1 AAA) */
   --dmc-accent-gold: #f0b938;
   --dmc-accent-gold-hover: #f59e0b;
   --dmc-accent-gold-dark: #d97706;
+  --dmc-accent-gold-ink: #14281d;
   --dmc-accent-sand: #d4a373;
   --dmc-highlight-bg: #fef08a;
   --dmc-highlight-ink: #78350f;
@@ -150,8 +224,10 @@
 
   /* 3. Neutral Surfaces, /mcq/practice Sheet, Typography Ink & Borders */
   --dmc-surface-ground: #fafbfc;
-  --dmc-surface-muted: #f8fafc;
+  --dmc-surface-muted: #f1f5f9;
   --dmc-surface-card: #ffffff;
+  --dmc-surface-overlay: rgba(15, 23, 42, 0.56);
+  --dmc-scrim-portrait: linear-gradient(180deg, rgba(5, 28, 14, 0) 45%, rgba(5, 28, 14, 0.86) 100%);
   --dmc-surface-mcq-sheet: #e6f4f1;
   --dmc-surface-mcq-sheet-tint: #f0fbf8;
   --dmc-mcq-sheet-arc: rgba(13, 74, 40, 0.08);
@@ -195,6 +271,10 @@
   --dmc-status-editorial-border: #93c5fd;
   --dmc-status-editorial-ink: #1e3a8a;
 
+  --dmc-status-locked-bg: #f8fafc;
+  --dmc-status-locked-border: #cbd5e1;
+  --dmc-status-locked-ink: #334155;
+
   /* Feature Accent & Document Badges */
   --dmc-pdf-icon-bg: #fee2e2;
   --dmc-pdf-icon-fg: #dc2626;
@@ -206,17 +286,22 @@
   --dmc-meter-urdu: #ea580c;
   --dmc-meter-math-comp: #0284c7;
 
-  /* 5. Subject Taxonomy Pastel Tile Palette (10 Categories) */
-  --dmc-subject-gk-bg: #ecfdf5;       --dmc-subject-gk-ink: #0d4a28;
-  --dmc-subject-pak-bg: #dcfce7;      --dmc-subject-pak-ink: #15803d;
-  --dmc-subject-islamic-bg: #fef3c7;  --dmc-subject-islamic-ink: #b45309;
-  --dmc-subject-science-bg: #f3e8ff;  --dmc-subject-science-ink: #7e22ce;
-  --dmc-subject-english-bg: #dbeafe;  --dmc-subject-english-ink: #1d4ed8;
-  --dmc-subject-urdu-bg: #ffedd5;     --dmc-subject-urdu-ink: #c2410c;
-  --dmc-subject-math-bg: #ffe4e6;     --dmc-subject-math-ink: #be123c;
-  --dmc-subject-computer-bg: #e0f2fe; --dmc-subject-computer-ink: #0369a1;
-  --dmc-subject-sports-bg: #fef9c3;   --dmc-subject-sports-ink: #a16207;
-  --dmc-subject-mixed-bg: #ede9fe;    --dmc-subject-mixed-ink: #6d28d9;
+  /* 5. Compact Low-Saturation Academic Taxonomy Tints (4 Balanced Editorial Pairs) */
+  --dmc-ed-tax-sage-bg: #eef3ee;      --dmc-ed-tax-sage-ink: #204638;
+  --dmc-ed-tax-stone-bg: #f4f1ea;     --dmc-ed-tax-stone-ink: #4e4a3e;
+  --dmc-ed-tax-slate-bg: #eef3f7;     --dmc-ed-tax-slate-ink: #2b4d6b;
+  --dmc-ed-tax-olive-bg: #f2f5e8;     --dmc-ed-tax-olive-ink: #354b24;
+
+  --dmc-subject-gk-bg: var(--dmc-ed-tax-sage-bg);           --dmc-subject-gk-ink: var(--dmc-ed-tax-sage-ink);
+  --dmc-subject-pak-bg: var(--dmc-ed-tax-sage-bg);          --dmc-subject-pak-ink: var(--dmc-ed-tax-sage-ink);
+  --dmc-subject-islamic-bg: var(--dmc-ed-tax-stone-bg);     --dmc-subject-islamic-ink: var(--dmc-ed-tax-stone-ink);
+  --dmc-subject-science-bg: var(--dmc-ed-tax-olive-bg);     --dmc-subject-science-ink: var(--dmc-ed-tax-olive-ink);
+  --dmc-subject-english-bg: var(--dmc-ed-tax-slate-bg);     --dmc-subject-english-ink: var(--dmc-ed-tax-slate-ink);
+  --dmc-subject-urdu-bg: var(--dmc-ed-tax-stone-bg);        --dmc-subject-urdu-ink: var(--dmc-ed-tax-stone-ink);
+  --dmc-subject-math-bg: var(--dmc-ed-tax-olive-bg);        --dmc-subject-math-ink: var(--dmc-ed-tax-olive-ink);
+  --dmc-subject-computer-bg: var(--dmc-ed-tax-slate-bg);    --dmc-subject-computer-ink: var(--dmc-ed-tax-slate-ink);
+  --dmc-subject-sports-bg: var(--dmc-ed-tax-sage-bg);       --dmc-subject-sports-ink: var(--dmc-ed-tax-sage-ink);
+  --dmc-subject-mixed-bg: var(--dmc-ed-tax-slate-bg);       --dmc-subject-mixed-ink: var(--dmc-ed-tax-slate-ink);
 
   /* 6. Spacing Scale (4px / 8px Base Rhythm) */
   --dmc-space-1: 0.25rem;
@@ -229,8 +314,8 @@
   --dmc-space-12: 3rem;
   --dmc-space-16: 4rem;
 
-  /* 7. Fluid Typography Scale & Measure Tokens */
-  --dmc-text-display-hero: clamp(2rem, 3.2vw + 1.15rem, 2.75rem);
+  /* 7. Fluid Typography Scale, Urdu RTL Metrics & Measure Tokens */
+  --dmc-text-display-hero: clamp(1.875rem, 3.0vw + 1.1rem, 2.625rem);
   --dmc-text-page-title: clamp(1.625rem, 2.2vw + 1.05rem, 2.125rem);
   --dmc-text-section-heading: clamp(1.375rem, 1.4vw + 0.95rem, 1.75rem);
   --dmc-text-card-title: clamp(1.0625rem, 0.5vw + 0.95rem, 1.1875rem);
@@ -238,6 +323,8 @@
   --dmc-text-body-sm: 0.875rem;
   --dmc-text-label-micro: 0.75rem;
   --dmc-text-label-xs: 0.6875rem;
+  --dmc-text-urdu: clamp(1.0625rem, 0.4vw + 0.95rem, 1.1875rem);
+  --dmc-leading-urdu: 2.1;
   --dmc-measure-prose: 68ch;
 
   /* 8. Radii Tokens */
@@ -252,6 +339,29 @@
   --dmc-shadow-1: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
   --dmc-shadow-2: 0 8px 20px -4px rgba(13, 74, 40, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
   --dmc-shadow-3: 0 20px 32px -8px rgba(8, 51, 27, 0.18), 0 8px 16px -4px rgba(15, 23, 42, 0.06);
+
+  /* 10. v3.0 M3 Tonal Mint, Interactive Emerald Accent, Timed Mock & Telemetry Tokens */
+  --dmc-surface-mint-wash: #ecfdf5;
+  --dmc-surface-mint-tonal: #d1fae5;
+  --dmc-surface-mint-border: #a7f3d0;
+  --dmc-emerald-accent: #047857;
+  --dmc-emerald-accent-hover: #065f46;
+  --dmc-emerald-accent-dark: #064e3b;
+  --dmc-emerald-accent-ink: #065f46;
+  --dmc-timer-safe-bg: #ecfdf5;
+  --dmc-timer-safe-border: #047857;
+  --dmc-timer-safe-ink: #065f46;
+  --dmc-timer-warn-bg: #fffbeb;
+  --dmc-timer-warn-border: #d97706;
+  --dmc-timer-warn-ink: #92400e;
+  --dmc-timer-danger-bg: #fef2f2;
+  --dmc-timer-danger-border: #ef4444;
+  --dmc-timer-danger-ink: #991b1b;
+  --dmc-chart-visits: #0d4a28;
+  --dmc-chart-attempts: #0369a1;
+  --dmc-chart-downloads: #b45309;
+  --dmc-chart-grid: #e2e8f0;
+  --dmc-chart-axis-ink: #64748b;
 
   /* Legacy Aliases (bridging components cleanly onto single-source --dmc-* tokens) */
   --color-brand-dark: var(--dmc-brand-dark);
@@ -312,15 +422,81 @@
   --pastel-math-bg: var(--dmc-subject-math-bg);         --pastel-math-icon: var(--dmc-subject-math-ink);
   --pastel-english-bg: var(--dmc-subject-english-bg);   --pastel-english-icon: var(--dmc-subject-english-ink);
   --pastel-urdu-bg: var(--dmc-subject-urdu-bg);         --pastel-urdu-icon: var(--dmc-subject-urdu-ink);
+
+  /* Editorial Redesign Palette & Motion Tokens (Playbook Sections 2.3 & 8.2) */
+  --dmc-ed-page: #f7f8f5;
+  --dmc-ed-surface: #ffffff;
+  --dmc-ed-surface-soft: #f0f2ed;
+  --dmc-ed-surface-raised: #fbfcfa;
+  --dmc-ed-ink: #171c1a;
+  --dmc-ed-ink-secondary: #4e5952;
+  --dmc-ed-ink-muted: #747f77;
+  --dmc-ed-border: #e2e7e1;
+  --dmc-ed-border-strong: #c8d0c8;
+  --dmc-ed-brand-deep: #204638;
+  --dmc-ed-brand-deep-hover: #18362b;
+  --dmc-ed-accent: #d9f36a;
+  --dmc-ed-accent-ink: #192116;
+  --dmc-ed-action: #19231d;
+  --dmc-ed-action-hover: #29372f;
+  --dmc-ed-action-ink: #ffffff;
+  --dmc-ed-success-bg: #eaf5ee;
+  --dmc-ed-success-ink: #21633e;
+  --dmc-ed-success-border: #b8dec7;
+  --dmc-ed-warning-bg: #fff4d9;
+  --dmc-ed-warning-ink: #79520b;
+  --dmc-ed-warning-border: #ead196;
+  --dmc-ed-danger-bg: #fcedec;
+  --dmc-ed-danger-ink: #a3342e;
+  --dmc-ed-danger-border: #ecc2bf;
+  --dmc-ed-info-bg: #eaf1f8;
+  --dmc-ed-info-ink: #315d86;
+  --dmc-ed-info-border: #c0d5ea;
+  --dmc-ed-dark-surface: #171c1a;
+  --dmc-ed-dark-surface-raised: #19231d;
+  --dmc-ed-dark-ink: #f7f8f5;
+  --dmc-ed-dark-ink-secondary: #c8d0c8;
+  --dmc-ed-dark-border: #29372f;
+
+  /* Editorial Typography, Radii & Neutral Ink Elevation Tokens (Playbook Sections 2.4 & 2.5) */
+  --text-display-hero: clamp(2.25rem, 2.8vw + 1.25rem, 3.375rem);
+  --text-page-title: clamp(1.75rem, 1.8vw + 1.15rem, 2.5rem);
+  --text-section-heading: clamp(1.375rem, 1.1vw + 1rem, 1.75rem);
+  --text-card-title: clamp(1rem, 0.35vw + 0.9rem, 1.1875rem);
+  --text-body: clamp(0.9375rem, 0.25vw + 0.875rem, 1.0625rem);
+  --text-supporting: 0.875rem;
+  --text-metadata: 0.8125rem;
+  --dmc-ed-radius-control: 0.5rem;
+  --dmc-ed-radius-panel: 0.875rem;
+  --dmc-ed-radius-sheet: 1.125rem;
+  --dmc-ed-shadow-0: none;
+  --dmc-ed-shadow-1: 0 1px 2px rgba(23, 28, 26, 0.04), 0 1px 3px rgba(23, 28, 26, 0.05);
+  --dmc-ed-shadow-2: 0 8px 20px -6px rgba(23, 28, 26, 0.08), 0 2px 6px -2px rgba(23, 28, 26, 0.04);
+  --dmc-ed-shadow-3: 0 20px 36px -10px rgba(23, 28, 26, 0.16), 0 6px 14px -4px rgba(23, 28, 26, 0.06);
+
+  --motion-duration-press: 120ms;
+  --motion-duration-hover: 150ms;
+  --motion-duration-popover: 190ms;
+  --motion-duration-dialog: 220ms;
+  --motion-duration-reveal: 190ms;
+  --motion-duration-route: 170ms;
+  --motion-duration-quiz: 150ms;
+  --motion-ease-enter: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
 }
 
 /* Base Canvas & Typographic Role Tokens */
+html,
+body {
+  overflow-x: clip;
+}
+
 body {
   font-family: var(--font-inter, 'Inter'), var(--font-jakarta, 'Plus Jakarta Sans'), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: var(--dmc-text-body-base);
-  line-height: 1.6;
-  background-color: var(--dmc-surface-ground);
-  color: var(--dmc-ink-primary);
+  font-size: var(--text-body);
+  line-height: 1.65;
+  background-color: var(--color-page);
+  color: var(--color-ink);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -330,23 +506,23 @@ h1, h2, h3, h4, .font-display {
 
 .type-display-hero {
   font-family: var(--font-jakarta, 'Plus Jakarta Sans'), sans-serif;
-  font-size: var(--dmc-text-display-hero);
-  font-weight: 800;
-  line-height: 1.15;
+  font-size: var(--text-display-hero);
+  font-weight: 700;
+  line-height: 1.12;
   letter-spacing: -0.025em;
 }
 
 .type-page-title {
   font-family: var(--font-jakarta, 'Plus Jakarta Sans'), sans-serif;
-  font-size: var(--dmc-text-page-title);
-  font-weight: 800;
-  line-height: 1.2;
+  font-size: var(--text-page-title);
+  font-weight: 700;
+  line-height: 1.18;
   letter-spacing: -0.02em;
 }
 
 .type-section-heading {
   font-family: var(--font-jakarta, 'Plus Jakarta Sans'), sans-serif;
-  font-size: var(--dmc-text-section-heading);
+  font-size: var(--text-section-heading);
   font-weight: 700;
   line-height: 1.25;
   letter-spacing: -0.015em;
@@ -354,22 +530,30 @@ h1, h2, h3, h4, .font-display {
 
 .type-card-title {
   font-family: var(--font-jakarta, 'Plus Jakarta Sans'), sans-serif;
-  font-size: var(--dmc-text-card-title);
-  font-weight: 700;
+  font-size: var(--text-card-title);
+  font-weight: 600;
   line-height: 1.35;
   letter-spacing: -0.01em;
 }
 
 .type-body-base {
-  font-size: var(--dmc-text-body-base);
+  font-size: var(--text-body);
   font-weight: 400;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
-.type-body-sm {
-  font-size: var(--dmc-text-body-sm);
-  font-weight: 500;
-  line-height: 1.5;
+.type-body-sm,
+.type-supporting {
+  font-size: var(--text-supporting);
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+.type-metadata {
+  font-size: var(--text-metadata);
+  font-weight: 400;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
 }
 
 .type-label-micro {
@@ -389,9 +573,39 @@ h1, h2, h3, h4, .font-display {
   font-variant-numeric: tabular-nums;
 }
 
-/* Brand Hero Gradient Surface */
+/* Urdu & Mixed-Script RTL / LTR Typographic Isolation */
+.font-urdu {
+  font-family: var(--font-urdu, 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', serif);
+}
+
+.type-urdu {
+  font-family: var(--font-urdu, 'Noto Nastaliq Urdu', 'Noto Naskh Arabic', serif);
+  font-size: var(--dmc-text-urdu);
+  line-height: var(--dmc-leading-urdu);
+  font-weight: 400;
+}
+
+.type-urdu[dir='rtl'],
+[dir='rtl'] .type-urdu {
+  text-align: right;
+}
+
+.unicode-bidi-isolate,
+.bidi-isolate {
+  unicode-bidi: isolate;
+}
+
+/* Brand Hero Gradient & Overlay Scrim Surfaces */
 .hero-gradient {
   background: linear-gradient(180deg, var(--dmc-brand-emerald) 0%, var(--dmc-brand-forest) 55%, var(--dmc-brand-dark) 100%);
+}
+
+.portrait-scrim {
+  background: var(--dmc-scrim-portrait);
+}
+
+.modal-scrim {
+  background-color: var(--dmc-surface-overlay);
 }
 
 /* Pill Badges */
@@ -406,22 +620,6 @@ h1, h2, h3, h4, .font-display {
   text-transform: uppercase;
 }
 
-/* Lenis Smooth Scroll Structural Rules */
-html.lenis,
-html.lenis body {
-  height: auto;
-}
-.lenis:not(.lenis-autoToggle).lenis-stopped {
-  overflow: clip;
-}
-.lenis [data-lenis-prevent],
-.lenis [data-lenis-prevent-wheel],
-.lenis [data-lenis-prevent-touch] {
-  overscroll-behavior: contain;
-}
-.lenis.lenis-smooth iframe {
-  pointer-events: none;
-}
 
 /* Card Hover & Tactile Press Micro-Interactions */
 .track-card {
@@ -532,22 +730,22 @@ html.lenis body {
   }
 }
 .dmc-reveal {
-  animation: dmcFadeSlideDown 200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: dmcFadeSlideDown var(--motion-duration-reveal, 190ms) var(--motion-ease-enter, cubic-bezier(0.22, 1, 0.36, 1)) both;
 }
 .dmc-question-enter {
-  animation: dmcFadeSlideDown 170ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: dmcFadeSlideDown var(--motion-duration-quiz, 150ms) var(--motion-ease-enter, cubic-bezier(0.22, 1, 0.36, 1)) both;
 }
 .dmc-drawer-enter {
-  animation: dmcFadeSlideDown 190ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: dmcFadeSlideDown var(--motion-duration-popover, 190ms) var(--motion-ease-enter, cubic-bezier(0.22, 1, 0.36, 1)) both;
 }
 .dmc-backdrop-enter {
-  animation: dmcBackdropFade 160ms ease-out both;
+  animation: dmcBackdropFade var(--motion-duration-hover, 150ms) ease-out both;
 }
 .dmc-modal-enter {
-  animation: dmcModalEnter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: dmcModalEnter var(--motion-duration-dialog, 220ms) var(--motion-ease-enter, cubic-bezier(0.22, 1, 0.36, 1)) both;
 }
 .dmc-toast-enter {
-  animation: dmcToastEnter 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: dmcToastEnter var(--motion-duration-popover, 190ms) var(--motion-ease-enter, cubic-bezier(0.22, 1, 0.36, 1)) both;
 }
 
 @keyframes dmcSkeletonPulse {
@@ -625,18 +823,18 @@ html.lenis body {
   display: none;
 }
 
-/* Material Design Elevation Utility Classes */
+/* Material & Editorial Elevation Utility Classes */
 .elevation-0 {
-  box-shadow: var(--dmc-shadow-0);
+  box-shadow: var(--shadow-editorial-0);
 }
 .elevation-1 {
-  box-shadow: var(--dmc-shadow-1);
+  box-shadow: var(--shadow-editorial-1);
 }
 .elevation-2 {
-  box-shadow: var(--dmc-shadow-2);
+  box-shadow: var(--shadow-editorial-2);
 }
 .elevation-3 {
-  box-shadow: var(--dmc-shadow-3);
+  box-shadow: var(--shadow-editorial-3);
 }
 
 /* Universal Reduced Motion Safety */

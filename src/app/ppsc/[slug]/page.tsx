@@ -8,7 +8,6 @@ import { SectionBand } from '@/components/layout/SectionBand';
 import { CommissionBrandBadge } from '@/components/branding/CommissionBrandBadge';
 import { VerificationBadge } from '@/components/ui/Badge';
 import { EmptyStateCard } from '@/components/ui/EmptyStateCard';
-import { ProvenanceBox } from '@/components/ui/ProvenanceBox';
 import { PdfResourceCard } from '@/components/library/PdfResourceCard';
 import { CorrectionTrigger } from '@/components/feedback/CorrectionTrigger';
 import { JsonLd } from '@/components/seo/JsonLd';
@@ -127,14 +126,11 @@ export default async function PostDetailPage({
             </div>
           </div>
 
-          <ProvenanceBox
-            officialUrl="https://www.ppsc.gop.pk/"
-            officialLabel="Official Portal: ppsc.gop.pk"
-            verification={postEntity.verification}
-            sources={sources}
-            title={`Source Provenance (${postEntity.basicScale})`}
-            summary={postEntity.syllabusSummary}
-          />
+          {postEntity.syllabusSummary && (
+            <p className="type-body-base text-[var(--color-ink-secondary)] max-w-3xl leading-relaxed">
+              {postEntity.syllabusSummary}
+            </p>
+          )}
         </div>
       </SectionBand>
 
@@ -143,7 +139,7 @@ export default async function PostDetailPage({
         <div className="space-y-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
-              <span className="pill-badge bg-amber-50 text-amber-900 border border-amber-200 mb-2">
+              <span className="pill-badge bg-[var(--color-brand-tint)] text-[var(--color-brand-deep)] border border-[var(--color-border-strong)] mb-2">
                 DOWNLOADABLE SOLVED PDFS
               </span>
               <h2 id="downloads-section-title" className="type-section-heading text-[var(--dmc-ink-primary)]">

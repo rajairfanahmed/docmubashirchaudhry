@@ -34,17 +34,21 @@ describe('Step 10 Performance Budgets, Code Splitting & Asset Optimization', () 
     expect(heroSearch).toContain("import('@/lib/search')");
   });
 
-  it('lazy-loads heavy modals, quiz summary, Lenis smooth scroll, and splits homepage Subject Strip to RSC', () => {
+  it('lazy-loads heavy modals and quiz summary, avoids Lenis scroll hijacking, and splits homepage Subject Strip to RSC', () => {
     const geoWorkbench = readProjectFile('src', 'components', 'geography', 'GeographyWorkbench.tsx');
     const mcqRunner = readProjectFile('src', 'components', 'mcq', 'McqPracticeRunner.tsx');
     const mcqPreview = readProjectFile('src', 'components', 'mcq', 'McqQuestionsPreviewList.tsx');
+    const authModalProvider = readProjectFile('src', 'components', 'auth', 'AuthModalProvider.tsx');
     const providers = readProjectFile('src', 'app', 'providers.tsx');
-    const smoothScroll = readProjectFile('src', 'components', 'motion', 'SmoothScrollProvider.tsx');
+    const geoScoreModal = readProjectFile('src', 'components', 'geography', 'GeographyScoreModal.tsx');
     const homePage = readProjectFile('src', 'app', 'page.tsx');
 
     expect(geoWorkbench).toContain("from 'next/dynamic'");
     expect(geoWorkbench).toContain("import('./GeographyScoreModal')");
     expect(geoWorkbench).toContain('isDefaultFirstPage');
+
+    expect(authModalProvider).toContain("from 'next/dynamic'");
+    expect(authModalProvider).toContain("import('@/components/auth/AuthModal')");
 
     expect(mcqRunner).toContain("from 'next/dynamic'");
     expect(mcqRunner).toContain("import('./McqSessionSummary')");
@@ -52,8 +56,8 @@ describe('Step 10 Performance Budgets, Code Splitting & Asset Optimization', () 
     expect(mcqPreview).toContain('hasServerProvidedPageOne');
 
     expect(providers).not.toContain('QueryClientProvider');
-    expect(smoothScroll).not.toMatch(/^import Lenis from 'lenis'/m);
-    expect(smoothScroll).toContain("import('lenis')");
+    expect(providers).not.toContain('SmoothScrollProvider');
+    expect(geoScoreModal).not.toContain('canvas-confetti');
 
     expect(homePage).toContain('McqSubjectStrip');
     expect(homePage).toContain('hideSubjectStrip');
@@ -67,7 +71,7 @@ describe('Step 10 Performance Budgets, Code Splitting & Asset Optimization', () 
     const pdfDetail = readProjectFile('src', 'components', 'library', 'PdfDetailPanel.tsx');
 
     expect(layout).toContain("subsets: ['latin']");
-    expect(layout).toContain("weight: ['600', '700', '800']");
+    expect(layout).toContain("weight: ['600', '700']");
     expect(layout).toContain("display: 'swap'");
     expect(layout).toContain('adjustFontFallback: true');
     expect(layout).toContain('href="https://img.logo.dev"');
@@ -88,9 +92,13 @@ describe('Step 10 Performance Budgets, Code Splitting & Asset Optimization', () 
     expect(pdfDetail).toContain('height={640}');
   });
 
-  it('aligns edge caching headers across next.config.ts and public/_headers', () => {
+  it('aligns edge caching headers, AVIF/WebP image formats, and package import optimization', () => {
     const nextConfig = readProjectFile('next.config.ts');
     const headersFile = readProjectFile('public', '_headers');
+
+    expect(nextConfig).toContain('"image/avif"');
+    expect(nextConfig).toContain('"image/webp"');
+    expect(nextConfig).toContain('optimizePackageImports');
 
     for (const file of [nextConfig, headersFile]) {
       expect(file).toContain('/data/v1/');

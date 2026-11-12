@@ -18,14 +18,14 @@ export interface SectionBandProps {
 }
 
 const SURFACE_CLASSES: Record<SectionSurface, string> = {
-  ground: 'bg-[var(--dmc-surface-ground)]',
-  muted: 'bg-[var(--dmc-surface-muted)] border-y border-[var(--dmc-border-subtle)]',
-  card: 'bg-[var(--dmc-surface-card)] border-y border-[var(--dmc-border-subtle)]',
-  hero: 'hero-gradient text-white',
-  emerald: 'bg-[var(--dmc-brand-forest)] text-white',
-  trust: 'bg-[var(--dmc-status-verified-bg)] border-y border-[var(--dmc-status-verified-border)]/40',
-  footer: 'bg-[var(--dmc-brand-footer)] text-slate-300',
-  'mcq-sheet': 'mcq-sheet-surface border-y border-[var(--dmc-border-subtle)]'
+  ground: 'bg-[var(--color-page)]',
+  muted: 'bg-[var(--color-surface-soft)] border-y border-[var(--color-border)]',
+  card: 'bg-[var(--color-surface)] border-y border-[var(--color-border)]',
+  hero: 'bg-[var(--color-surface)] border-b border-[var(--color-border)] text-[var(--color-ink)]',
+  emerald: 'bg-[var(--color-dark-surface-raised)] text-[var(--color-dark-ink)] border-y border-[var(--color-dark-border)]',
+  trust: 'bg-[var(--color-success-bg)] border-y border-[var(--color-success-border)]',
+  footer: 'bg-[var(--color-dark-surface)] text-[var(--color-dark-ink-secondary)]',
+  'mcq-sheet': 'bg-[var(--color-surface-soft)] border-y border-[var(--color-border)]'
 };
 
 const DENSITY_CLASSES: Record<SectionDensity, string> = {
@@ -49,7 +49,7 @@ export function SectionBand({
   containerClassName,
   children
 }: SectionBandProps) {
-  const isDarkSurface = surface === 'hero' || surface === 'emerald' || surface === 'footer';
+  const isDarkSurface = surface === 'emerald' || surface === 'footer';
 
   return (
     <section

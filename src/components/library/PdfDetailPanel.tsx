@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
-  Download,
   FileText,
   ShieldCheck
 } from 'lucide-react';
@@ -14,6 +13,7 @@ import type { RelatedItem } from '@/lib/data/repository';
 import { derivePdfYear, formatBytes, formatVerificationDate } from '@/lib/format';
 import { VerificationBadge } from '@/components/ui/Badge';
 import { CorrectionTrigger } from '@/components/feedback/CorrectionTrigger';
+import { GatedPdfDownloadButton } from '@/components/library/GatedPdfDownloadButton';
 
 export interface PdfDetailPanelProps {
   pdf: PdfResource;
@@ -68,12 +68,12 @@ export function PdfDetailPanel({ pdf, sources, relatedItems }: PdfDetailPanelPro
                 />
               </div>
             ) : (
-              <div className="aspect-[3/4] rounded-xl border border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-muted)] flex flex-col justify-between p-5 border-t-4 border-t-[var(--dmc-brand-forest)]">
+              <div className="aspect-[3/4] rounded-[var(--radius-panel)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] flex flex-col justify-between p-5">
                 <div className="space-y-2">
-                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-brand-forest)]">
+                  <span className="inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-brand-deep)]">
                     {pdf.gradeLabel}
                   </span>
-                  <div className="font-bold text-base text-[var(--dmc-ink-primary)] leading-snug">
+                  <div className="font-bold text-base text-[var(--color-ink)] leading-snug">
                     {pdf.title}
                   </div>
                 </div>
@@ -88,18 +88,19 @@ export function PdfDetailPanel({ pdf, sources, relatedItems }: PdfDetailPanelPro
               </div>
             )}
 
-            <a
-              href={pdf.filePath}
-              download
-              className="dmc-press w-full min-h-[48px] inline-flex items-center justify-center gap-2 bg-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-brand-emerald)] text-white font-bold text-sm py-3 px-5 rounded-[var(--dmc-radius-button)] shadow-xs"
-            >
-              <Download className="w-4 h-4" aria-hidden="true" />
-              <span>Download PDF ({formatBytes(pdf.fileSizeBytes)})</span>
-            </a>
+            <GatedPdfDownloadButton
+              pdfId={pdf.slug}
+              title={pdf.title}
+              fileSizeBytes={pdf.fileSizeBytes}
+              fallbackPublicHref={pdf.filePath}
+              size="lg"
+              label={`Download PDF (${formatBytes(pdf.fileSizeBytes)})`}
+              className="w-full shadow-xs"
+            />
 
             <div className="flex items-center justify-center gap-2 text-xs text-[var(--dmc-ink-muted)]">
               <ShieldCheck className="w-4 h-4 text-[var(--dmc-status-verified-icon)]" aria-hidden="true" />
-              <span>Free direct download &middot; No login</span>
+              <span>Protected by Signed URL &middot; Free sign-in required</span>
             </div>
           </div>
         </div>

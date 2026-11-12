@@ -71,13 +71,13 @@ export function PaginationBar({
     <nav
       aria-label={`Pagination for ${itemLabel}`}
       className={cn(
-        'flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-5 border-t border-[var(--dmc-border-subtle)]',
+        'flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-5 border-t border-[var(--color-border)]',
         className
       )}
     >
-      <p className="text-xs text-[var(--dmc-ink-secondary)] tabular-nums text-center sm:text-left">
-        Showing <strong className="text-[var(--dmc-ink-primary)]">{startItem}-{endItem}</strong> of{' '}
-        <strong className="text-[var(--dmc-ink-primary)]">{totalItems}</strong> {itemLabel}
+      <p className="text-xs text-[var(--color-ink-secondary)] tabular-nums text-center sm:text-left">
+        Showing <strong className="text-[var(--color-ink)]">{startItem}-{endItem}</strong> of{' '}
+        <strong className="text-[var(--color-ink)]">{totalItems}</strong> {itemLabel}
       </p>
 
       <div className="flex items-center justify-center gap-1.5 flex-wrap">
@@ -86,7 +86,7 @@ export function PaginationBar({
           onClick={() => onPageChange(clampedPage - 1)}
           disabled={!hasPreviousPage}
           aria-label="Previous page"
-          className="dmc-press min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-card)] px-3 text-xs font-bold text-[var(--dmc-ink-primary)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+          className="dmc-press min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-3 text-xs font-semibold text-[var(--color-ink)] hover:border-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]"
         >
           <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           <span className="ml-1">Prev</span>
@@ -99,7 +99,7 @@ export function PaginationBar({
                 <span
                   key={token}
                   aria-hidden="true"
-                  className="px-1.5 text-xs font-bold text-[var(--dmc-ink-muted)] select-none"
+                  className="px-1.5 text-xs font-semibold text-[var(--color-ink-muted)] select-none"
                 >
                   ...
                 </span>
@@ -115,11 +115,11 @@ export function PaginationBar({
                 aria-current={isCurrent ? 'page' : undefined}
                 aria-label={`Page ${token}`}
                 className={cn(
-                  'dmc-press min-w-[44px] min-h-[44px] px-2.5 inline-flex items-center justify-center rounded-[var(--dmc-radius-button)] border text-xs font-bold tabular-nums cursor-pointer',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]',
+                  'dmc-press min-w-[44px] min-h-[44px] px-2.5 inline-flex items-center justify-center rounded-[var(--radius-control)] border text-xs font-semibold tabular-nums cursor-pointer',
+                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]',
                   isCurrent
-                    ? 'border-[var(--dmc-brand-forest)] bg-[var(--dmc-brand-forest)] text-white shadow-xs'
-                    : 'border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-card)] text-[var(--dmc-ink-primary)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)]'
+                    ? 'border-[var(--color-action)] bg-[var(--color-action)] text-[var(--color-action-ink)] shadow-xs'
+                    : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink)] hover:border-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)]'
                 )}
               >
                 {token}
@@ -128,7 +128,7 @@ export function PaginationBar({
           })}
         </div>
 
-        <span className="sm:hidden px-2.5 text-xs font-bold text-[var(--dmc-ink-primary)] tabular-nums">
+        <span className="sm:hidden px-2.5 text-xs font-semibold text-[var(--color-ink)] tabular-nums">
           Page {clampedPage} of {safeTotalPages}
         </span>
 
@@ -137,7 +137,7 @@ export function PaginationBar({
           onClick={() => onPageChange(clampedPage + 1)}
           disabled={!hasNextPage}
           aria-label="Next page"
-          className="dmc-press min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-card)] px-3 text-xs font-bold text-[var(--dmc-ink-primary)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+          className="dmc-press min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] px-3 text-xs font-semibold text-[var(--color-ink)] hover:border-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]"
         >
           <span className="mr-1">Next</span>
           <ChevronRight className="h-4 w-4" aria-hidden="true" />

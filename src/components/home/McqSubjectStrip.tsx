@@ -45,21 +45,21 @@ export function McqSubjectStrip({
           <Link
             key={subject.id}
             href={href}
-            className="track-card bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] hover:border-[var(--dmc-brand-forest)] rounded-2xl p-2.5 min-[360px]:p-3 sm:p-4 elevation-1 flex flex-col justify-between space-y-2.5 sm:space-y-3 group min-w-0 min-h-[84px]"
+            className="track-card bg-[var(--color-surface)] border border-[var(--color-border)] hover:border-[var(--color-brand-deep)] rounded-[var(--radius-panel)] p-2.5 min-[360px]:p-3 sm:p-4 elevation-1 flex flex-col justify-between space-y-2.5 sm:space-y-3 group min-w-0 min-h-[84px]"
           >
             <div className="flex items-center gap-2 min-[360px]:gap-2.5 sm:gap-3 min-w-0">
               <span
-                className="w-8 h-8 min-[360px]:w-10 min-[360px]:h-10 rounded-[var(--dmc-radius-squircle)] flex items-center justify-center shrink-0"
+                className="w-8 h-8 min-[360px]:w-10 min-[360px]:h-10 rounded-[var(--radius-control)] flex items-center justify-center shrink-0"
                 style={{ backgroundColor: palette.bgVar, color: palette.inkVar }}
                 aria-hidden="true"
               >
                 <SubjectIconChip subjectId={subject.id} iconOnly inheritColor size="md" />
               </span>
               <div className="min-w-0">
-                <div className="text-xs min-[360px]:text-[13px] font-bold text-[var(--dmc-ink-primary)] leading-tight break-words [overflow-wrap:anywhere]">
+                <div className="text-xs min-[360px]:text-[13px] font-bold text-[var(--color-ink)] leading-tight break-words [overflow-wrap:anywhere]">
                   {subject.name}
                 </div>
-                <div className="text-[11px] text-[var(--dmc-ink-muted)] mt-0.5 truncate tabular-nums">
+                <div className="text-[11px] text-[var(--color-ink-muted)] mt-0.5 truncate tabular-nums">
                   {qCount > 0
                     ? `${qCount} MCQ${qCount === 1 ? '' : 's'}`
                     : subjectTopics.length > 0
@@ -69,7 +69,7 @@ export function McqSubjectStrip({
               </div>
             </div>
 
-            <div className="inline-flex flex-wrap items-center gap-1 text-xs font-bold text-[var(--dmc-brand-forest)] group-hover:underline min-w-0 max-w-full">
+            <div className="inline-flex flex-wrap items-center gap-1 text-xs font-semibold text-[var(--color-brand-deep)] group-hover:underline min-w-0 max-w-full">
               <BookOpen className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
               <span>Explore</span>
               <ArrowRight

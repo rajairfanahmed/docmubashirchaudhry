@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { ArrowRight, FileText, Globe, HelpCircle, Loader2, RotateCcw, Search, Shield, X } from 'lucide-react';
 import type { PortalSearchEngine, SearchHit } from '@/lib/search';
 import { DATA_ENDPOINTS, fetchStaticData } from '@/lib/data/client-fetch';
@@ -20,6 +21,7 @@ export function NavbarSearch({
   onActionComplete
 }: NavbarSearchProps = {}) {
   const router = useRouter();
+  const prefersReduced = useReducedMotion();
   const inputRef = useRef<HTMLInputElement>(null);
   const listboxId = useId();
   const [query, setQuery] = useState('');
@@ -167,12 +169,14 @@ export function NavbarSearch({
         method="GET"
         role="search"
         onSubmit={(e) => {
+          e.preventDefault();
           if (query.trim().length > 0) {
-            e.preventDefault();
             setIsOpen(false);
             onActionComplete?.();
             notifyNavigationStart();
             router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+          } else {
+            inputRef.current?.focus();
           }
         }}
         className={
@@ -246,16 +250,20 @@ export function NavbarSearch({
         )}
       </form>
 
-      {isOpen && (
-        <div
-          id={listboxId}
-          data-lenis-prevent
-          role="listbox"
-          aria-label="Search results"
-          className={`dmc-drawer-enter absolute mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden max-h-[70dvh] overflow-y-auto overscroll-contain ${
-            isMobile ? 'left-0 right-0 w-full' : 'right-0 w-80'
-          }`}
-        >
+      <AnimatePresence>
+        {isOpen && (
+          <m.div
+            id={listboxId}
+            role="listbox"
+            aria-label="Search results"
+            initial={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
+            transition={{ duration: prefersReduced ? 0.08 : 0.17, ease: [0.22, 1, 0.36, 1] }}
+            className={`absolute mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-50 overflow-hidden max-h-[70dvh] overflow-y-auto overscroll-contain ${
+              isMobile ? 'left-0 right-0 w-full' : 'right-0 w-80'
+            }`}
+          >
           {isLoadingIndex && results.length === 0 ? (
             <div className="p-3 space-y-2.5" aria-busy="true" aria-label="Loading search suggestions">
               <div className="dmc-skeleton h-9 rounded-lg w-full" />
@@ -303,7 +311,6 @@ export function NavbarSearch({
           ) : (
             <div>
               <ul
-                data-lenis-prevent
                 className="divide-y divide-slate-100 max-h-72 overflow-y-auto overscroll-contain"
               >
                 {results.map((hit, idx) => {
@@ -377,8 +384,9 @@ export function NavbarSearch({
               </Link>
             </div>
           )}
-        </div>
-      )}
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -160,11 +160,11 @@ export function PdfFilterToolbar({
 
   return (
     <div className="space-y-8">
-      <div className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-[var(--dmc-radius-card)] p-4 sm:p-5 elevation-1 space-y-3">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-4 sm:p-5 shadow-xs space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
           <div className="lg:col-span-2 relative">
             <Search
-              className="w-4 h-4 text-[var(--dmc-ink-muted)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+              className="w-4 h-4 text-[var(--color-ink-muted)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
               aria-hidden="true"
             />
             <input
@@ -173,7 +173,7 @@ export function PdfFilterToolbar({
               onChange={(e) => updateFilter({ ...filter, search: e.target.value })}
               aria-label="Search PDF titles and authors"
               placeholder="Search booklet title, scale, or author..."
-              className="w-full h-11 pl-10 pr-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs sm:text-sm text-[var(--dmc-ink-primary)] placeholder:text-[var(--dmc-ink-muted)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+              className="w-full h-11 pl-10 pr-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs sm:text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
             />
           </div>
 
@@ -182,7 +182,7 @@ export function PdfFilterToolbar({
               aria-label="Filter by exam"
               value={filter.examSlug}
               onChange={(e) => updateFilter({ ...filter, examSlug: e.target.value })}
-              className="w-full h-11 px-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+              className="w-full h-11 px-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
             >
               <option value="">All Exams</option>
               {exams.map((exam) => (
@@ -197,7 +197,7 @@ export function PdfFilterToolbar({
             aria-label="Filter by subject"
             value={filter.subjectId}
             onChange={(e) => updateFilter({ ...filter, subjectId: e.target.value, topicId: '' })}
-            className="w-full h-11 px-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+            className="w-full h-11 px-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
           >
             <option value="">All Subjects</option>
             {subjects.map((subj) => (
@@ -211,7 +211,7 @@ export function PdfFilterToolbar({
             aria-label="Filter by topic"
             value={filter.topicId}
             onChange={(e) => updateFilter({ ...filter, topicId: e.target.value })}
-            className="w-full h-11 px-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+            className="w-full h-11 px-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
           >
             <option value="">All Topics ({visibleTopics.length})</option>
             {visibleTopics.map((topic) => (
@@ -225,7 +225,7 @@ export function PdfFilterToolbar({
             aria-label="Filter by year"
             value={filter.year}
             onChange={(e) => updateFilter({ ...filter, year: e.target.value })}
-            className="w-full h-11 px-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+            className="w-full h-11 px-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
           >
             <option value="">All Years</option>
             {availableYears.map((yr) => (
@@ -239,7 +239,7 @@ export function PdfFilterToolbar({
             aria-label="Sort PDF booklets"
             value={filter.sort}
             onChange={(e) => updateFilter({ ...filter, sort: e.target.value as PdfSortOption })}
-            className="w-full h-11 px-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs font-semibold text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+            className="w-full h-11 px-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
           >
             <option value="newest">Sort: Newest</option>
             <option value="questions">Sort: Most Questions</option>
@@ -250,14 +250,14 @@ export function PdfFilterToolbar({
 
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1 text-xs">
           <div className="flex flex-wrap items-center gap-2">
-            <label htmlFor="library-type-filter" className="text-[var(--dmc-ink-muted)] font-semibold">
+            <label htmlFor="library-type-filter" className="text-[var(--color-ink-muted)] font-semibold">
               Type:
             </label>
             <select
               id="library-type-filter"
               value={filter.resourceType}
               onChange={(e) => updateFilter({ ...filter, resourceType: e.target.value })}
-              className="h-11 px-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+              className="h-11 px-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
             >
               <option value="">All Resource Types</option>
               <option value="solved">Solved MCQ Compilations</option>
@@ -266,14 +266,14 @@ export function PdfFilterToolbar({
           </div>
 
           <div className="flex items-center gap-3">
-            <span aria-live="polite" className="font-bold text-[var(--dmc-ink-primary)] tabular-nums">
+            <span aria-live="polite" className="font-semibold text-[var(--color-ink)] tabular-nums">
               {filteredResources.length} booklet{filteredResources.length === 1 ? '' : 's'}
             </span>
             {hasFilters && (
               <button
                 type="button"
                 onClick={handleReset}
-                className="inline-flex items-center gap-1 min-h-[44px] px-2 font-bold text-[var(--dmc-brand-forest)] hover:underline cursor-pointer"
+                className="inline-flex items-center gap-1 min-h-[44px] px-2 font-semibold text-[var(--color-brand-deep)] hover:underline cursor-pointer"
               >
                 <RotateCcw className="w-3 h-3" aria-hidden="true" />
                 <span>Reset Filters</span>

@@ -10,7 +10,7 @@ import {
   MCQ_DEFAULT_PAGE_SIZE,
   parsePageParam
 } from '@/lib/pagination';
-import { useSmoothScroll } from '@/components/motion/SmoothScrollProvider';
+import { scrollToElementWithOffset } from '@/lib/motion/scroll';
 import { isReducedMotionPreferred } from '@/lib/motion/useReducedMotion';
 import { SubjectIconChip } from '@/components/branding/SubjectIconChip';
 import { AnswerHighlight } from '@/components/ui/AnswerHighlight';
@@ -68,7 +68,6 @@ export function McqQuestionsPreviewList({
   } | null>(null);
 
   const listTopRef = useRef<HTMLDivElement>(null);
-  const { scrollToTarget } = useSmoothScroll();
 
   useEffect(() => {
     if (syncUrlPage && typeof window !== 'undefined') {
@@ -167,7 +166,7 @@ export function McqQuestionsPreviewList({
       }
     }
     if (typeof window !== 'undefined' && listTopRef.current) {
-      scrollToTarget(listTopRef.current, { offset: -80, immediate: isReducedMotionPreferred() });
+      scrollToElementWithOffset(listTopRef.current, { offset: -80, immediate: isReducedMotionPreferred() });
     }
   };
 
@@ -191,7 +190,7 @@ export function McqQuestionsPreviewList({
           </span>
           {isLoading && (
             <Loader2
-              className="w-3.5 h-3.5 animate-spin text-[var(--dmc-brand-forest)] shrink-0"
+              className="w-3.5 h-3.5 animate-spin text-[var(--color-brand-deep)] shrink-0"
               aria-label="Loading questions"
             />
           )}
@@ -201,16 +200,16 @@ export function McqQuestionsPreviewList({
       {loadError && (
         <div
           role="alert"
-          className="bg-[var(--dmc-status-unverified-bg)] border border-[var(--dmc-status-unverified-border)] rounded-xl p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--dmc-ink-primary)]"
+          className="bg-[var(--color-warning-bg)] border border-[var(--color-warning-border)] rounded-[var(--radius-panel)] p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs text-[var(--color-warning-ink)]"
         >
           <span className="inline-flex items-center gap-2 font-semibold">
-            <AlertCircle className="w-4 h-4 text-[var(--dmc-status-unverified-icon)] shrink-0" aria-hidden="true" />
+            <AlertCircle className="w-4 h-4 text-[var(--color-warning-ink)] shrink-0" aria-hidden="true" />
             <span>{loadError} Showing local snapshot.</span>
           </span>
           <button
             type="button"
             onClick={() => setRetryTick((n) => n + 1)}
-            className="inline-flex items-center gap-1 min-h-[44px] px-3 rounded-lg bg-white border border-[var(--dmc-border-subtle)] font-bold text-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] cursor-pointer"
+            className="inline-flex items-center gap-1 min-h-[44px] px-3 rounded-[var(--radius-control)] bg-[var(--color-surface)] border border-[var(--color-border-strong)] font-semibold text-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
             <span>Retry Load</span>
@@ -231,10 +230,10 @@ export function McqQuestionsPreviewList({
           return (
             <article
               key={q.id}
-              className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-[var(--dmc-radius-card)] p-4 sm:p-5 elevation-1 space-y-3"
+              className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-4 sm:p-5 shadow-xs space-y-3"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[var(--dmc-ink-muted)] tabular-nums">
+                <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] tabular-nums">
                   <span>Question {globalIndex}</span>
                   <span>&middot;</span>
                   <span>{q.difficulty}</span>
@@ -248,25 +247,25 @@ export function McqQuestionsPreviewList({
                 )}
               </div>
 
-              <h3 className="font-bold text-sm sm:text-base text-[var(--dmc-ink-primary)] leading-snug">
+              <h3 className="font-bold text-sm sm:text-base text-[var(--color-ink)] leading-snug">
                 {q.stem}
               </h3>
 
               {showAnswerKey && correctOpt && (
                 <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="font-semibold text-[var(--dmc-ink-muted)]">Verified Answer:</span>
+                  <span className="font-semibold text-[var(--color-ink-muted)]">Verified Answer:</span>
                   <AnswerHighlight shape="chip">{correctOpt.text}</AnswerHighlight>
                 </div>
               )}
 
-              <p className="text-xs text-[var(--dmc-ink-secondary)] leading-relaxed">
+              <p className="text-xs text-[var(--color-ink-secondary)] leading-relaxed">
                 {q.explanation}
               </p>
 
               <div className="pt-1 flex justify-end">
                 <Link
                   href={practiceHref}
-                  className="inline-flex items-center gap-1.5 min-h-[44px] sm:min-h-0 px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-status-verified-bg)] transition-colors"
+                  className="inline-flex items-center gap-1.5 min-h-[44px] sm:min-h-[38px] px-3 py-1.5 rounded-[var(--radius-control)] text-xs font-semibold text-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] transition-colors"
                 >
                   <PlayCircle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                   <span>Practice Interactive Quiz</span>

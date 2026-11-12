@@ -40,12 +40,12 @@ export function GeographyFilterBar({
   );
 
   return (
-    <div className="bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-[var(--dmc-radius-card)] p-4 sm:p-5 elevation-1 space-y-4">
+    <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-4 sm:p-5 shadow-xs space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
         {/* Search Input */}
         <div className="lg:col-span-4 relative">
           <Search
-            className="w-4 h-4 text-[var(--dmc-ink-muted)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            className="w-4 h-4 text-[var(--color-ink-muted)] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
             aria-hidden="true"
           />
           <input
@@ -54,7 +54,7 @@ export function GeographyFilterBar({
             onChange={(e) => onChangeFilter({ ...filter, search: e.target.value })}
             aria-label="Search country name, capital, or ISO code"
             placeholder="Search country, capital, currency..."
-            className="w-full h-11 pl-10 pr-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs sm:text-sm text-[var(--dmc-ink-primary)] placeholder:text-[var(--dmc-ink-muted)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+            className="w-full h-11 pl-10 pr-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs sm:text-sm text-[var(--color-ink)] placeholder:text-[var(--color-ink-muted)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
           />
         </div>
 
@@ -70,7 +70,7 @@ export function GeographyFilterBar({
                 regionId: ''
               })
             }
-            className="w-full h-11 px-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs sm:text-sm text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+            className="w-full h-11 px-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs sm:text-sm text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
           >
             <option value="">All Continents</option>
             {continents.map((cont) => (
@@ -87,7 +87,7 @@ export function GeographyFilterBar({
             aria-label="Filter by region"
             value={filter.regionId}
             onChange={(e) => onChangeFilter({ ...filter, regionId: e.target.value })}
-            className="w-full h-11 px-3 rounded-[var(--dmc-radius-button)] border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-muted)] text-xs sm:text-sm text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+            className="w-full h-11 px-3 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs sm:text-sm text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)]"
           >
             <option value="">All Regions ({visibleRegions.length})</option>
             {visibleRegions.map((reg) => (
@@ -103,7 +103,7 @@ export function GeographyFilterBar({
           <div className="flex items-center justify-between gap-2">
             <span
               aria-live="polite"
-              className="text-xs font-bold text-[var(--dmc-ink-primary)] tabular-nums"
+              className="text-xs font-semibold text-[var(--color-ink)] tabular-nums"
             >
               {filteredCount} countr{filteredCount === 1 ? 'y' : 'ies'}
             </span>
@@ -112,7 +112,7 @@ export function GeographyFilterBar({
               <button
                 type="button"
                 onClick={onClearFilters}
-                className="inline-flex items-center gap-1 min-h-[44px] px-2.5 text-xs font-bold text-[var(--dmc-ink-secondary)] hover:text-[var(--dmc-brand-forest)] underline cursor-pointer"
+                className="inline-flex items-center gap-1 min-h-[44px] px-2.5 text-xs font-semibold text-[var(--color-ink-secondary)] hover:text-[var(--color-brand-deep)] underline cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Clear filters</span>
@@ -123,7 +123,7 @@ export function GeographyFilterBar({
           {onQuizSelection && (
             <Button
               type="button"
-              variant="gold"
+              variant="primary"
               size="md"
               className="w-full md:w-auto"
               disabled={eligibleQuizCount < 1}

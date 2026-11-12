@@ -89,7 +89,7 @@ export function McqPaginationStrip({
           onClick={handlePrev}
           disabled={prevDisabled}
           aria-label="Previous question"
-          className="dmc-press min-h-[44px] min-w-[44px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-card)] text-xs font-semibold text-[var(--dmc-mcq-heading)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+          className="dmc-press min-h-[44px] min-w-[44px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-ink)] hover:border-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]"
         >
           Prev
         </button>
@@ -101,7 +101,7 @@ export function McqPaginationStrip({
                 <span
                   key={token}
                   aria-hidden="true"
-                  className="px-1.5 text-xs font-bold text-[var(--dmc-ink-muted)] select-none"
+                  className="px-1.5 text-xs font-semibold text-[var(--color-ink-muted)] select-none"
                 >
                   ...
                 </span>
@@ -121,12 +121,12 @@ export function McqPaginationStrip({
                 aria-current={isCurrent ? 'step' : undefined}
                 aria-label={`Question ${displayNumber}, ${isAnswered ? 'answered' : 'unanswered'}`}
                 className={cn(
-                  'dmc-press min-h-[44px] min-w-[44px] px-2.5 inline-flex items-center justify-center rounded-lg border text-xs font-bold tabular-nums cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]',
+                  'dmc-press min-h-[44px] min-w-[44px] px-2.5 inline-flex items-center justify-center rounded-lg border text-xs font-semibold tabular-nums cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]',
                   isCurrent
-                    ? 'border-[var(--dmc-mcq-heading)] bg-[var(--dmc-mcq-heading)] text-white shadow-xs'
+                    ? 'border-[var(--color-action)] bg-[var(--color-action)] text-[var(--color-action-ink)] shadow-xs'
                     : isAnswered
-                      ? 'border-[var(--dmc-status-verified-border)] bg-[var(--dmc-status-verified-bg)] text-[var(--dmc-status-verified-ink)] hover:border-[var(--dmc-brand-forest)]'
-                      : 'border-[var(--dmc-border-subtle)] bg-[var(--dmc-surface-card)] text-[var(--dmc-mcq-heading)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)]'
+                      ? 'border-[var(--color-success-border)] bg-[var(--color-success-bg)] text-[var(--color-success-ink)] hover:border-[var(--color-brand-deep)]'
+                      : 'border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-ink)] hover:border-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)]'
                 )}
               >
                 {displayNumber}
@@ -140,7 +140,7 @@ export function McqPaginationStrip({
           onClick={handleNext}
           disabled={nextDisabled}
           aria-label={nextLabel}
-          className="dmc-press min-h-[44px] min-w-[44px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--dmc-border-strong)] bg-[var(--dmc-surface-card)] text-xs font-semibold text-[var(--dmc-mcq-heading)] hover:border-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-surface-muted)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+          className="dmc-press min-h-[44px] min-w-[44px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-xs font-semibold text-[var(--color-ink)] hover:border-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]"
         >
           {nextLabel}
         </button>
@@ -152,7 +152,7 @@ export function McqPaginationStrip({
           type="button"
           onClick={handlePrev}
           disabled={prevDisabled}
-          className="dmc-press min-h-[44px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--dmc-mcq-heading)]/35 bg-[var(--dmc-surface-card)] text-sm font-bold text-[var(--dmc-mcq-heading)] hover:bg-[var(--dmc-surface-muted)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+          className="dmc-press min-h-[44px] px-4 inline-flex items-center justify-center rounded-lg border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]"
         >
           Prev
         </button>
@@ -160,7 +160,7 @@ export function McqPaginationStrip({
           type="button"
           onClick={handleNext}
           disabled={nextDisabled}
-          className="dmc-press min-h-[44px] px-4 inline-flex items-center justify-center rounded-lg bg-[var(--dmc-mcq-heading)] hover:bg-[var(--dmc-brand-forest)] text-sm font-bold text-white disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--dmc-brand-forest)]"
+          className="dmc-press min-h-[44px] px-4 inline-flex items-center justify-center rounded-lg bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-sm font-semibold text-[var(--color-action-ink)] disabled:opacity-40 cursor-pointer disabled:cursor-default focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-deep)]"
         >
           {nextLabel}
         </button>

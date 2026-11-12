@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,6 +24,7 @@ export function Modal({
   className
 }: ModalProps) {
   const [mounted, setMounted] = useState(false);
+  const prefersReduced = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -98,46 +100,61 @@ export function Modal({
     };
   }, [isOpen]);
 
-  if (!isOpen || !mounted) return null;
+  if (!mounted) return null;
 
   const dialogContent = (
-    <div
-      data-lenis-prevent
-      className="dmc-backdrop-enter fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
-      role="presentation"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onCloseRef.current();
-      }}
-    >
-      <div
-        ref={containerRef}
-        data-lenis-prevent
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={labelledBy}
-        className={cn(
-          'dmc-modal-enter w-[calc(100%-2rem)] sm:w-full max-w-lg max-h-[85dvh] overflow-y-auto overscroll-contain bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-[var(--dmc-radius-modal)] p-4 sm:p-6 elevation-3 space-y-5',
-          className
-        )}
-      >
-        <div className="flex items-start justify-between gap-4 border-b border-[var(--dmc-border-subtle)] pb-3">
-          <h2 id={labelledBy} className="type-card-title text-[var(--dmc-ink-primary)] pt-1.5">
-            {title}
-          </h2>
-          <button
-            ref={closeBtnRef}
-            type="button"
-            onClick={() => onCloseRef.current()}
-            aria-label="Close modal dialog"
-            className="dmc-press min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg flex items-center justify-center text-[var(--dmc-ink-secondary)] hover:bg-slate-100 hover:text-[var(--dmc-ink-primary)] focus-visible:outline-2 focus-visible:outline-[var(--dmc-brand-forest)] cursor-pointer shrink-0"
+    <AnimatePresence>
+      {isOpen && (
+        <m.div
+          key="modal-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: prefersReduced ? 0.08 : 0.16, ease: 'easeOut' }}
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[var(--color-dark-surface)]/65 p-0 sm:p-4 backdrop-blur-xs"
+          role="presentation"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onCloseRef.current();
+          }}
+        >
+          <m.div
+            key="modal-panel"
+            ref={containerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={labelledBy}
+            initial={prefersReduced ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
+            transition={{
+              duration: prefersReduced ? 0.08 : 0.22,
+              ease: [0.22, 1, 0.36, 1]
+            }}
+            className={cn(
+              'w-full sm:w-full max-w-lg h-dvh sm:h-auto max-h-dvh sm:max-h-[85dvh] overflow-y-auto overscroll-contain bg-[var(--color-surface)] border border-[var(--color-border)] rounded-none sm:rounded-[var(--radius-sheet)] p-4 sm:p-6 elevation-3 space-y-5',
+              className
+            )}
           >
-            <X className="w-4 h-4" aria-hidden="true" />
-          </button>
-        </div>
+            <div className="flex items-start justify-between gap-4 border-b border-[var(--color-border)] pb-3">
+              <h2 id={labelledBy} className="type-card-title text-[var(--color-ink)] pt-1.5">
+                {title}
+              </h2>
+              <button
+                ref={closeBtnRef}
+                type="button"
+                onClick={() => onCloseRef.current()}
+                aria-label="Close modal dialog"
+                className="dmc-press min-w-[44px] min-h-[44px] w-11 h-11 rounded-[var(--radius-control)] flex items-center justify-center text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)] hover:text-[var(--color-ink)] focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)] cursor-pointer shrink-0"
+              >
+                <X className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </div>
 
-        <div>{children}</div>
-      </div>
-    </div>
+            <div>{children}</div>
+          </m.div>
+        </m.div>
+      )}
+    </AnimatePresence>
   );
 
   return createPortal(dialogContent, document.body);

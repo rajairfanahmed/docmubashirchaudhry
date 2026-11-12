@@ -62,10 +62,10 @@ export function PostFilterBar({ posts, questionCountByPostId }: PostFilterBarPro
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 id="posts-grid-title" className="type-section-heading text-[var(--dmc-ink-primary)]">
+          <h2 id="posts-grid-title" className="type-section-heading text-[var(--color-ink)]">
             PPSC Recruitment Posts
           </h2>
-          <p className="type-body-sm text-[var(--dmc-ink-secondary)] mt-1">
+          <p className="type-body-sm text-[var(--color-ink-secondary)] mt-1">
             Filter active or closed recruitment cadres and download verified solved PDF booklets.
           </p>
         </div>
@@ -73,9 +73,9 @@ export function PostFilterBar({ posts, questionCountByPostId }: PostFilterBarPro
         <div
           role="group"
           aria-label="Filter PPSC posts by recruitment status"
-          className="inline-flex flex-wrap items-center gap-2 bg-[var(--dmc-surface-card)] border border-[var(--dmc-border-subtle)] rounded-xl p-1.5 self-start elevation-1"
+          className="inline-flex flex-wrap items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-1.5 self-start shadow-xs"
         >
-          <Filter className="w-3.5 h-3.5 text-[var(--dmc-brand-forest)] ml-1.5 mr-0.5" aria-hidden="true" />
+          <Filter className="w-3.5 h-3.5 text-[var(--color-brand-deep)] ml-1.5 mr-0.5" aria-hidden="true" />
           {tabs.map((tab) => {
             const active = filter === tab.key;
             return (
@@ -84,10 +84,10 @@ export function PostFilterBar({ posts, questionCountByPostId }: PostFilterBarPro
                 type="button"
                 aria-pressed={active}
                 onClick={() => handleSelectFilter(tab.key)}
-                className={`dmc-press min-h-[44px] px-3.5 py-1.5 rounded-lg text-xs font-bold cursor-pointer tabular-nums ${
+                className={`dmc-press min-h-[44px] px-3.5 py-1.5 rounded-[var(--radius-control)] text-xs font-semibold cursor-pointer tabular-nums focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)] ${
                   active
-                    ? 'bg-[var(--dmc-brand-forest)] text-white'
-                    : 'text-[var(--dmc-ink-secondary)] hover:bg-[var(--dmc-surface-muted)] hover:text-[var(--dmc-ink-primary)]'
+                    ? 'bg-[var(--color-action)] text-[var(--color-action-ink)]'
+                    : 'text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)] hover:text-[var(--color-ink)]'
                 }`}
               >
                 {tab.label} ({tab.count})

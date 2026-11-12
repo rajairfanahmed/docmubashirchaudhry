@@ -4,7 +4,6 @@ import { Info } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
 import { EmptyStateCard } from '@/components/ui/EmptyStateCard';
-import { ProvenanceBox } from '@/components/ui/ProvenanceBox';
 import { CommissionBrandBadge } from '@/components/branding/CommissionBrandBadge';
 import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
@@ -35,7 +34,6 @@ export default async function FpscHubPage() {
     repo.getPdfResources({ examSlug: 'fpsc', includeDrafts: false }),
     repo.getQuestions({ examId: 'exam-fpsc', includeDrafts: false })
   ]);
-  const sources = fpscExam ? await repo.getSources(fpscExam.verification.sourceIds) : [];
 
   return (
     <>
@@ -49,9 +47,9 @@ export default async function FpscHubPage() {
             currentPath="/fpsc"
           />
 
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-6 border-b border-[var(--dmc-border-subtle)]">
-            <div className="space-y-2 max-w-3xl">
-              <span className="pill-badge bg-amber-50 text-amber-900 border border-amber-200">
+          <div className="pb-6 border-b border-[var(--dmc-border-subtle)]">
+            <div className="space-y-3 max-w-3xl">
+              <span className="pill-badge bg-[var(--color-brand-tint)] text-[var(--color-brand-deep)] border border-[var(--color-border-strong)]">
                 FEDERAL RECRUITMENT &middot; {fpscExam?.status === 'draft' ? 'COMING SOON' : 'ACTIVE'}
               </span>
               <div className="flex items-center gap-3.5">
@@ -64,18 +62,6 @@ export default async function FpscHubPage() {
                 {fpscExam?.summary ?? 'Federal general recruitment hub and official commission citations.'}
               </p>
             </div>
-
-            {fpscExam && (
-              <div className="lg:max-w-sm w-full">
-                <ProvenanceBox
-                  title="Official Commission Source"
-                  officialUrl={fpscExam.officialPortalUrl ?? 'https://www.fpsc.gov.pk/'}
-                  officialLabel="fpsc.gov.pk"
-                  verification={fpscExam.verification}
-                  sources={sources}
-                />
-              </div>
-            )}
           </div>
         </div>
       </SectionBand>

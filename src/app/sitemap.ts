@@ -1,7 +1,9 @@
 import type { MetadataRoute } from 'next';
 import { getContentRepository } from '@/lib/data';
 import { getServerManifest } from '@/lib/data/server-manifest';
+import { parseSecretSupabaseConfig } from '@/lib/env';
 import { buildCanonicalUrl } from '@/lib/seo/metadata';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 function parseDate(iso?: string | null, fallback = new Date('2026-11-11T00:00:00.000Z')): Date {
   if (!iso) return fallback;
@@ -29,6 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: buildCanonicalUrl('/geography'), lastModified: fallbackDate, changeFrequency: 'weekly', priority: 0.9 },
     { url: buildCanonicalUrl('/exams'), lastModified: fallbackDate, changeFrequency: 'weekly', priority: 0.9 },
     { url: buildCanonicalUrl('/ppsc'), lastModified: fallbackDate, changeFrequency: 'weekly', priority: 0.9 },
+    { url: buildCanonicalUrl('/quizzes'), lastModified: fallbackDate, changeFrequency: 'daily', priority: 0.9 },
     { url: buildCanonicalUrl('/mcq'), lastModified: fallbackDate, changeFrequency: 'weekly', priority: 0.8 },
     { url: buildCanonicalUrl('/library'), lastModified: fallbackDate, changeFrequency: 'weekly', priority: 0.9 },
     { url: buildCanonicalUrl('/about'), lastModified: fallbackDate, changeFrequency: 'monthly', priority: 0.5 },
@@ -118,6 +121,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.8
     });
+  }
+
+  // Published V3 Quizzes from Supabase (when configured)
+  if (parseSecretSupabaseConfig()) {
+    try {
+      const admin = createSupabaseAdminClient();
+      const { data: quizRows } = await admin
+        .from('quizzes')
+        .select('slug, updated_at, created_at')
+        .eq('is_published', true)
+        .limit(500);
+
+      for (const quiz of quizRows ?? []) {
+        entries.push({
+          url: buildCanonicalUrl(`/quizzes/${quiz.slug}`),
+          lastModified: parseDate(quiz.updated_at ?? quiz.created_at, fallbackDate),
+          changeFrequency: 'weekly',
+          priority: 0.8
+        });
+      }
+    } catch {
+      // Static dataset entries remain complete even when Supabase is unreachable
+    }
   }
 
   return entries;

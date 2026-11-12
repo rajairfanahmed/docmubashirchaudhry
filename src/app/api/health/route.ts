@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getContentRepository } from '@/lib/data';
 import { getServerManifest } from '@/lib/data/server-manifest';
+import { getV3RuntimeReadiness } from '@/lib/env';
 import { SITE_NAME, SITE_URL } from '@/lib/seo/metadata';
 
 export const dynamic = 'force-dynamic';
@@ -24,6 +25,7 @@ export async function GET(): Promise<NextResponse> {
         exams: snapshot.exams.length,
         recruitmentPosts: snapshot.recruitmentPosts.length
       },
+      v3: getV3RuntimeReadiness(),
       runtime: {
         node: process.version,
         vercelEnv: process.env.VERCEL_ENV ?? 'local'

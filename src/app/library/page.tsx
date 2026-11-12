@@ -5,15 +5,16 @@ import { FileText } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
 import { PdfFilterToolbar } from '@/components/library/PdfFilterToolbar';
+import { CloudPdfCatalogSection } from '@/components/library/CloudPdfCatalogSection';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Free Solved Exam PDFs & Study Booklets Library',
+  title: 'Solved Exam PDFs & Watermarked Study Booklets Library',
   description:
-    'Free, zero-login educational PDF booklets with verified metadata, page counts, file sizes, SHA-256 checksums, and direct downloads.',
+    'Browse watermarked educational PDF booklets with verified metadata, page counts, file sizes, and signed temporary downloads for PPSC & FPSC aspirants.',
   path: '/library'
 });
 
@@ -62,7 +63,8 @@ export default async function PdfLibraryPage() {
                 PDF Study Booklets Library
               </h1>
               <p className="type-body-base text-[var(--dmc-ink-secondary)]">
-                Download solved MCQ compilations and verified study guides directly. Free, no ads, and no login required.
+                Browse solved MCQ compilations and watermarked study guides openly. Sign in with a
+                free student account when downloading to receive an expiring signed file link.
               </p>
             </div>
 
@@ -90,6 +92,7 @@ export default async function PdfLibraryPage() {
           <h2 id="library-grid-heading" className="type-section-heading text-[var(--dmc-ink-primary)]">
             Available PDF Resources
           </h2>
+          <CloudPdfCatalogSection />
           <PdfFilterToolbar
             resources={pdfs}
             exams={exams}

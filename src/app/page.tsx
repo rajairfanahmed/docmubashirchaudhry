@@ -1,243 +1,404 @@
 import React from 'react';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Globe } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  ClipboardCheck,
+  FileText,
+  Globe,
+  Layers,
+  ShieldCheck
+} from 'lucide-react';
 import { SectionBand } from '@/components/layout/SectionBand';
-import { StandingTrustNotice } from '@/components/layout/StandingTrustNotice';
 import { HeroSearch } from '@/components/home/HeroSearch';
 import { AuthorityExamTiles } from '@/components/home/AuthorityExamTiles';
 import { McqLauncherWidget } from '@/components/home/McqLauncherWidget';
 import { McqSubjectStrip } from '@/components/home/McqSubjectStrip';
+import { StandingTrustNotice } from '@/components/layout/StandingTrustNotice';
 import { PdfResourceCard } from '@/components/library/PdfResourceCard';
 import { CountryCard } from '@/components/geography/CountryCard';
-import { ScrollReveal } from '@/components/motion/ScrollReveal';
 import { getContentRepository } from '@/lib/data';
-import { buildPageMetadata } from '@/lib/seo/metadata';
+import { parseSecretSupabaseConfig } from '@/lib/env';
+import { buildPageMetadata, SITE_NAME } from '@/lib/seo/metadata';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
+
+export const revalidate = 60;
 
 export const metadata: Metadata = buildPageMetadata({
-  absoluteTitle: 'docmubashirchaudhry | Free PPSC, CSS/PMS, Geography Quiz & Solved PDFs',
+  absoluteTitle: `${SITE_NAME} | Free Competitive Exam Preparation Portal`,
   description:
-    'Independent, free competitive exam preparation portal for PPSC, CSS/PMS, FPSC, and NTS candidates. Practice World Geography, browse recruitment post guides, and download solved MCQ booklets.',
+    'Notes, MCQs, quizzes, practice material and other useful resources, all in one place for PPSC and FPSC aspirants.',
   path: '/'
 });
 
-export default async function HomePage() {
-  const repo = getContentRepository();
-  const [pdfs, countries, questions, refData, subjects, topics, exams] = await Promise.all([
-    repo.getPdfResources({ sort: 'newest', includeDrafts: false }),
-    repo.getCountries({ onlyVerified: true, includeDrafts: false }),
-    repo.getQuestions({ includeDrafts: false }),
-    repo.getGeographyReference(),
-    repo.getSubjects(),
-    repo.getTopics(),
-    repo.getExams()
-  ]);
-
-  const featuredCountry =
-    countries.find((c) => c.slug === 'pakistan') ?? countries[0] ?? null;
-
-  const currencyMap = new Map(refData.currencies.map((c) => [c.id, c]));
-  const languageMap = new Map(refData.languages.map((l) => [l.id, l]));
-  const continentMap = new Map(refData.continents.map((c) => [c.id, c]));
-  const regionMap = new Map(refData.regions.map((r) => [r.id, r]));
-
-  const topicMap = new Map(topics.map((t) => [t.id, t]));
-  const subjectMap = new Map(subjects.map((s) => [s.id, s]));
-
-  const questionCountsBySubject: Record<string, number> = {};
-  for (const question of questions) {
-    const seenSubjects = new Set<string>();
-    for (const topicId of question.topicIds) {
-      const topic = topicMap.get(topicId);
-      if (topic && !seenSubjects.has(topic.subjectId)) {
-        seenSubjects.add(topic.subjectId);
-        questionCountsBySubject[topic.subjectId] =
-          (questionCountsBySubject[topic.subjectId] ?? 0) + 1;
-      }
-    }
+async function getSafeDbCounts(): Promise<{
+  quizzes: number;
+  pdfs: number;
+  questions: number;
+}> {
+  if (!parseSecretSupabaseConfig()) {
+    return { quizzes: 0, pdfs: 0, questions: 0 };
   }
 
+  try {
+    const admin = createSupabaseAdminClient();
+    const [quizRes, pdfRes, qRes] = await Promise.all([
+      admin.from('quizzes').select('id', { count: 'exact', head: true }).eq('is_published', true),
+      admin
+        .from('pdf_resources')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_published', true),
+      admin.from('quiz_questions').select('id', { count: 'exact', head: true })
+    ]);
+
+    return {
+      quizzes: quizRes.count ?? 0,
+      pdfs: pdfRes.count ?? 0,
+      questions: qRes.count ?? 0
+    };
+  } catch {
+    return { quizzes: 0, pdfs: 0, questions: 0 };
+  }
+}
+
+export default async function HomePage() {
+  const repo = getContentRepository();
+  const [exams, subjects, topics, questions, pdfs, countries, reference, dbCounts] =
+    await Promise.all([
+      repo.getExams(),
+      repo.getSubjects(),
+      repo.getTopics(),
+      repo.getQuestions({ includeDrafts: false }),
+      repo.getPdfResources({ sort: 'newest', includeDrafts: false }),
+      repo.getCountries({ includeDrafts: false }),
+      repo.getGeographyReference(),
+      getSafeDbCounts()
+    ]);
+
+  const topicMap = new Map(topics.map((topic) => [topic.id, topic]));
+  const subjectMap = new Map(subjects.map((subject) => [subject.id, subject]));
+  const questionCountsBySubject = questions.reduce<Record<string, number>>((acc, q) => {
+    const matchedSubjects = new Set<string>();
+    for (const topicId of q.topicIds) {
+      const subjectId = topicMap.get(topicId)?.subjectId;
+      if (subjectId) {
+        matchedSubjects.add(subjectId);
+      }
+    }
+    for (const subjectId of matchedSubjects) {
+      acc[subjectId] = (acc[subjectId] ?? 0) + 1;
+    }
+    return acc;
+  }, {});
+
+  const resolvePdfSubjectLabel = (topicIds: string[]): string | undefined => {
+    for (const topicId of topicIds) {
+      const subjectId = topicMap.get(topicId)?.subjectId;
+      if (subjectId) {
+        const subject = subjectMap.get(subjectId);
+        if (subject) return subject.name;
+      }
+    }
+    return undefined;
+  };
+
+  const featuredCountry =
+    countries.find((country) => country.slug === 'pakistan') ?? countries[0] ?? null;
+  const continentName = featuredCountry
+    ? reference.continents.find((c) => c.id === featuredCountry.continentId)?.name
+    : undefined;
+  const regionName = featuredCountry
+    ? reference.regions.find((r) => r.id === featuredCountry.regionId)?.name
+    : undefined;
+
+  const quickStats = [
+    {
+      label: 'Active Quizzes & Mocks',
+      value: String(dbCounts.quizzes),
+      href: '/quizzes',
+      icon: ClipboardCheck
+    },
+    {
+      label: 'Solved PDF Booklets',
+      value: String(Math.max(pdfs.length, dbCounts.pdfs)),
+      href: '/library',
+      icon: FileText
+    },
+    {
+      label: 'Published MCQs',
+      value: String(questions.length + dbCounts.questions),
+      href: '/mcq',
+      icon: BookOpen
+    },
+    {
+      label: 'Country Profiles',
+      value: String(countries.length),
+      href: '/geography',
+      icon: Globe
+    }
+  ];
+
   return (
-    <div>
-      {/* Band 1: Emerald Hero + Predictive Search Box */}
-      <SectionBand surface="hero" density="spacious" labelledBy="hero-heading">
-        <div className="max-w-4xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center pill-badge bg-[var(--dmc-brand-surface)] text-[var(--dmc-accent-gold)] border border-emerald-400/30">
-            Free, Open-Access Candidate Preparation
+    <div className="flex flex-col">
+      {/* Band 1: Light-First Editorial Split Hero */}
+      <SectionBand
+        surface="hero"
+        density="compact"
+        className="pt-5 pb-10 sm:pt-7 sm:pb-12 lg:pt-8 lg:pb-14"
+        containerClassName="relative"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
+          <div className="lg:col-span-7 space-y-5 sm:space-y-6">
+            <div className="inline-flex flex-wrap items-center gap-2 text-xs font-semibold tracking-wide text-[var(--color-brand-deep)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] px-3 py-1 rounded-md">
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              <span>PPSC &middot; FPSC &middot; CSS &middot; PMS &middot; FIA &middot; PERA</span>
+            </div>
+
+            <h1 className="type-display-hero text-[var(--color-ink)]">
+              Notes, MCQs, quizzes, practice material and other useful resources, all in one place
+              for PPSC and FPSC aspirants.
+            </h1>
+
+            <p className="text-sm sm:text-base text-[var(--color-ink-secondary)] max-w-2xl leading-relaxed">
+              Browse World Geography references and commission exam guides openly without login.
+              Sign in with a free student account to attempt saved quizzes, timed mocks, and
+              watermarked study PDFs.
+            </p>
+
+            <div className="bg-[var(--color-page)] p-2 sm:p-2.5 rounded-[var(--radius-panel)] border border-[var(--color-border-strong)]">
+              <HeroSearch />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <Link
+                href="/quizzes"
+                className="dmc-press inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] font-semibold text-sm"
+              >
+                <ClipboardCheck className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span>Explore Quizzes &amp; Mocks</span>
+                <ArrowRight className="w-4 h-4 shrink-0" aria-hidden="true" />
+              </Link>
+
+              <Link
+                href="/library"
+                className="dmc-press inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-[var(--radius-control)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] text-[var(--color-ink)] border border-[var(--color-border-strong)] font-semibold text-sm"
+              >
+                <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span>Browse PDF Library</span>
+              </Link>
+            </div>
           </div>
 
-          <h1 id="hero-heading" className="type-display-hero text-white">
-            Verified Exam Guides, Geography Drills &amp; Solved MCQs
-          </h1>
-
-          <p className="type-body-base text-emerald-100 max-w-2xl mx-auto">
-            Free past-paper PDFs, data-verified World Geography quizzes, and topic-filtered MCQ drills with zero ads and zero login.
-          </p>
-
-          <HeroSearch />
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 pt-2 text-left">
-            <div className="rounded-xl bg-[var(--dmc-brand-surface)]/80 border border-emerald-400/20 p-3.5">
-              <div className="text-lg font-extrabold text-white tabular-nums">{countries.length} Nations</div>
-              <div className="text-xs text-emerald-200">World Geography Profiles</div>
-            </div>
-            <div className="rounded-xl bg-[var(--dmc-brand-surface)]/80 border border-emerald-400/20 p-3.5">
-              <div className="text-lg font-extrabold text-[var(--dmc-accent-gold)] tabular-nums">{pdfs.length} PDF Booklets</div>
-              <div className="text-xs text-emerald-200">SHA-256 Verified Downloads</div>
-            </div>
-            <div className="rounded-xl bg-[var(--dmc-brand-surface)]/80 border border-emerald-400/20 p-3.5">
-              <div className="text-lg font-extrabold text-white tabular-nums">{questions.length} MCQs</div>
-              <div className="text-xs text-emerald-200">Active Recall Question Bank</div>
-            </div>
-            <div className="rounded-xl bg-[var(--dmc-brand-surface)]/80 border border-emerald-400/20 p-3.5">
-              <div className="text-lg font-extrabold text-[var(--dmc-accent-gold)]">Zero Login</div>
-              <div className="text-xs text-emerald-200">Free Forever, No Ads</div>
+          {/* Right Column: Framed Portrait Card with Crisp Scrim Credential */}
+          <div className="lg:col-span-5">
+            <div className="relative rounded-[var(--radius-sheet)] overflow-hidden border border-[var(--color-border)] bg-[var(--color-surface-soft)] elevation-2 aspect-[4/4.5] max-h-[450px] w-full max-w-md mx-auto lg:ml-auto">
+              <Image
+                src="/images/mubashirchaudhry1 (3).jpg"
+                alt="Doc Mubashir Chaudhry in formal dark navy suit beneath the PPSC Punjab Public Service Commission crest"
+                fill
+                priority
+                quality={85}
+                sizes="(max-width: 1024px) 100vw, 420px"
+                className="object-cover object-top"
+              />
+              <div className="absolute inset-x-0 bottom-0 portrait-scrim p-5 sm:p-6 flex flex-col gap-1">
+                <span className="text-xs font-semibold tracking-wide text-[var(--color-accent)]">
+                  Portal Educator &amp; Mentor
+                </span>
+                <div className="font-display font-bold text-lg sm:text-xl text-white leading-tight">
+                  Doc Mubashir Chaudhry
+                </div>
+                <p className="text-xs text-[var(--color-dark-ink-secondary)] leading-snug">
+                  FIA, PPSC, PERA, FPSC, CSS &amp; PMS Competitive Exam Educator
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </SectionBand>
 
-      {/* Band 2: Five Exam Tiles Strip + Check Strip + Independence Notice */}
-      <SectionBand surface="card" density="standard" labelledBy="exam-tiles-heading">
+      {/* Band 2: Honest 4-Column Quick Stats Strip */}
+      <SectionBand
+        surface="muted"
+        density="compact"
+        className="py-5 sm:py-6"
+      >
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {quickStats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Link
+                key={stat.label}
+                href={stat.href}
+                className="track-card flex items-center gap-3.5 rounded-[var(--radius-panel)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-border-strong)] p-3.5 sm:p-4"
+              >
+                <div className="w-10 h-10 rounded-[var(--radius-control)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] text-[var(--color-brand-deep)] flex items-center justify-center shrink-0">
+                  <Icon className="w-5 h-5" aria-hidden="true" />
+                </div>
+                <div className="min-w-0">
+                  <div className="font-display font-bold text-xl sm:text-2xl text-[var(--color-ink)] tabular-nums leading-none">
+                    {stat.value}
+                  </div>
+                  <div className="text-xs font-medium text-[var(--color-ink-secondary)] mt-1 truncate">
+                    {stat.label}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </SectionBand>
+
+      {/* Band 3: Exam Hubs & Geography Strip */}
+      <SectionBand labelledBy="home-exam-hubs-heading" surface="ground">
         <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <span className="pill-badge bg-[var(--dmc-status-unverified-bg)] text-[var(--dmc-status-unverified-ink)] border border-[var(--dmc-status-unverified-border)]/40">
-              Prepare For
-            </span>
-            <h2 id="exam-tiles-heading" className="type-section-heading text-[var(--dmc-ink-primary)]">
-              Exam Categories &amp; Commission Shortcuts
-            </h2>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div className="space-y-1">
+              <span className="text-xs font-semibold text-[var(--color-brand-deep)]">
+                Exam Hubs &amp; Open Reference
+              </span>
+              <h2 id="home-exam-hubs-heading" className="type-section-heading text-[var(--color-ink)]">
+                Commission Hubs &amp; World Geography
+              </h2>
+            </div>
+            <Link
+              href="/exams"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-deep)] hover:underline shrink-0"
+            >
+              <span>All Exam Hubs</span>
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
           </div>
 
           <AuthorityExamTiles />
         </div>
       </SectionBand>
 
-      {/* Band 3: Latest PDFs */}
-      <SectionBand surface="muted" density="standard" labelledBy="latest-pdfs-heading">
-        <ScrollReveal>
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-              <div>
-                <h2 id="latest-pdfs-heading" className="type-section-heading text-[var(--dmc-ink-primary)]">
-                  Latest PDFs
+      {/* Band 4: Latest Solved Watermarked PDFs */}
+      <SectionBand
+        labelledBy="home-pdfs-heading"
+        surface="card"
+      >
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+            <div className="space-y-1">
+              <span className="text-xs font-semibold text-[var(--color-brand-deep)]">
+                Watermarked Study Booklets
+              </span>
+              <h2 id="home-pdfs-heading" className="type-section-heading text-[var(--color-ink)]">
+                Latest Solved Exam PDFs
+              </h2>
+            </div>
+            <Link
+              href="/library"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-deep)] hover:underline shrink-0"
+            >
+              <span>Browse Full PDF Library</span>
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {pdfs.slice(0, 6).map((pdf) => (
+              <PdfResourceCard
+                key={pdf.id}
+                pdf={pdf}
+                subjectLabel={resolvePdfSubjectLabel(pdf.topicIds)}
+              />
+            ))}
+          </div>
+        </div>
+      </SectionBand>
+
+      {/* Band 5: Featured World Geography Profile & Topic MCQ Practice */}
+      <SectionBand labelledBy="home-practice-heading" surface="ground">
+        <div className="space-y-10">
+          {featuredCountry && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+              <div className="lg:col-span-5 space-y-4">
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-brand-deep)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] px-3 py-1 rounded-md">
+                  <Globe className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>Open Geography Module</span>
+                </div>
+                <h2 className="type-section-heading text-[var(--color-ink)]">
+                  World Geography &amp; Country Reference
                 </h2>
-                <p className="type-body-sm text-[var(--dmc-ink-secondary)]">
-                  Direct SHA-256 verified solved MCQ booklets with file size and edition provenance.
+                <p className="type-body-base text-[var(--color-ink-secondary)]">
+                  Explore {countries.length} country profiles with verified capitals, currencies,
+                  official languages, and high-yield recall flashcards. Kept openly accessible with
+                  zero login required.
                 </p>
+                <div className="flex flex-wrap gap-3 pt-1">
+                  <Link
+                    href="/geography#quiz-module"
+                    className="dmc-press inline-flex items-center gap-2 min-h-[44px] px-5 py-2.5 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold"
+                  >
+                    <span>Start Geography Quiz</span>
+                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                  </Link>
+                  <Link
+                    href="/geography"
+                    className="dmc-press inline-flex items-center gap-2 min-h-[44px] px-4 py-2.5 rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] text-sm font-semibold text-[var(--color-ink)]"
+                  >
+                    <span>Browse All Countries</span>
+                  </Link>
+                </div>
+              </div>
+
+              <div className="lg:col-span-7">
+                <CountryCard
+                  country={featuredCountry}
+                  currencies={reference.currencies}
+                  languages={reference.languages}
+                  continentName={continentName}
+                  regionName={regionName}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Subject MCQ Practice & Subject Strip */}
+          <div className="space-y-6 pt-6 border-t border-[var(--color-border)]">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+              <div className="space-y-1">
+                <span className="text-xs font-semibold text-[var(--color-brand-deep)] inline-flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>Bilingual Subject Bank</span>
+                </span>
+                <h2
+                  id="home-practice-heading"
+                  className="type-section-heading text-[var(--color-ink)]"
+                >
+                  Practice MCQs by Exam &amp; Subject
+                </h2>
               </div>
               <Link
-                href="/library"
-                className="inline-flex items-center gap-1.5 min-h-[44px] sm:min-h-0 text-sm font-bold text-[var(--dmc-brand-forest)] hover:underline"
+                href="/quizzes"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--color-brand-deep)] hover:underline shrink-0"
               >
-                <span>Browse Full PDF Library</span>
+                <span>Open Saved Quiz &amp; Mock Hub</span>
                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pdfs.slice(0, 3).map((pdf) => {
-                const firstTopic = topicMap.get(pdf.topicIds[0] ?? '');
-                const firstSubject = firstTopic ? subjectMap.get(firstTopic.subjectId) : undefined;
-                return (
-                  <PdfResourceCard
-                    key={pdf.id}
-                    pdf={pdf}
-                    subjectLabel={firstSubject?.name}
-                  />
-                );
-              })}
-            </div>
+            <McqLauncherWidget
+              exams={exams}
+              subjects={subjects}
+              hideSubjectStrip
+            />
+
+            <McqSubjectStrip
+              subjects={subjects}
+              topics={topics}
+              questionCountsBySubject={questionCountsBySubject}
+            />
           </div>
-        </ScrollReveal>
+        </div>
       </SectionBand>
 
-      {/* Band 4: World Geography Teaser (5:7 Split) */}
-      <SectionBand surface="card" density="standard" labelledBy="geo-teaser-heading">
-        <ScrollReveal>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-5 space-y-4">
-              <span className="inline-flex items-center gap-1.5 type-label-micro text-[var(--dmc-brand-forest)] bg-[var(--dmc-status-verified-bg)] px-3 py-1 rounded-full">
-                <Globe className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Interactive Geography Module</span>
-              </span>
-              <h2 id="geo-teaser-heading" className="type-section-heading text-[var(--dmc-ink-primary)]">
-                World Geography Reference &amp; Active Quiz
-              </h2>
-              <p className="type-body-sm text-[var(--dmc-ink-secondary)]">
-                Filter verified sovereign states by A-Z letter, continent, and region. Review high-yield golden answer pills first, then launch Tier 2 quiz drills on the same page.
-              </p>
-              <div className="flex flex-wrap gap-3 pt-1">
-                <Link
-                  href="/geography"
-                  className="dmc-press inline-flex items-center gap-2 min-h-[44px] px-6 py-2.5 rounded-[var(--dmc-radius-button)] bg-[var(--dmc-accent-gold)] hover:bg-[var(--dmc-accent-gold-hover)] text-[var(--dmc-ink-primary)] text-sm font-bold"
-                >
-                  <span>Start Geography Quiz</span>
-                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
-
-            <div className="lg:col-span-7">
-              {featuredCountry ? (
-                <CountryCard
-                  country={featuredCountry}
-                  currencies={featuredCountry.currencyIds
-                    .map((id) => currencyMap.get(id))
-                    .filter((c): c is NonNullable<typeof c> => Boolean(c))}
-                  languages={featuredCountry.officialLanguageIds
-                    .map((id) => languageMap.get(id))
-                    .filter((l): l is NonNullable<typeof l> => Boolean(l))}
-                  continentName={continentMap.get(featuredCountry.continentId)?.name}
-                  regionName={regionMap.get(featuredCountry.regionId)?.name}
-                />
-              ) : null}
-            </div>
-          </div>
-        </ScrollReveal>
-      </SectionBand>
-
-      {/* Band 5: MCQ Practice Entry + Subject Grid */}
-      <SectionBand surface="ground" density="standard" labelledBy="mcq-entry-heading">
-        <ScrollReveal>
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-              <div>
-                <h2 id="mcq-entry-heading" className="type-section-heading text-[var(--dmc-ink-primary)]">
-                  Pick Exam &amp; Subject to Practice MCQs
-                </h2>
-                <p className="type-body-sm text-[var(--dmc-ink-secondary)]">
-                  Single-question practice mode with locked answer verification, golden pills, explanations, and missed-question retry.
-                </p>
-              </div>
-              <Link
-                href="/mcq"
-                className="inline-flex items-center gap-1 min-h-[44px] sm:min-h-0 text-xs font-bold text-[var(--dmc-brand-forest)] hover:underline shrink-0"
-              >
-                <span>Advanced Topic Filters</span>
-                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-              </Link>
-            </div>
-
-            <div className="space-y-8">
-              <McqLauncherWidget
-                exams={exams}
-                subjects={subjects}
-                topics={topics}
-                questionCountsBySubject={questionCountsBySubject}
-                hideSubjectStrip
-              />
-              <McqSubjectStrip
-                subjects={subjects}
-                topics={topics}
-                questionCountsBySubject={questionCountsBySubject}
-              />
-            </div>
-          </div>
-        </ScrollReveal>
-      </SectionBand>
-
-      {/* Band 6: Standing Trust Banner */}
+      {/* Band 6: Scoped Standing Trust Notice */}
       <StandingTrustNotice variant="band" />
     </div>
   );

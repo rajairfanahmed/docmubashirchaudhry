@@ -1,37 +1,26 @@
-# Backend Implementation Plan
+# Backend Implementation Plan (v3.0 Upgrade)
 
-> Status: Core Foundation Complete  
-> Last updated: 2026-11-11
+> Status: Code & Mocked Verification Complete (Awaiting Owner Supabase/R2 Dashboard Provisioning)  
+> Last updated: 2026-11-12
 
-## 1. Goal and scope
-Build the PRD v2.0 database-free JSON content backend, integrity validation CLI, static `/data/v1/` artifact builder, deterministic quiz engine, versioned `localStorage` engine, MiniSearch indexing/query engine, security cleanup, and repository CI checks for `docmubashirchaudhry`, integrated cleanly into the existing Next.js frontend.
+## 1. Completed backend engineering phases
+- [x] **Phase 1 - Environment & CSP Alignment (`.env.local`, `.env.example`, `src/lib/env.ts`, `next.config.ts`, `public/_headers`):** Standardized Supabase/R2/Admin environment variables, added Zod runtime validators, clamped signed R2 URL TTL to `[120, 300]` seconds, and updated CSP `connect-src` for Supabase Auth and Cloudflare R2 presigned uploads.
+- [x] **Phase 2 - PostgreSQL Schema, Triggers & RLS (`supabase/migrations/0001_v3_initial_schema.sql`, `src/lib/supabase/database.types.ts`):** Created tables (`profiles`, `pdf_resources`, `pdf_access_log`, `quizzes`, `quiz_questions`, `quiz_attempts`, `site_visits`), auth signup trigger (`handle_new_auth_user`), download counter trigger (`increment_pdf_download_count`), RLS policies, and analytics retention RPC (`prune_v3_analytics_logs`).
+- [x] **Phase 3 - Auth, Session Middleware & Admin Guard (`src/lib/supabase/server.ts`, `src/lib/supabase/middleware.ts`, `src/middleware.ts`, `src/lib/auth/guards.ts`, `src/app/api/auth/*`):** Implemented `httpOnly` cookie session handling for email/password + verification and Google OAuth PKCE, conditional session refresh skipping anonymous public routes, and server-side `ADMIN_EMAILS` allow-list enforcement.
+- [x] **Phase 4 - Private Cloudflare R2 Storage & Gated Downloads (`src/lib/r2/client.ts`, `src/app/api/pdfs/*`, `src/app/api/admin/pdfs/*`):** Implemented direct-to-R2 presigned upload (`<= 50 MB`), R2 `HeadObject` + `application/pdf` MIME check on metadata registration, authenticated short-lived download URL generation (`180s` default), and `pdf_access_log` recording.
+- [x] **Phase 5 - Quizzes, Mock Exams, User History & Admin Analytics (`src/lib/v3/*`, `src/app/api/quizzes/*`, `src/app/api/me/*`, `src/app/api/analytics/visit`, `src/app/api/admin/{quizzes,questions,analytics}/*`):** Built bilingual MCQ handling, server-side negative-marking scorer, mock answer sealing, CSV/JSON bulk import (`1..500`), private student history endpoints, and admin analytics + retention pruning routes.
+- [x] **Phase 6 - Automated Verification (`tests/v3-backend.test.ts`, `tests/v3-route-auth-and-contracts.test.ts`):** Added unit and mocked route contract suites alongside existing v2.0 suites (`84/84` Vitest tests, `npm run validate`, `npm run typecheck`, isolated `next build`).
 
-## 2. Assumptions and constraints
-- Zero SQL/NoSQL database, zero server runtime sessions, zero login/paywalls.
-- Pending owner confirmations (`F1` BS-14 vs BS-16, `F2` 80/20 syllabus, `F3` conditional flag, `F4` official PDF citation) are represented strictly in schema and provenance metadata (`verification.status: 'unverified'` / `secondary` where unverified) without presenting editorial guesses as verified PPSC official rules.
-- Existing UI design tokens, Material rules, routes (`/`, `/countries`, `/ppsc`, `/ppsc/[post]`, `/about`), and backwards-compatible `Country` interface adapters remain intact.
-
-## 3. Modules / vertical slices
-| Order | Module / slice | Behavior delivered | Dependencies | Acceptance criteria | Status |
-|---|---|---|---|---|---|
-| 1 | Security Cleanup & Config | Remove exposed API tokens in `.env.example`, `src/lib/api.ts`, `frontend/js/config.js`; add `public/_headers` | None | Zero `rc_live_` token literals; CSP & HSTS headers written | Complete |
-| 2 | Dependencies & Zod Schemas | Install `zod`, `minisearch`, `vitest`, `tsx`; implement all schemas under `src/lib/schemas/` | `zod` | All PRD Section 8.4/8.5 entities parse and enforce invariants | Complete |
-| 3 | Canonical JSON Repository (`src/data/`) | Create `sources.json`, `geography/*`, `examinations/*`, `taxonomy/*`, `questions/*`, `resources/pdf-resources.json` backed by real PDF checksums | Module 2 | All records structured cleanly; provenance separated | Complete |
-| 4 | Validation & Static Data CLI (`scripts/`) | `validate.ts` (15 PRD rules), `build-static-data.ts` (`/data/v1/` + MiniSearch), `pdf-manifest.ts`, `import-csv.ts`, `export-csv.ts`, `check-links.ts` | Modules 2, 3 | `npm run validate` exits `0`; `/public/data/v1/manifest.json` & index built | Complete |
-| 5 | `ContentRepository` & Adapters (`src/lib/data/`) | Implement `JsonContentRepository` + static artifact loader + adapter for existing `useCountries` | Modules 2, 3, 4 | All 14 `ContentRepository` methods tested and typed | Complete |
-| 6 | Deterministic Quiz, Storage & Search Engines | `src/lib/quiz/`, `src/lib/storage/`, `src/lib/search/` implementing seeded shuffle, multi-answer/disputed checks, region distractors, storage fallback, MiniSearch | Module 5 | All quiz edge cases (South Africa, EUR, disputed) pass Vitest | Complete |
-| 7 | Frontend Integration & CI Workflows | Wire `api.ts`, `QuizSection`, `useQuizStore`, `ppsc` pages (data-driven F1/F2 provenance), `AcademicFeedbackForm` (`mailto:` composer), `NavbarSearch`; add `.github/workflows/` | Modules 5, 6 | Clean TypeScript & Next.js build verified | Complete |
-| 8 | Automated Test Suite & Docs Sign-Off | Unit + integration Vitest suite across all modules; update `docs/backend/*` with observed outputs | Modules 1-7 | All Vitest suites, validate, data:build, and build pass | Complete |
-| 9 | Full Countries Sync, Pagination API, Logo.dev & PDF Dedup | Sync all 250 countries (`scripts/sync-countries.ts`), add Logo.dev CDN + subject icon catalog (`src/lib/branding/logos.ts`), implement backend pagination (`/api/countries`, `/api/questions`, static `/pages/`), point `pdf-resources.json` to non-duplicated PDFs with `R10_PDF_NO_DUPLICATE_HASH` | Modules 1-8 | 250 countries verified, 2 unique PDFs verified, pagination + branding tests pass | Complete |
-
-## 4. Verification plan
-- `npm run data:sync-countries` (complete 250-territory sync from canonical open snapshot)
-- `npm run data:pdf-manifest` & `npm run validate` (all 15 integrity checks on `src/data/`, PDF checksums, duplicate-hash guard)
-- `npm run data:build` (static JSON, paginated page slices, branding/taxonomy artifacts, and MiniSearch index generation)
-- `npm test` (Vitest suite covering schemas, validator rules, quiz rules, storage fallback, repository pagination, Logo.dev/subject catalogs, and Route Handlers)
-- `npm run typecheck` (`tsc --noEmit`)
-- Isolated production build verification with `NEXT_DIST_DIR=".next-verify" npx next build`
-
-## 5. Out of scope
-- Generating fake official PPSC PDFs without primary commission documentation.
-- Frontend visual implementation of Logo.dev image tags, subject icon chips, and pagination controls (explicitly deferred to frontend handoff per user request).
+## 2. Owner provisioning checklist (Before frontend integration & live deploy)
+1. **Supply Missing `.env.local` Values:** Fill `NEXT_PUBLIC_SUPABASE_URL` (from Supabase Project Settings -> Data API) and `ADMIN_EMAILS` (owner email allow-list). Copy all finalized variables from `.env.local` into Vercel Project Environment Variables.
+2. **Apply Database Migration:** Run `supabase/migrations/0001_v3_initial_schema.sql` once in the Supabase SQL Editor.
+3. **Configure Supabase Auth Redirects & Providers:**
+   - Enable **Google OAuth** and **Email (with Confirm Email)** in Supabase Authentication -> Providers.
+   - Add Redirect URLs:
+     - `https://docmubashirchaudhry.vercel.app/api/auth/callback`
+     - `http://localhost:3000/api/auth/callback`
+4. **Secure Cloudflare R2 Bucket (`docmubashirchaudhary`) & Edge WAF:**
+   - Ensure `Public R2.dev Subdomain Access` is **disabled** so no direct public object URL exists.
+   - Add bucket CORS policy permitting `PUT`/`HEAD` from `https://docmubashirchaudhry.vercel.app` and `http://localhost:3000` (with `AllowedHeaders: ["content-type"]`).
+   - Add Cloudflare Edge WAF rate-limiting rules for `/api/auth/*`, `/api/pdfs/*/download`, and `/api/analytics/visit`.
+5. **Frontend Integration Handoff:** Hand API contracts (`docs/backend/api-contract.md`) to design-engineer for login modals (triggered at quiz start / PDF download), quiz timer UI, private student dashboard, and `/admin` dashboard pages.

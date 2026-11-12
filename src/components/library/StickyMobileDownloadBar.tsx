@@ -1,22 +1,24 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Download } from 'lucide-react';
 import { formatBytes } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { GatedPdfDownloadButton } from '@/components/library/GatedPdfDownloadButton';
 
 export interface StickyMobileDownloadBarProps {
   title: string;
   filePath: string;
   fileSizeBytes: number;
   pageCount?: number;
+  pdfSlug?: string;
 }
 
 export function StickyMobileDownloadBar({
   title,
   filePath,
   fileSizeBytes,
-  pageCount
+  pageCount,
+  pdfSlug
 }: StickyMobileDownloadBarProps) {
   const [isFooterVisible, setIsFooterVisible] = useState(false);
 
@@ -24,7 +26,8 @@ export function StickyMobileDownloadBar({
     if (typeof window === 'undefined' || typeof IntersectionObserver === 'undefined') {
       return;
     }
-    const footer = document.querySelector('footer[role="contentinfo"]') ?? document.querySelector('footer');
+    const footer =
+      document.querySelector('footer[role="contentinfo"]') ?? document.querySelector('footer');
     if (!footer) return;
 
     const observer = new IntersectionObserver(
@@ -46,27 +49,25 @@ export function StickyMobileDownloadBar({
       data-sticky-download-bar="true"
       aria-hidden={isFooterVisible || undefined}
       className={cn(
-        'md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-[var(--dmc-border-subtle)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] flex items-center justify-between gap-3 elevation-3 min-h-[64px] transition-[transform,opacity] duration-200 motion-reduce:transition-none',
+        'md:hidden fixed bottom-0 inset-x-0 z-40 bg-[var(--color-surface)]/95 backdrop-blur border-t border-[var(--color-border)] px-4 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] flex items-center justify-between gap-3 elevation-3 min-h-[64px] transition-[transform,opacity] duration-200 motion-reduce:transition-none',
         isFooterVisible && 'translate-y-full opacity-0 pointer-events-none'
       )}
     >
       <div className="min-w-0 flex-1">
-        <div className="text-xs font-bold text-[var(--dmc-ink-primary)] truncate">{title}</div>
-        <div className="text-[11px] text-[var(--dmc-ink-muted)] tabular-nums">
+        <div className="text-xs font-bold text-[var(--color-ink)] truncate">{title}</div>
+        <div className="text-[11px] text-[var(--color-ink-muted)] tabular-nums">
           {formatBytes(fileSizeBytes)} &middot; {pageCount ? `${pageCount} pages` : 'PDF Booklet'}
         </div>
       </div>
 
-      <a
-        href={filePath}
-        download
+      <GatedPdfDownloadButton
+        pdfId={pdfSlug ?? title}
+        title={title}
+        fileSizeBytes={fileSizeBytes}
+        fallbackPublicHref={filePath}
         tabIndex={isFooterVisible ? -1 : undefined}
-        className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[44px] bg-[var(--dmc-brand-forest)] hover:bg-[var(--dmc-brand-emerald)] text-white text-xs font-bold px-4 py-2 rounded-[var(--dmc-radius-button)] shrink-0"
-      >
-        <Download className="w-3.5 h-3.5" aria-hidden="true" />
-        <span>Download PDF</span>
-      </a>
+        label="Download PDF"
+      />
     </div>
   );
 }
-

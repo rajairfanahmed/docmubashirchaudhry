@@ -30,19 +30,19 @@ export function ProvenanceBox({
     <div
       role="note"
       className={cn(
-        'rounded-[var(--dmc-radius-card)] p-4 sm:p-5 border space-y-3 min-w-0',
+        'rounded-[var(--radius-panel)] p-4 sm:p-5 border space-y-3 min-w-0',
         isVerified
-          ? 'bg-[var(--dmc-status-verified-bg)]/60 border-[var(--dmc-status-verified-border)]/40 text-emerald-950'
-          : 'bg-[var(--dmc-status-unverified-bg)] border-[var(--dmc-status-unverified-border)]/60 text-amber-950',
+          ? 'bg-[var(--color-success-bg)]/70 border-[var(--color-success-border)] text-[var(--color-ink)]'
+          : 'bg-[var(--color-warning-bg)] border-[var(--color-warning-border)] text-[var(--color-warning-ink)]',
         className
       )}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
           {isVerified ? (
-            <ShieldCheck className="w-4 h-4 text-[var(--dmc-status-verified-icon)] shrink-0" aria-hidden="true" />
+            <ShieldCheck className="w-4 h-4 text-[var(--color-success-ink)] shrink-0" aria-hidden="true" />
           ) : (
-            <AlertTriangle className="w-4 h-4 text-[var(--dmc-status-unverified-icon)] shrink-0" aria-hidden="true" />
+            <AlertTriangle className="w-4 h-4 text-[var(--color-warning-ink)] shrink-0" aria-hidden="true" />
           )}
           <span>{title ?? (isVerified ? 'Verified Primary Source' : 'Unverified Source Metadata')}</span>
         </div>
@@ -52,7 +52,7 @@ export function ProvenanceBox({
             status={verification.status}
             label={isVerified ? 'Verified' : 'Unverified'}
           />
-          <span className="text-[11px] font-semibold">
+          <span className="text-[11px] font-semibold text-[var(--color-ink-secondary)]">
             Checked: {formatVerificationDate(verification.lastCheckedAt)}
           </span>
         </div>

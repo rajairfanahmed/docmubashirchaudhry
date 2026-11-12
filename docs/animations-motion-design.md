@@ -1,56 +1,73 @@
-# Animations & Motion Design Specification (Step 7 of 10)
+# Animations & Motion Design Specification
 
-> **Consumer Skill:** `07-animations-motion-design` (Enhancement Phase - Run After Step 6)
-> **Scope:** Restraint-first, purposeful academic micro-interactions, GPU-composited transitions, `>= 70%` World Geography quiz celebration choreography, strict `prefers-reduced-motion` static fallbacks, and interruption behavior.
-> **Token & State Dependencies:** Enhances static states defined in [`ui-components.md`](./ui-components.md) without modifying visual color tokens in [`visual-design.md`](./visual-design.md).
+> Hardware-accelerated **Motion for React** (`motion/react`) + crisp CSS transition specification adopted from [`Platform_Frontend_Guidelines.md`](../Platform_Frontend_Guidelines.md) Section 8. Motion serves orientation and clarity - never speed penalties or decorative excess.
 
 ---
 
-## 1. Motion Philosophy & Budget
+## 1. Library Decision & Root Configuration
 
-Students preparing for competitive exams use the portal rapidly and repeatedly on mobile hardware. Motion MUST be **crisp, tactile, fast (`150ms - 320ms`), non-blocking, and strictly GPU-composited (`transform`, `opacity`)**:
-- **Zero gratuitous scroll-jacking, parallax, or floating hero gimmicks.**
-- **Allowed animated CSS properties ONLY:** `transform`, `opacity` (plus SVG `stroke-dashoffset` or CSS color transitions `background-color`/`border-color` on short 150ms button feedback). Never animate `width`, `height`, `top`, `left`, or layout `margin`/`padding`.
-
----
-
-## 2. Specific Approved Motion Inventory
-
-Every approved motion below specifies exact trigger, duration, easing, interruption handling, and mandatory `prefers-reduced-motion: reduce` fallback:
-
-| Component / Interaction | Trigger | Motion Details (`no-preference`) | Interruption Handling | `prefers-reduced-motion: reduce` Fallback |
-|---|---|---|---|---|
-| **1. Card Hover Elevation (`CountryCard`, `PdfCard`, `ExamTile`, `SubjectQuickTile`)** | `:hover` / pointer enter | `transform: translateY(-2px)` + smooth shadow/border transition (`180ms cubic-bezier(0.2, 0.8, 0.2, 1)`) | Immediately reverses cleanly on pointer leave without overshoot | Zero `translateY`; crisp border color (`#0D4A28`) + background tint change only |
-| **2. Button & Option Press Feedback (`Button`, MCQ Option A-D)** | `:active` press / select | Brief `transform: scale(0.985)` (`100ms ease-out`) settling cleanly when option locks | Immediately transitions to locked Emerald/Crimson state on click/Space | Instant visual color lock, zero scaling |
-| **3. Live Bulletin Pulse Dot (`Hero` / `Status` / Active `Open` PPSC pill)** | Ambient loop (single subtle indicator max per screen) | `.pulse-dot` radial opacity & gentle `scale(1 -> 1.45 -> 1)` halo (`2s ease-in-out infinite`) | N/A | Static solid `#059669` dot (`animation: none`) |
-| **4. MCQ / Quiz Explanation Reveal (`ExplanationBox`)** | Option click locks answer | Smooth fade + subtle slide (`opacity: 0 -> 1`, `translateY(-6px -> 0)`, `220ms ease-out`) | If user rapidly clicks `"Next Question"`, unmount/reset cleanly without lingering fade timers | Instant appearance (`opacity: 1`, `transition: none`) |
-| **5. Tier 1 -> Tier 2 Smooth Scroll Jump (`Test in Quiz` / `Quiz this selection`)** | Button click | `element.scrollIntoView({ behavior: 'smooth', block: 'start' })` followed by focus shift to quiz heading | User manual touch/wheel scroll immediately cancels browser smooth scroll | `behavior: 'auto'` (instant clean jump + focus transfer) |
-| **6. Mobile Navigation Drawer & Filter Panel** | Hamburger toggle / Search toggle | Slide-fade reveal (`opacity: 0 -> 1`, `translateY(-8px -> 0)`, `200ms cubic-bezier(0.16, 1, 0.3, 1)`) | Re-toggling before completion reverses immediately via CSS transition (`Escape` closes instantly) | Instant visibility toggle (`opacity: 1`, `transform: none`) |
-| **7. Modal & Popover Entrance (`ScoreModal`, Search Autocomplete)** | Quiz completion / Query hits | Backdrop fade `160ms`; Dialog card `opacity: 0 -> 1` + `scale(0.96 -> 1)` (`220ms cubic-bezier(0.16, 1, 0.3, 1)`) | Pressing `Escape` or clicking `Retake` immediately unmounts and clears pending timers | Instant dialog mount (`opacity: 1`, `transform: none`) |
-| **8. Geography Quiz Celebration (`>= 70%` Score in `ScoreModal`)** | Quiz ends with `Math.round((score / total) * 100) >= 70` | Lightweight GPU-composited emerald (`#10B981`, `#0D4A28`) & gold (`#F0B938`, `#FEF08A`) celebratory confetti burst (`1400ms` max, auto-terminating, max 28 lightweight CSS particles OR crisp Canvas overlay with `pointer-events: none` strictly inside modal header) | Auto-stops cleanly at `1400ms` OR instantly cancels if user clicks `Retake`, `Next`, or closes modal (`useEffect` cleanup) | **Zero particle motion.** Renders a crisp, high-contrast **Static Achievement Badge** (`Trophy` icon inside `#FEF08A` / `#F0B938` ring labeled `"70%+ Mastery Achieved"`) matching user spec verbatim |
-| **9. Progress Stepper, Top Loading Bar & MCQ Circular Ring (`mcqs-design.png`)** | Next Question advance / `+1` point / route navigation | `transform: scaleX(progress)` (`250ms ease-out`) on linear bars; SVG `stroke-dashoffset` smooth arc transition (`250ms ease-out`) on `/mcq/practice` circular `X/N` ring; Lenis smooth scroll (`SmoothScrollProvider`) + non-blocking top loading bar (`TopLoadingBar`) + hamburger icon morph | Updates smoothly to new target fraction on rapid answers or navigation; cancels scroll cleanly on touch/wheel input | Instant `scaleX` / `stroke-dashoffset` jump (`transition: none`); instant scroll (`behavior: 'auto'`); instant menu toggle |
+- **Installed Package Inspection (`package.json`):** The project already installs `"motion": "^14.12.0"` (`motion/react` with `<MotionConfig reducedMotion="user">` + `<LazyMotion features={domAnimation}>` in `src/app/providers.tsx`). Retain `motion` and never install a competing React animation runtime.
+- **Native CSS First for Simple Hover/Focus:** Use lightweight CSS `transition-colors` / `transition-transform` (`120-180ms`) for button, link, border, and option focus/hover states instead of wrapping static UI in React motion components.
+- **Remove Legacy Scroll/Celebration Anti-Patterns:**
+  - Retire `lenis` (`SmoothScrollProvider.tsx` & `lenis` CSS overrides) - native OS scrolling stays immediate and predictable for browser back navigation and `#hash` jumps.
+  - Retire `canvas-confetti` and any bouncing post-answer option animations; use calm transitions and clear score/feedback cards instead.
 
 ---
 
-## 3. Global Reduced-Motion CSS Rule
+## 2. Motion Principles
 
-Enforce a safety baseline in `src/app/globals.css`:
-
-```css
-@media (prefers-reduced-motion: reduce) {
-  .pulse-dot::after,
-  .animate-celebration-particle {
-    animation: none !important;
-  }
-}
-```
-
-And implement a tiny shared hook `useReducedMotion()` checking `window.matchMedia('(prefers-reduced-motion: reduce)')` inside interactive React components (`ScoreModal` confetti vs static badge, `scrollIntoView` behavior `'auto'` vs `'smooth'`).
+1. **Purposeful Only:** Motion must explain a state change, establish continuity, confirm an action, or improve spatial orientation (drawers, dialogs, question swaps, expanded explanations, active filter shifts, upload progress).
+2. **Zero Blocking Delays:** Interface interactions (selecting an MCQ option, opening navigation, typing search, submitting an exam) must remain immediate; motion never delays a primary action.
+3. **Resilient Baseline:** Every view remains 100% readable and functional with all non-essential motion disabled.
+4. **No Gratuitous Element Animation:** Do not animate every card, section, icon, or text block merely because Motion supports it.
 
 ---
 
-## 4. Backend Integration Points
+## 3. Canonical Duration & Easing Tokens
 
-- **Question & Quiz Timing Independence:** All quiz scoring (`quiz-engine.ts`), option locking, and `dmc:v1:*` `localStorage` persistence happen **synchronously on state commit**, never waiting on animation `onAnimationEnd` callbacks so users clicking `"Next Question"` rapidly or testing with `prefers-reduced-motion` never lose points or drop state.
-- **Zero Loading-Screen Delays:** Because `/data/v1/` data is static and small, never add artificial delay timers (`setTimeout`) before showing quiz cards or search results; show skeleton shimmer ONLY during genuine async network fetch of `/data/v1/search-index/all.json`.
+| Interaction | Duration Token | Curve / Implementation |
+| --- | --- | --- |
+| **Button / Icon Press** | `90 - 140 ms` | Subtle tactile press (`scale(0.985)`) via CSS `ease-out` |
+| **Hover / Focus Transition** | `120 - 180 ms` | Border/surface color transition via CSS; subtle elevation lift only on truly clickable cards |
+| **Menu / Popover (`AccountMenu`, search suggestions)** | `160 - 220 ms` | `m.div` `opacity` + `translateY(-4px -> 0)` (`ease-out` enter, `ease-in` exit) |
+| **Dialog / Mobile Drawer (`AuthModal`, `ConfirmSubmitModal`, Nav Drawer)** | `180 - 260 ms` | Backdrop fade + content slide/scale (`0.98 -> 1`) via `AnimatePresence` |
+| **Small Content Reveal (`ExplanationBox`, Accordion, Inline Alert)** | `160 - 220 ms` | Smooth opacity + crisp settle without layout thrashing |
+| **Route / Page Content Transition** | `140 - 200 ms` | Optional light fade strictly if it adds zero navigation latency |
+| **Quiz Question / Feedback Transition** | `120 - 180 ms` | Crisp opacity swap + instant semantic state border/icon fill (zero bounce) |
 
+- **Easing Discipline:** Use calm ease-out (`cubic-bezier(0.22, 1, 0.36, 1)`) for entrances and clean ease-in (`cubic-bezier(0.4, 0, 1, 1)`) for exits. **Strictly forbid elastic overshoot and large spring bounces** across study workflows.
+
+---
+
+## 4. Where to Use vs. Where NOT to Use Motion
+
+### Approved Motion Surfaces
+- Mobile navigation slide-over drawer and `AccountMenu` dropdown entry/exit.
+- Modal dialogs (`AuthModal`, `ConfirmSubmitModal`, CSV import, destructive confirmations) via `AnimatePresence`.
+- Small layout transitions inside filter strips, tabs, and expanding document details.
+- Progress indicators (`CircularProgressRing`, PDF upload bar) where transition makes numeric change easier to perceive.
+- Quiz question swap, instant answer verification state, and inline explanation reveal.
+- Non-blocking `ToastProvider` notifications (`enter`/`exit`).
+- Restrained card hover lift strictly on genuinely clickable interactive cards.
+
+### Explicit Forbidden Patterns
+- **Never** add large parallax scrolling effects.
+- **Never** hijack browser scrolling or force smooth scrolling (`lenis`).
+- **Never** mount autoplay carousels or rotating hero banners.
+- **Never** use large page-wide zooms, 3D flips, or spinning transitions.
+- **Never** animate every homepage section sequentially into view (`whileInView` chains that lag scrolling).
+- **Never** bounce MCQ options after selection or render confetti bursts.
+- **Never** pulse or blink a countdown timer continuously across an entire mock exam.
+- **Never** animate large hero photography or tables in ways that delay LCP or cause layout shift.
+
+---
+
+## 5. Performance & Reduced-Motion Accessibility Rules
+
+- **GPU-Composited Properties Only:** Animate `transform` (`translate3d`, `scale`) and `opacity` (plus SVG `stroke-dashoffset`). Never animate `width`, `height`, `top`, `left`, or expensive multi-element `filter: blur()` on scroll.
+- **List Capping:** Never animate or stagger long lists (`24` country cards or `100` admin rows) simultaneously.
+- **Multi-Layer Reduced Motion Gate (`prefers-reduced-motion: reduce`):**
+  1. Keep root `<MotionConfig reducedMotion="user">` active across every route.
+  2. Use `useReducedMotion()` inside custom Motion components (`motion/react`) to remove directional travel, parallax, and continuous decorative motion cleanly (preserving simple instant state/opacity feedback).
+  3. Maintain CSS `@media (prefers-reduced-motion: reduce)` fallbacks stripping `.dmc-press`, progress bar transitions, and pulse animations so no movement persists.
+  4. Never autoplay media or animations when reduced motion is active, and verify behavior on narrower mobile viewports and lower-powered devices.
