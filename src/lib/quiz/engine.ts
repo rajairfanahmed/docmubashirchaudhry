@@ -286,12 +286,15 @@ export function generateGeographyQuestion(
 
 /**
  * Generates an ordered set of Geography questions for a subset/scope and fact type(s).
+ * When `onePerCountry` is true, produces up to one verified question per country in `countries`
+ * (cycling deterministically across `factTypes`) so the deck length matches the selected country count.
  */
 export function generateGeographyQuizSet(params: {
   countries: readonly CountryEntity[];
   allCountries: readonly CountryEntity[];
   factTypes?: readonly GeographyFactType[];
   limit?: number;
+  onePerCountry?: boolean;
   seed?: string | number;
   maps?: GeographyLookupMaps;
 }): GeneratedGeographyQuestion[] {
@@ -299,7 +302,8 @@ export function generateGeographyQuizSet(params: {
     countries,
     allCountries,
     factTypes = ['capital', 'currency', 'language'],
-    limit = countries.length * factTypes.length,
+    onePerCountry = false,
+    limit = onePerCountry ? countries.length : countries.length * factTypes.length,
     seed = 'dmc-quiz-v1',
     maps = {}
   } = params;
@@ -308,10 +312,24 @@ export function generateGeographyQuizSet(params: {
   const results: GeneratedGeographyQuestion[] = [];
 
   for (const country of shuffledCountries) {
-    for (const factType of factTypes) {
+    if (results.length >= limit) return results;
+    const orderedFacts = onePerCountry
+      ? deterministicShuffle(factTypes, `${seed}:${country.id}:facts`)
+      : factTypes;
+
+    for (const factType of orderedFacts) {
       if (results.length >= limit) return results;
-      const q = generateGeographyQuestion(country, factType, allCountries, maps, `${seed}:${country.id}:${factType}`);
-      if (q) results.push(q);
+      const q = generateGeographyQuestion(
+        country,
+        factType,
+        allCountries,
+        maps,
+        `${seed}:${country.id}:${factType}`
+      );
+      if (q) {
+        results.push(q);
+        if (onePerCountry) break;
+      }
     }
   }
   return results;

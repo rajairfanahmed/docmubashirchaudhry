@@ -71,6 +71,37 @@ interface StoredGeoQuizState {
   filter: GeographyFilterState;
 }
 
+function matchesCountryFilter(
+  country: CountryEntity,
+  filter: GeographyFilterState,
+  options?: { includeLetter?: boolean }
+): boolean {
+  if (filter.continentId && country.continentId !== filter.continentId) return false;
+  if (filter.regionId && country.regionId !== filter.regionId) return false;
+
+  if (options?.includeLetter !== false && filter.letter) {
+    if (country.nameCommon.charAt(0).toUpperCase() !== filter.letter.toUpperCase()) {
+      return false;
+    }
+  }
+
+  const needle = filter.search.trim().toLowerCase();
+  if (needle) {
+    const hay = [
+      country.nameCommon,
+      country.nameOfficial,
+      country.isoAlpha2,
+      country.isoAlpha3,
+      ...country.capitals
+    ]
+      .join(' ')
+      .toLowerCase();
+    if (!hay.includes(needle)) return false;
+  }
+
+  return true;
+}
+
 function isStoredGeoQuizState(value: unknown): value is StoredGeoQuizState {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<StoredGeoQuizState>;
@@ -184,7 +215,8 @@ export function GeographyWorkbench({
         countries: pool,
         allCountries: countries,
         factTypes: FACT_SEQUENCE,
-        limit: Math.min(Math.max(pool.length * 3, 10), 20),
+        onePerCountry: true,
+        limit: pool.length,
         seed: `selection-${label}-${seed}`,
         maps: lookupMaps
       });
@@ -282,14 +314,7 @@ export function GeographyWorkbench({
           setCurrentPage(urlPage);
 
           if (!countrySlug && window.location.hash === '#quiz-module') {
-            const matchingPool = countries.filter((c) => {
-              if (urlFilter.continentId && c.continentId !== urlFilter.continentId) return false;
-              if (urlFilter.regionId && c.regionId !== urlFilter.regionId) return false;
-              if (urlFilter.letter && !c.nameCommon.toUpperCase().startsWith(urlFilter.letter)) {
-                return false;
-              }
-              return true;
-            });
+            const matchingPool = countries.filter((c) => matchesCountryFilter(c, urlFilter));
             const deckLabel =
               matchedRegion?.name ??
               matchedContinent?.name ??
@@ -341,17 +366,7 @@ export function GeographyWorkbench({
       }
 
       // Recompute selection deck with matching scope
-      const matchingPool = countries.filter((c) => {
-        if (restoredFilter.continentId && c.continentId !== restoredFilter.continentId) return false;
-        if (restoredFilter.regionId && c.regionId !== restoredFilter.regionId) return false;
-        if (
-          restoredFilter.letter &&
-          !c.nameCommon.toUpperCase().startsWith(restoredFilter.letter.toUpperCase())
-        ) {
-          return false;
-        }
-        return true;
-      });
+      const matchingPool = countries.filter((c) => matchesCountryFilter(c, restoredFilter));
       const deck = buildSelectionDeck(matchingPool, saved.label || 'Saved Selection', saved.roundSeed);
       if (deck.entries.length > 0) {
         setQuizDeck(deck);
@@ -373,26 +388,11 @@ export function GeographyWorkbench({
   ]);
 
   // Compute filtered list + A-Z counts
-  const baseMatches = useMemo(() => {
-    const q = filter.search.trim().toLowerCase();
-    return countries.filter((c) => {
-      if (filter.continentId && c.continentId !== filter.continentId) return false;
-      if (filter.regionId && c.regionId !== filter.regionId) return false;
-      if (q) {
-        const hay = [
-          c.nameCommon,
-          c.nameOfficial,
-          c.isoAlpha2,
-          c.isoAlpha3,
-          ...c.capitals
-        ]
-          .join(' ')
-          .toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-      return true;
-    });
-  }, [countries, filter.continentId, filter.regionId, filter.search]);
+  const baseMatches = useMemo(
+    () =>
+      countries.filter((c) => matchesCountryFilter(c, filter, { includeLetter: false })),
+    [countries, filter]
+  );
 
   const letterCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -418,15 +418,33 @@ export function GeographyWorkbench({
     [filteredCountries, countries, lookupMaps]
   );
 
-  const scopeLabel = useMemo(() => {
-    if (filter.letter) return `Letter "${filter.letter}"`;
-    if (filter.regionId) return regionsById.get(filter.regionId)?.name ?? 'Selected Region';
-    if (filter.continentId) return continentsById.get(filter.continentId)?.name ?? 'Selected Continent';
-    if (filter.search.trim()) return `Search "${filter.search.trim()}"`;
-    return 'All Verified Nations';
-  }, [filter, regionsById, continentsById]);
+  const resolveScopeLabel = useCallback(
+    (targetFilter: GeographyFilterState): string => {
+      if (targetFilter.letter) return `Letter "${targetFilter.letter}"`;
+      if (targetFilter.regionId) {
+        return regionsById.get(targetFilter.regionId)?.name ?? 'Selected Region';
+      }
+      if (targetFilter.continentId) {
+        return continentsById.get(targetFilter.continentId)?.name ?? 'Selected Continent';
+      }
+      if (targetFilter.search.trim()) return `Search "${targetFilter.search.trim()}"`;
+      return 'All Verified Nations';
+    },
+    [regionsById, continentsById]
+  );
 
-  const persistSnapshot = (nextIndex: number, nextAnswers: Record<number, string>, nextDeck = quizDeck, nextSeed = roundSeed) => {
+  const scopeLabel = useMemo(
+    () => resolveScopeLabel(filter),
+    [resolveScopeLabel, filter]
+  );
+
+  const persistSnapshot = (
+    nextIndex: number,
+    nextAnswers: Record<number, string>,
+    nextDeck = quizDeck,
+    nextSeed = roundSeed,
+    nextFilter = filter
+  ) => {
     storage.save({
       mode: nextDeck.mode,
       label: nextDeck.label,
@@ -434,8 +452,21 @@ export function GeographyWorkbench({
       roundSeed: nextSeed,
       currentIndex: nextIndex,
       answersByIndex: nextAnswers,
-      filter
+      filter: nextFilter
     });
+  };
+
+  const syncDeckIfUntouched = (nextFilter: GeographyFilterState) => {
+    if (quizDeck.mode !== 'selection' || Object.keys(answersByIndex).length > 0) {
+      return;
+    }
+    const nextPool = countries.filter((c) => matchesCountryFilter(c, nextFilter));
+    const nextLabel = resolveScopeLabel(nextFilter);
+    const nextDeck = buildSelectionDeck(nextPool, nextLabel, roundSeed);
+    setQuizDeck(nextDeck);
+    setCurrentIndex(0);
+    setIsScoreModalOpen(false);
+    persistSnapshot(0, {}, nextDeck, roundSeed, nextFilter);
   };
 
   const handleQuizSelection = () => {
@@ -480,12 +511,14 @@ export function GeographyWorkbench({
     setFilter(nextFilter);
     setCurrentPage(1);
     syncTier1Url(nextFilter, 1);
+    syncDeckIfUntouched(nextFilter);
   };
 
   const handleClearFilters = () => {
     setFilter(EMPTY_FILTER);
     setCurrentPage(1);
     syncTier1Url(EMPTY_FILTER, 1);
+    syncDeckIfUntouched(EMPTY_FILTER);
   };
 
   const activeEntry = quizDeck.entries[currentIndex];

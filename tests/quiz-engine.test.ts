@@ -1,11 +1,14 @@
 import { describe, it, expect } from 'vitest';
+import { NextRequest } from 'next/server';
 import { loadDefaultSnapshot } from '@/lib/data';
 import {
   generateGeographyQuestion,
+  generateGeographyQuizSet,
   isAnswerCorrect,
   isCountryEligibleForFact,
   normalizeAnswer
 } from '@/lib/quiz';
+import { GET as getCountriesQuizRoute } from '@/app/api/countries/quiz/route';
 
 describe('Geography Quiz Engine', () => {
   const snapshot = loadDefaultSnapshot();
@@ -85,6 +88,75 @@ describe('Geography Quiz Engine', () => {
     const tinyPool = snapshot.countries.slice(0, 2);
     expect(isCountryEligibleForFact(tinyPool[0], 'capital', tinyPool, maps)).toBe(false);
     expect(generateGeographyQuestion(tinyPool[0], 'capital', tinyPool, maps, 'tiny-1')).toBeNull();
+  });
+
+  it('builds one question per eligible country for B, A, and All selections with no 20-question cap', async () => {
+    const published = snapshot.countries.filter((c) => c.status === 'published');
+    const factSequence = ['capital', 'currency', 'language'] as const;
+
+    const bCountries = published.filter((c) => c.nameCommon.toUpperCase().startsWith('B'));
+    const bEligible = bCountries.filter((c) =>
+      factSequence.some((ft) => isCountryEligibleForFact(c, ft, published, maps))
+    );
+    expect(bEligible.length).toBe(21);
+
+    const bQuiz = generateGeographyQuizSet({
+      countries: bEligible,
+      allCountries: published,
+      onePerCountry: true,
+      seed: 'test-letter-B',
+      maps
+    });
+    expect(bQuiz).toHaveLength(21);
+    expect(new Set(bQuiz.map((q) => q.countryId)).size).toBe(21);
+
+    const aCountries = published.filter((c) => c.nameCommon.toUpperCase().startsWith('A'));
+    const aEligible = aCountries.filter((c) =>
+      factSequence.some((ft) => isCountryEligibleForFact(c, ft, published, maps))
+    );
+    const aQuiz = generateGeographyQuizSet({
+      countries: aEligible,
+      allCountries: published,
+      onePerCountry: true,
+      seed: 'test-letter-A',
+      maps
+    });
+    expect(aQuiz).toHaveLength(aEligible.length);
+
+    const allEligible = published.filter((c) =>
+      factSequence.some((ft) => isCountryEligibleForFact(c, ft, published, maps))
+    );
+    const allQuiz = generateGeographyQuizSet({
+      countries: allEligible,
+      allCountries: published,
+      onePerCountry: true,
+      seed: 'test-all',
+      maps
+    });
+    expect(allQuiz).toHaveLength(allEligible.length);
+    expect(allQuiz.length).toBeGreaterThan(200);
+
+    // Backend /api/countries/quiz endpoint returns full uncapped selection lengths
+    const bRes = await getCountriesQuizRoute(
+      new NextRequest('http://localhost:3000/api/countries/quiz?letter=B')
+    );
+    expect(bRes.status).toBe(200);
+    const bBody = await bRes.json();
+    expect(bBody.totalQuestions).toBe(21);
+    expect(bBody.questions).toHaveLength(21);
+
+    const allRes = await getCountriesQuizRoute(
+      new NextRequest('http://localhost:3000/api/countries/quiz?letter=all')
+    );
+    expect(allRes.status).toBe(200);
+    const allBody = await allRes.json();
+    expect(allBody.totalQuestions).toBe(allEligible.length);
+    expect(allBody.questions).toHaveLength(allEligible.length);
+
+    const badRes = await getCountriesQuizRoute(
+      new NextRequest('http://localhost:3000/api/countries/quiz?letter=INVALID')
+    );
+    expect(badRes.status).toBe(400);
   });
 });
 

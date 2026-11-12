@@ -29,6 +29,7 @@ export default async function GeographyWorkbenchPage() {
   const eligibleQuizQuestionCount = generateGeographyQuizSet({
     countries,
     allCountries: countries,
+    onePerCountry: true,
     maps: {
       currenciesById: new Map(reference.currencies.map((currency) => [currency.id, currency])),
       languagesById: new Map(reference.languages.map((language) => [language.id, language]))
