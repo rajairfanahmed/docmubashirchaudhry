@@ -31,7 +31,12 @@ export function resolveSiteUrl(
 
   const withProtocol = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
   try {
-    return new URL(withProtocol).origin;
+    const parsed = new URL(withProtocol);
+    const bareHost = parsed.hostname.replace(/^\[(.*)\]$/, '$1').toLowerCase();
+    if (bareHost === 'localhost' || bareHost === '127.0.0.1' || bareHost === '::1') {
+      return DEFAULT_SITE_URL;
+    }
+    return parsed.origin;
   } catch {
     return DEFAULT_SITE_URL;
   }

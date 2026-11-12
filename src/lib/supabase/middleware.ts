@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { isAdminEmail, parsePublicSupabaseConfig } from '@/lib/env';
-import { sanitizeNextPath } from '@/lib/auth/guards';
+import { resolveRequestOrigin, sanitizeNextPath } from '@/lib/auth/guards';
 import { buildSecureAuthCookieOptions } from './server';
 
 const SUPABASE_AUTH_CALLBACK_KEYS = [
@@ -31,7 +31,7 @@ function buildAuthCallbackRedirect(request: NextRequest): NextResponse | null {
     return null;
   }
 
-  const callbackUrl = new URL('/api/auth/callback', request.url);
+  const callbackUrl = new URL('/api/auth/callback', resolveRequestOrigin(request));
   for (const key of SUPABASE_AUTH_CALLBACK_KEYS) {
     const val = searchParams.get(key);
     if (val) callbackUrl.searchParams.set(key, val);
@@ -98,7 +98,7 @@ export async function updateSupabaseSession(request: NextRequest): Promise<NextR
           { status: 503, headers: { 'Cache-Control': 'no-store' } }
         );
       }
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/', resolveRequestOrigin(request)));
     }
     return response;
   }
@@ -154,7 +154,7 @@ export async function updateSupabaseSession(request: NextRequest): Promise<NextR
           { status: 401, headers: { 'Cache-Control': 'no-store' } }
         );
       }
-      const loginRedirect = new URL('/', request.url);
+      const loginRedirect = new URL('/', resolveRequestOrigin(request));
       loginRedirect.searchParams.set('auth', 'required');
       loginRedirect.searchParams.set('next', pathname);
       return NextResponse.redirect(loginRedirect);
@@ -167,7 +167,7 @@ export async function updateSupabaseSession(request: NextRequest): Promise<NextR
           { status: 403, headers: { 'Cache-Control': 'no-store' } }
         );
       }
-      return NextResponse.redirect(new URL('/', request.url));
+      return NextResponse.redirect(new URL('/', resolveRequestOrigin(request)));
     }
   }
 

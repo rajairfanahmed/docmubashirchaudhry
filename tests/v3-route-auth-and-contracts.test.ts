@@ -613,6 +613,7 @@ describe('v3.0 API Authorization, Gating & Private Signed Download Contracts (Mo
     const codeRes = await updateSupabaseSession(codeReq);
     expect(codeRes.status).toBe(302);
     const codeLocation = new URL(codeRes.headers.get('location') ?? '');
+    expect(codeLocation.origin).toBe('https://docmubashirchaudhry.vercel.app');
     expect(codeLocation.pathname).toBe('/api/auth/callback');
     expect(codeLocation.searchParams.get('code')).toBe('ceb1db9d-6bc3-4f27-a5d0-943c78f1c37f');
     expect(codeLocation.searchParams.get('next')).toBe('/');
@@ -631,6 +632,13 @@ describe('v3.0 API Authorization, Gating & Private Signed Download Contracts (Mo
     const prevEnv = process.env.NODE_ENV;
     const prevSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
     try {
+      const localhostInDevReq = new NextRequest('http://localhost:3000/api/auth/signup', {
+        headers: { host: 'localhost:3000' }
+      });
+      expect(resolveRequestOrigin(localhostInDevReq)).toBe(
+        'https://docmubashirchaudhry.vercel.app'
+      );
+
       (process.env as Record<string, string | undefined>).NODE_ENV = 'production';
       process.env.NEXT_PUBLIC_SITE_URL = 'https://docmubashirchaudhry.vercel.app';
 

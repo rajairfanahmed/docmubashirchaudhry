@@ -138,32 +138,42 @@ export function sanitizeNextPath(raw?: string | null): string {
 }
 
 function isLoopbackHost(host: string): boolean {
-  const bare = host.split(':')[0]?.toLowerCase() ?? '';
-  return bare === 'localhost' || bare === '127.0.0.1' || bare === '::1' || bare === '[::1]';
+  const bare = host.replace(/^\[(.*)\]$/, '$1').split(':')[0]?.toLowerCase() ?? '';
+  return bare === 'localhost' || bare === '127.0.0.1' || bare === '::1';
 }
 
+/**
+ * Resolves the public origin for auth redirects and email links.
+ * Never returns localhost or loopback addresses in any environment; falls back
+ * cleanly to the configured official domain (`https://docmubashirchaudhry.vercel.app`).
+ */
 export function resolveRequestOrigin(request: NextRequest): string {
-  const isProduction = process.env.NODE_ENV === 'production';
+  const canonicalOrigin = resolveSiteUrl();
   const forwardedHost = request.headers.get('x-forwarded-host')?.split(',')[0]?.trim();
   const forwardedProto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim() || 'https';
   const hostHeader = request.headers.get('host')?.split(',')[0]?.trim();
 
-  if (isProduction) {
-    if (
-      forwardedHost &&
-      /^[a-z0-9.-]+(?::\d+)?$/i.test(forwardedHost) &&
-      !isLoopbackHost(forwardedHost)
-    ) {
-      return `${forwardedProto}://${forwardedHost}`;
-    }
-
-    if (hostHeader && /^[a-z0-9.-]+(?::\d+)?$/i.test(hostHeader) && !isLoopbackHost(hostHeader)) {
-      return `https://${hostHeader}`;
-    }
-
-    return resolveSiteUrl();
+  if (
+    forwardedHost &&
+    /^[a-z0-9.-]+(?::\d+)?$/i.test(forwardedHost) &&
+    !isLoopbackHost(forwardedHost)
+  ) {
+    return `${forwardedProto}://${forwardedHost}`;
   }
 
-  return request.nextUrl.origin;
+  if (hostHeader && /^[a-z0-9.-]+(?::\d+)?$/i.test(hostHeader) && !isLoopbackHost(hostHeader)) {
+    return `https://${hostHeader}`;
+  }
+
+  try {
+    const reqUrl = new URL(request.url);
+    if (!isLoopbackHost(reqUrl.hostname)) {
+      return reqUrl.origin;
+    }
+  } catch {
+    // Fall through to official canonical origin
+  }
+
+  return canonicalOrigin;
 }
 

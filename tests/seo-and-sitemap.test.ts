@@ -175,6 +175,12 @@ describe('Dynamic Sitemap & Robots Configuration', () => {
       })
     ).toBe('https://docmubashirchaudhry.vercel.app');
     expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: 'http://[::invalid' })).toBe(DEFAULT_SITE_URL);
+    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: 'http://localhost:3000' })).toBe(
+      DEFAULT_SITE_URL
+    );
+    expect(resolveSiteUrl({ NEXT_PUBLIC_SITE_URL: 'http://127.0.0.1:3000' })).toBe(
+      DEFAULT_SITE_URL
+    );
   });
 
   it('uses the Vercel canonical domain, emits CollectionPage JSON-LD, hardens robots, and keeps country meta truthful', async () => {
