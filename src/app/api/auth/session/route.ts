@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getOptionalSessionUser } from '@/lib/auth/guards';
+import { fetchSupabaseAuthSettings } from '@/lib/supabase/server';
 import { handleRouteError } from '@/lib/v3/http';
 
 export const dynamic = 'force-dynamic';
@@ -21,10 +22,19 @@ export async function GET(): Promise<NextResponse> {
       );
     }
 
+    const authSettings = await fetchSupabaseAuthSettings();
+    const providers = authSettings
+      ? {
+          email: authSettings.emailEnabled,
+          google: authSettings.googleEnabled
+        }
+      : undefined;
+
     const response = NextResponse.json(
       {
         configured: true,
         authenticated: Boolean(session.user),
+        ...(providers ? { providers } : {}),
         user: session.user
           ? {
               id: session.user.id,

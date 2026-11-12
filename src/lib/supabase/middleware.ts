@@ -8,6 +8,7 @@ const SUPABASE_AUTH_CALLBACK_KEYS = [
   'code',
   'token_hash',
   'type',
+  'flow',
   'error',
   'error_code',
   'error_description'
@@ -31,7 +32,7 @@ function buildAuthCallbackRedirect(request: NextRequest): NextResponse | null {
   }
 
   const callbackUrl = new URL('/api/auth/callback', request.url);
-  for (const key of ['code', 'token_hash', 'type', 'error', 'error_description'] as const) {
+  for (const key of SUPABASE_AUTH_CALLBACK_KEYS) {
     const val = searchParams.get(key);
     if (val) callbackUrl.searchParams.set(key, val);
   }

@@ -32,6 +32,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const code = searchParams.get('code')?.trim();
   const tokenHash = searchParams.get('token_hash')?.trim();
   const otpType = searchParams.get('type')?.trim() as EmailOtpType | undefined;
+  const flow = searchParams.get('flow')?.trim();
+  const isRecoveryFlow = flow === 'recovery' || otpType === 'recovery';
+  const successFlag: Record<string, string> = isRecoveryFlow
+    ? { authReset: '1' }
+    : { authConfirmed: '1' };
+  const providerErrorCode = searchParams.get('error_code')?.trim();
   const providerError = searchParams.get('error_description') ?? searchParams.get('error');
 
   if (!parsePublicSupabaseConfig()) {
@@ -44,10 +50,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  if (providerError) {
+  if (providerError || providerErrorCode) {
+    const normalized = `${providerErrorCode ?? ''} ${providerError ?? ''}`.toLowerCase();
+    const friendlyError = normalized.includes('otp_expired')
+      ? 'This email verification or reset link has expired. Request a new email below.'
+      : normalized.includes('provider is not enabled') || normalized.includes('unsupported provider')
+      ? 'google_provider_disabled'
+      : 'Authentication cancelled or link expired. Please try again.';
+
     return NextResponse.redirect(
       buildCallbackRedirectUrl(origin, '/', {
-        authError: 'Authentication cancelled or link expired.'
+        authError: friendlyError
       }),
       {
         status: 302,
@@ -56,7 +69,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  let failureMessage = 'Authentication link expired or invalid.';
+  let failureMessage = 'Authentication link expired or invalid. Request a new email below.';
 
   try {
     const { supabase, applyAuthCookies } = await createSupabaseServerClient();
@@ -67,7 +80,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         await syncUserProfile(data.user);
         return applyAuthCookies(
           NextResponse.redirect(
-            buildCallbackRedirectUrl(origin, nextPath, { authConfirmed: '1' }),
+            buildCallbackRedirectUrl(origin, nextPath, successFlag),
             {
               status: 302,
               headers: { 'Cache-Control': 'no-store' }
@@ -89,7 +102,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         await syncUserProfile(data.user);
         return applyAuthCookies(
           NextResponse.redirect(
-            buildCallbackRedirectUrl(origin, nextPath, { authConfirmed: '1' }),
+            buildCallbackRedirectUrl(origin, nextPath, successFlag),
             {
               status: 302,
               headers: { 'Cache-Control': 'no-store' }

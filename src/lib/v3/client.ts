@@ -9,12 +9,14 @@ import type {
   AdminUploadUrlResponse,
   AdminUsersAnalyticsResponse,
   ApiErrorFieldDetail,
+  AuthMessageResponse,
   AuthSessionState,
   BulkImportQuestionsInput,
   BulkImportResult,
   CreatePdfInput,
   CreateQuestionInput,
   CreateQuizInput,
+  ForgotPasswordInput,
   LoginInput,
   LoginResponse,
   PdfDownloadGrant,
@@ -26,8 +28,10 @@ import type {
   QuizStartResponse,
   QuizSubmitInput,
   QuizSubmitResponse,
+  ResendVerificationInput,
   SignupInput,
   SignupResponse,
+  UpdatePasswordInput,
   UpdatePdfInput,
   UpdateQuestionInput,
   UpdateQuizInput,
@@ -165,11 +169,21 @@ async function requestJson<T>(
     if (!res.ok) {
       const apiError = (data as { error?: { code?: string; message?: string; details?: unknown } } | null)
         ?.error;
+      const firstDetailMessage =
+        Array.isArray(apiError?.details) &&
+        typeof (apiError.details[0] as { message?: unknown } | undefined)?.message === 'string'
+          ? String((apiError.details[0] as { message: string }).message)
+          : undefined;
+      const resolvedMessage =
+        apiError?.code === 'VALIDATION_ERROR' && firstDetailMessage
+          ? firstDetailMessage
+          : apiError?.message;
+
       throw new V3ClientError({
         status: res.status,
         code: apiError?.code ?? `HTTP_${res.status}`,
         message:
-          apiError?.message ??
+          resolvedMessage ??
           (res.status === 401
             ? 'Please sign in to continue.'
             : res.status === 403
@@ -374,6 +388,12 @@ export const v3Api = {
       requestJson<LoginResponse>('/api/auth/login', { method: 'POST', body }),
     signup: (body: SignupInput) =>
       requestJson<SignupResponse>('/api/auth/signup', { method: 'POST', body }),
+    resendVerification: (body: ResendVerificationInput) =>
+      requestJson<AuthMessageResponse>('/api/auth/resend', { method: 'POST', body }),
+    forgotPassword: (body: ForgotPasswordInput) =>
+      requestJson<AuthMessageResponse>('/api/auth/forgot-password', { method: 'POST', body }),
+    updatePassword: (body: UpdatePasswordInput) =>
+      requestJson<AuthMessageResponse>('/api/auth/update-password', { method: 'POST', body }),
     logout: () =>
       requestJson<{ ok: boolean }>('/api/auth/logout', { method: 'POST' })
   },

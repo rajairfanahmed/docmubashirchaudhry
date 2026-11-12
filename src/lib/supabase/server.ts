@@ -4,6 +4,7 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js';
 import {
   isAdminEmail,
+  parsePublicSupabaseConfig,
   requirePublicSupabaseConfig,
   requireSecretSupabaseConfig
 } from '@/lib/env';
@@ -142,5 +143,255 @@ export async function syncUserProfile(user: User): Promise<ProfileRow | null> {
   }
 
   return data;
+}
+
+export interface SupabaseAuthProviderSettings {
+  emailEnabled: boolean;
+  googleEnabled: boolean;
+  mailerAutoconfirm: boolean;
+  signupDisabled: boolean;
+}
+
+const AUTH_SETTINGS_CACHE_TTL_MS = 30_000;
+let cachedAuthSettings: {
+  url: string;
+  value: SupabaseAuthProviderSettings;
+  expiresAtMs: number;
+} | null = null;
+
+export function clearAuthSettingsCacheForTests(): void {
+  cachedAuthSettings = null;
+}
+
+/**
+ * Fetches enabled auth providers from Supabase public /auth/v1/settings (short TTL cached)
+ * so OAuth routes and UI never redirect users into raw Supabase 400 provider-disabled errors.
+ */
+export async function fetchSupabaseAuthSettings(
+  options?: { bypassCache?: boolean }
+): Promise<SupabaseAuthProviderSettings | null> {
+  const publicConfig = parsePublicSupabaseConfig();
+  if (!publicConfig) return null;
+
+  const now = Date.now();
+  if (
+    !options?.bypassCache &&
+    cachedAuthSettings &&
+    cachedAuthSettings.url === publicConfig.url &&
+    cachedAuthSettings.expiresAtMs > now
+  ) {
+    return cachedAuthSettings.value;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 2_500);
+
+  try {
+    const res = await fetch(`${publicConfig.url}/auth/v1/settings`, {
+      method: 'GET',
+      headers: {
+        apikey: publicConfig.publishableKey,
+        Accept: 'application/json'
+      },
+      cache: 'no-store',
+      signal: controller.signal
+    });
+
+    if (!res.ok) return null;
+
+    const payload = (await res.json().catch(() => null)) as {
+      external?: Record<string, unknown>;
+      disable_signup?: boolean;
+      mailer_autoconfirm?: boolean;
+    } | null;
+
+    if (!payload || typeof payload !== 'object') return null;
+
+    const value: SupabaseAuthProviderSettings = {
+      emailEnabled: payload.external?.email !== false,
+      googleEnabled: payload.external?.google === true,
+      mailerAutoconfirm: payload.mailer_autoconfirm === true,
+      signupDisabled: payload.disable_signup === true
+    };
+
+    cachedAuthSettings = {
+      url: publicConfig.url,
+      value,
+      expiresAtMs: now + AUTH_SETTINGS_CACHE_TTL_MS
+    };
+
+    return value;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export type SupabaseAuthErrorContext =
+  | 'signup'
+  | 'login'
+  | 'resend'
+  | 'recovery'
+  | 'update_password'
+  | 'oauth';
+
+export interface MappedSupabaseAuthError {
+  status: number;
+  code: string;
+  message: string;
+}
+
+const AUTH_ERROR_DEFAULTS: Record<SupabaseAuthErrorContext, MappedSupabaseAuthError> = {
+  signup: {
+    status: 400,
+    code: 'SIGNUP_FAILED',
+    message: 'Unable to create your account right now. Please try again.'
+  },
+  login: {
+    status: 401,
+    code: 'INVALID_CREDENTIALS',
+    message: 'Incorrect email or password. Please check your credentials and try again.'
+  },
+  resend: {
+    status: 400,
+    code: 'RESEND_FAILED',
+    message: 'Unable to resend verification email right now. Please try again shortly.'
+  },
+  recovery: {
+    status: 400,
+    code: 'RECOVERY_FAILED',
+    message: 'Unable to send a password reset email right now. Please try again shortly.'
+  },
+  update_password: {
+    status: 400,
+    code: 'PASSWORD_UPDATE_FAILED',
+    message: 'Unable to update your password right now. Please request a new reset link.'
+  },
+  oauth: {
+    status: 400,
+    code: 'OAUTH_INIT_FAILED',
+    message: 'Unable to initialize Google sign-in right now.'
+  }
+};
+
+export function mapSupabaseAuthError(
+  error: { message?: string; code?: string; status?: number } | null | undefined,
+  context: SupabaseAuthErrorContext
+): MappedSupabaseAuthError {
+  const rawMessage = (error?.message ?? '').trim();
+  const normalizedMsg = rawMessage.toLowerCase();
+  const rawCode = (error?.code ?? '').trim().toLowerCase();
+
+  if (
+    rawCode === 'user_already_exists' ||
+    rawCode === 'email_exists' ||
+    normalizedMsg.includes('already registered') ||
+    normalizedMsg.includes('already exists') ||
+    normalizedMsg.includes('already been registered')
+  ) {
+    return {
+      status: 409,
+      code: 'ACCOUNT_ALREADY_EXISTS',
+      message: 'An account with this email is already created. Please sign in instead.'
+    };
+  }
+
+  if (rawCode === 'email_not_confirmed' || normalizedMsg.includes('email not confirmed')) {
+    return {
+      status: 403,
+      code: 'EMAIL_NOT_CONFIRMED',
+      message:
+        'Your account exists, but your email is not verified yet. Open the confirmation link in your inbox or resend a verification email below.'
+    };
+  }
+
+  if (rawCode === 'invalid_credentials' || normalizedMsg.includes('invalid login credentials')) {
+    return {
+      status: 401,
+      code: 'INVALID_CREDENTIALS',
+      message: 'Incorrect email or password. Double-check your details or create an account.'
+    };
+  }
+
+  if (
+    rawCode === 'over_email_send_rate_limit' ||
+    rawCode === 'over_request_rate_limit' ||
+    error?.status === 429 ||
+    normalizedMsg.includes('rate limit') ||
+    normalizedMsg.includes('too many requests') ||
+    normalizedMsg.includes('for security purposes')
+  ) {
+    return {
+      status: 429,
+      code: 'AUTH_RATE_LIMITED',
+      message: 'Too many authentication requests in a short time. Please wait a minute and try again.'
+    };
+  }
+
+  if (
+    rawCode === 'weak_password' ||
+    normalizedMsg.includes('password should be') ||
+    normalizedMsg.includes('weak password')
+  ) {
+    return {
+      status: 400,
+      code: 'WEAK_PASSWORD',
+      message: 'Password is too weak. Use at least 8 characters with letters and numbers.'
+    };
+  }
+
+  if (
+    rawCode === 'same_password' ||
+    normalizedMsg.includes('should be different from the old password')
+  ) {
+    return {
+      status: 400,
+      code: 'SAME_PASSWORD',
+      message: 'Choose a new password that is different from your current password.'
+    };
+  }
+
+  if (
+    rawCode === 'validation_failed' &&
+    (normalizedMsg.includes('provider is not enabled') || normalizedMsg.includes('unsupported provider'))
+  ) {
+    return {
+      status: 400,
+      code: 'PROVIDER_DISABLED',
+      message: 'Google Sign-In is not enabled yet. Use email and password below.'
+    };
+  }
+
+  if (rawCode === 'email_address_invalid' || normalizedMsg.includes('unable to validate email')) {
+    return {
+      status: 400,
+      code: 'INVALID_EMAIL',
+      message: 'Please enter a valid email address.'
+    };
+  }
+
+  if (rawCode === 'signup_disabled' || normalizedMsg.includes('signups not allowed')) {
+    return {
+      status: 403,
+      code: 'SIGNUP_DISABLED',
+      message: 'New account registrations are currently paused.'
+    };
+  }
+
+  if (rawCode === 'user_banned' || normalizedMsg.includes('user is banned')) {
+    return {
+      status: 403,
+      code: 'ACCOUNT_DISABLED',
+      message: 'This account is currently disabled.'
+    };
+  }
+
+  const fallback = AUTH_ERROR_DEFAULTS[context];
+  return {
+    status: error?.status && error.status >= 400 && error.status < 500 ? error.status : fallback.status,
+    code: fallback.code,
+    message: rawMessage || fallback.message
+  };
 }
 

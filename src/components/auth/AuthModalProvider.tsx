@@ -12,12 +12,25 @@ const LazyAuthModal = dynamic(
   { ssr: false }
 );
 
+export type AuthModalMode = 'login' | 'signup' | 'forgot' | 'reset';
+
 export interface AuthPromptRequest {
   title?: string;
   description?: string;
   nextUrl?: string;
-  initialMode?: 'login' | 'signup';
+  initialMode?: AuthModalMode;
+  initialError?: string | null;
   onAuthenticated?: () => void | Promise<void>;
+}
+
+function resolveFriendlyAuthError(rawCode: string): string {
+  if (rawCode === 'backend_not_configured') {
+    return 'Authentication service is not configured for this environment.';
+  }
+  if (rawCode === 'google_provider_disabled') {
+    return 'Google Sign-In is not enabled in Supabase yet. Sign in or create an account with your email below.';
+  }
+  return rawCode;
 }
 
 interface AuthModalContextValue {
@@ -53,7 +66,8 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
             ? `${window.location.pathname}${window.location.search}`
             : '/')
       ),
-      initialMode: nextRequest.initialMode ?? 'login'
+      initialMode: nextRequest.initialMode ?? 'login',
+      initialError: nextRequest.initialError ?? null
     });
     setIsOpen(true);
   }, []);
@@ -85,8 +99,9 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
     const nextParam = url.searchParams.get('next');
     const authError = url.searchParams.get('authError');
     const authConfirmed = url.searchParams.get('authConfirmed') === '1';
+    const authReset = url.searchParams.get('authReset') === '1';
 
-    if (!authRequired && !authError && !authConfirmed) return;
+    if (!authRequired && !authError && !authConfirmed && !authReset) return;
 
     if (authConfirmed) {
       void refreshSession();
@@ -99,30 +114,41 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
       });
     }
 
-    if (authError) {
-      showToast({
-        title: 'Authentication could not complete',
-        description:
-          authError === 'backend_not_configured'
-            ? 'Backend authentication is not configured for this environment.'
-            : authError,
-        tone: 'warning'
+    if (authReset) {
+      void refreshSession();
+      openAuthModal({
+        title: 'Set a New Password',
+        description: 'Choose a new password of at least 8 characters for your account.',
+        nextUrl: sanitizeClientNextPath(nextParam ?? url.pathname),
+        initialMode: 'reset'
       });
-    }
-
-    if (authRequired) {
-      const safeNext = sanitizeClientNextPath(nextParam);
+    } else if (authError || authRequired) {
+      const safeNext = sanitizeClientNextPath(nextParam ?? url.pathname);
       const isAdminTarget = safeNext === '/admin' || safeNext.startsWith('/admin/');
+      const friendlyError = authError ? resolveFriendlyAuthError(authError) : null;
+
+      if (friendlyError) {
+        showToast({
+          title: 'Authentication notice',
+          description: friendlyError,
+          tone: 'warning'
+        });
+      }
+
       openAuthModal({
         title: isAdminTarget ? 'Administrator Sign-In Required' : 'Sign in to continue',
         description: isAdminTarget
           ? 'Sign in with an allow-listed administrator account to open the Admin Console.'
-          : 'Sign in with your account to continue to your requested page.',
+          : 'Sign in or create a free account to continue.',
         nextUrl: safeNext,
-        onAuthenticated: () => {
-          router.push(safeNext);
-          router.refresh();
-        }
+        initialMode: 'login',
+        initialError: friendlyError,
+        onAuthenticated: authRequired
+          ? () => {
+              router.push(safeNext);
+              router.refresh();
+            }
+          : undefined
       });
     }
 
@@ -130,6 +156,7 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
     url.searchParams.delete('next');
     url.searchParams.delete('authError');
     url.searchParams.delete('authConfirmed');
+    url.searchParams.delete('authReset');
     const cleanTarget = `${url.pathname}${url.search}${url.hash}`;
     window.history.replaceState(null, '', cleanTarget);
   }, [pathname, openAuthModal, refreshSession, router, showToast]);
@@ -167,6 +194,7 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
           reasonDescription={request?.description}
           nextUrl={request?.nextUrl ?? '/'}
           initialMode={request?.initialMode ?? 'login'}
+          initialError={request?.initialError ?? null}
           onSuccessResume={completeAuthAction}
           onClose={closeAuthModal}
         />

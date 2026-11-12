@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient, resolveAuthProvider, syncUserProfile } from '@/lib/supabase/server';
+import {
+  createSupabaseServerClient,
+  mapSupabaseAuthError,
+  resolveAuthProvider,
+  syncUserProfile
+} from '@/lib/supabase/server';
 import { isAdminEmail } from '@/lib/env';
 import { apiErrorResponse, handleRouteError, parseJsonWithSchema } from '@/lib/v3/http';
 import { checkRateLimit, extractClientIp, rateLimitExceededResponse } from '@/lib/v3/rate-limit';
@@ -26,11 +31,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     if (error || !data.user) {
-      return apiErrorResponse({
-        status: 401,
-        code: 'INVALID_CREDENTIALS',
-        message: error?.message ?? 'Invalid email or password.'
-      });
+      return apiErrorResponse(mapSupabaseAuthError(error, 'login'));
     }
 
     const profile = await syncUserProfile(data.user);

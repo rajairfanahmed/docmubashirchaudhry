@@ -24,6 +24,26 @@ export const LoginBodySchema = z
   })
   .strict();
 
+export const ResendVerificationBodySchema = z
+  .object({
+    email: z.string().trim().email().max(254),
+    next: z.string().trim().max(256).optional()
+  })
+  .strict();
+
+export const ForgotPasswordBodySchema = z
+  .object({
+    email: z.string().trim().email().max(254),
+    next: z.string().trim().max(256).optional()
+  })
+  .strict();
+
+export const UpdatePasswordBodySchema = z
+  .object({
+    password: z.string().min(8).max(128)
+  })
+  .strict();
+
 export const PdfUploadUrlRequestSchema = z
   .object({
     filename: z.string().trim().min(5).max(180),

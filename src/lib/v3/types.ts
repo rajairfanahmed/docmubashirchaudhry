@@ -45,10 +45,16 @@ export interface AuthUser {
   isAdmin: boolean;
 }
 
+export interface AuthSessionProviders {
+  email: boolean;
+  google: boolean;
+}
+
 export interface AuthSessionState {
   configured: boolean;
   authenticated: boolean;
   user: AuthUser | null;
+  providers?: AuthSessionProviders;
 }
 
 export interface SignupInput {
@@ -62,6 +68,7 @@ export interface SignupResponse {
   ok: boolean;
   requiresEmailVerification: boolean;
   user: AuthUser | null;
+  message?: string;
 }
 
 export interface LoginInput {
@@ -72,6 +79,25 @@ export interface LoginInput {
 export interface LoginResponse {
   ok: boolean;
   user: AuthUser;
+}
+
+export interface ResendVerificationInput {
+  email: string;
+  next?: string;
+}
+
+export interface ForgotPasswordInput {
+  email: string;
+  next?: string;
+}
+
+export interface UpdatePasswordInput {
+  password: string;
+}
+
+export interface AuthMessageResponse {
+  ok: boolean;
+  message: string;
 }
 
 /* -------------------------------------------------------------------------- */
