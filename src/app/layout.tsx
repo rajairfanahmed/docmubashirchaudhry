@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { Providers } from './providers';
 import { Navbar } from '@/components/layout/Navbar';
@@ -10,20 +10,20 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { DEFAULT_OG_IMAGE_PATH, SITE_NAME, SITE_URL } from '@/lib/seo/metadata';
 import { buildRootSchema } from '@/lib/seo/structured-data';
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['600', '700'],
+const plusJakartaSans = localFont({
+  src: './fonts/plus-jakarta-sans-latin.woff2',
+  weight: '600 700',
   variable: '--font-jakarta',
   display: 'swap',
-  adjustFontFallback: true
+  adjustFontFallback: 'Arial'
 });
 
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+const inter = localFont({
+  src: './fonts/inter-latin.woff2',
+  weight: '400 700',
   variable: '--font-inter',
   display: 'swap',
-  adjustFontFallback: true
+  adjustFontFallback: 'Arial'
 });
 
 export const viewport: Viewport = {

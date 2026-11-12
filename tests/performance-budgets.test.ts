@@ -74,10 +74,12 @@ describe('Step 10 Performance Budgets, Code Splitting & Asset Optimization', () 
     const badge = readProjectFile('src', 'components', 'branding', 'CommissionBrandBadge.tsx');
     const pdfDetail = readProjectFile('src', 'components', 'library', 'PdfDetailPanel.tsx');
 
-    expect(layout).toContain("subsets: ['latin']");
-    expect(layout).toContain("weight: ['600', '700']");
+    expect(layout).toContain("from 'next/font/local'");
+    expect(layout).toContain('plus-jakarta-sans-latin.woff2');
+    expect(layout).toContain('inter-latin.woff2');
+    expect(layout).toContain("weight: '600 700'");
     expect(layout).toContain("display: 'swap'");
-    expect(layout).toContain('adjustFontFallback: true');
+    expect(layout).toContain("adjustFontFallback: 'Arial'");
     expect(layout).toContain('href="https://img.logo.dev"');
     expect(layout).toContain('href="https://flagcdn.com"');
 
