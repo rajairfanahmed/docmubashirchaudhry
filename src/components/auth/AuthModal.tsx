@@ -1,15 +1,15 @@
 'use client';
 
 import React, { useEffect, useId, useState } from 'react';
-import { ArrowLeft, Eye, EyeOff, KeyRound, Lock, MailCheck, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Lock, MailCheck, ShieldCheck } from 'lucide-react';
 import { useSignIn, useSignUp } from '@clerk/nextjs/legacy';
-import { useClerk } from '@clerk/nextjs';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { FieldWrapper, TextInput } from '@/components/ui/FormPrimitives';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useAuthSession } from '@/components/auth/AuthSessionProvider';
 import type { AuthModalMode } from '@/components/auth/AuthModalProvider';
+import { isV3ClientError, v3Api } from '@/lib/v3/client';
 import { cn } from '@/lib/utils';
 
 export interface AuthModalProps {
@@ -128,8 +128,7 @@ export function AuthModal({
 }: AuthModalProps) {
   const { isLoaded: isSignInLoaded, signIn, setActive: setSignInActive } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp, setActive: setSignUpActive } = useSignUp();
-  const clerk = useClerk();
-  const { refreshSession } = useAuthSession();
+  const { setAuthenticatedUser, refreshSession } = useAuthSession();
   const { showToast } = useToast();
   const baseId = useId();
 
@@ -213,16 +212,19 @@ export function AuthModal({
   };
 
   const handleGoogleSignIn = async () => {
-    if (!isSignInLoaded || !signIn) return;
     setIsSubmitting(true);
     setFormError(null);
     setFormErrorCode(null);
     try {
-      await signIn.authenticateWithRedirect({
-        strategy: 'oauth_google',
-        redirectUrl: '/sso-callback',
-        redirectUrlComplete: nextUrl || '/'
-      });
+      if (isSignInLoaded && signIn) {
+        await signIn.authenticateWithRedirect({
+          strategy: 'oauth_google',
+          redirectUrl: '/sso-callback',
+          redirectUrlComplete: nextUrl || '/'
+        });
+        return;
+      }
+      window.location.href = '/sso-callback';
     } catch (err) {
       const { message, code } = extractClerkErrorMessage(err);
       setFormError(message);
@@ -232,16 +234,19 @@ export function AuthModal({
   };
 
   const handleGoogleSignUp = async () => {
-    if (!isSignUpLoaded || !signUp) return;
     setIsSubmitting(true);
     setFormError(null);
     setFormErrorCode(null);
     try {
-      await signUp.authenticateWithRedirect({
-        strategy: 'oauth_google',
-        redirectUrl: '/sso-callback',
-        redirectUrlComplete: nextUrl || '/'
-      });
+      if (isSignUpLoaded && signUp) {
+        await signUp.authenticateWithRedirect({
+          strategy: 'oauth_google',
+          redirectUrl: '/sso-callback',
+          redirectUrlComplete: nextUrl || '/'
+        });
+        return;
+      }
+      window.location.href = '/sso-callback';
     } catch (err) {
       const { message, code } = extractClerkErrorMessage(err);
       setFormError(message);
@@ -251,11 +256,14 @@ export function AuthModal({
   };
 
   const handleResendCode = async () => {
-    if (!isSignUpLoaded || !signUp) return;
     setIsResending(true);
     setResendMessage(null);
     try {
-      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      if (isSignUpLoaded && signUp) {
+        await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      } else {
+        await v3Api.auth.resendVerification({ email: pendingVerificationEmail || email });
+      }
       const msg = 'A fresh verification code has been sent to your email.';
       setResendMessage(msg);
       showToast({
@@ -286,78 +294,114 @@ export function AuthModal({
     try {
       // Flow 1: Login
       if (mode === 'login') {
-        if (!isSignInLoaded || !signIn) return;
-        const result = await signIn.create({
-          identifier: email.trim(),
+        if (isSignInLoaded && signIn) {
+          const result = await signIn.create({
+            identifier: email.trim(),
+            password
+          });
+
+          if (result.status === 'complete') {
+            if (setSignInActive) {
+              await setSignInActive({ session: result.createdSessionId });
+            }
+            await refreshSession();
+            showToast({
+              title: 'Signed in cleanly',
+              description: `Welcome back, ${email.trim()}.`,
+              tone: 'success'
+            });
+            await onSuccessResume();
+            return;
+          }
+
+          if (result.status === 'needs_first_factor') {
+            setFormError('Additional authentication factor required.');
+            return;
+          }
+        }
+
+        // Direct backend API route connection
+        const backendRes = await v3Api.auth.login({
+          email: email.trim(),
           password
         });
 
-        if (result.status === 'complete') {
-          if (setSignInActive) {
-            await setSignInActive({ session: result.createdSessionId });
-          }
-          await refreshSession();
-          showToast({
-            title: 'Signed in cleanly',
-            description: `Welcome back, ${email.trim()}.`,
-            tone: 'success'
-          });
-          await onSuccessResume();
-          return;
-        }
-
-        if (result.status === 'needs_first_factor') {
-          setFormError('Additional authentication factor required.');
-          return;
-        }
-
-        setFormError('Authentication could not be completed. Please try again.');
+        setAuthenticatedUser(backendRes.user);
+        await refreshSession();
+        showToast({
+          title: 'Signed in cleanly',
+          description: `Welcome back, ${backendRes.user.displayName || backendRes.user.email}.`,
+          tone: 'success'
+        });
+        await onSuccessResume();
         return;
       }
 
       // Flow 2: Signup
       if (mode === 'signup') {
-        if (!isSignUpLoaded || !signUp) return;
-        await signUp.create({
-          emailAddress: email.trim(),
+        if (isSignUpLoaded && signUp) {
+          await signUp.create({
+            emailAddress: email.trim(),
+            password,
+            firstName: displayName.trim() || undefined
+          });
+
+          await signUp.prepareEmailAddressVerification({
+            strategy: 'email_code'
+          });
+
+          setPendingVerificationEmail(email.trim());
+          setVerificationCode('');
+          setMode('verify');
+          showToast({
+            title: 'Verification code sent',
+            description: `We sent a 6-digit code to ${email.trim()}.`,
+            tone: 'info'
+          });
+          return;
+        }
+
+        // Direct backend API route connection
+        const backendRes = await v3Api.auth.signup({
+          email: email.trim(),
           password,
-          firstName: displayName.trim() || undefined
+          displayName: displayName.trim() || undefined,
+          next: nextUrl
         });
 
-        await signUp.prepareEmailAddressVerification({
-          strategy: 'email_code'
-        });
-
-        setPendingVerificationEmail(email.trim());
-        setVerificationCode('');
-        setMode('verify');
+        if (backendRes.user) {
+          setAuthenticatedUser(backendRes.user);
+        }
+        await refreshSession();
         showToast({
-          title: 'Verification code sent',
-          description: `We sent a 6-digit code to ${email.trim()}.`,
-          tone: 'info'
+          title: 'Account created',
+          description: 'Welcome to Doc Mubashir Chaudhry Portal!',
+          tone: 'success'
         });
+        await onSuccessResume();
         return;
       }
 
       // Flow 3: Verify Email Code
       if (mode === 'verify') {
-        if (!isSignUpLoaded || !signUp) return;
-        const result = await signUp.attemptEmailAddressVerification({
-          code: verificationCode.trim()
-        });
-
-        if (result.status === 'complete') {
-          if (setSignUpActive) {
-            await setSignUpActive({ session: result.createdSessionId });
-          }
-          await refreshSession();
-          showToast({
-            title: 'Account created',
-            description: `Welcome, ${displayName.trim() || pendingVerificationEmail || email.trim()}.`,
-            tone: 'success'
+        if (isSignUpLoaded && signUp) {
+          const result = await signUp.attemptEmailAddressVerification({
+            code: verificationCode.trim()
           });
-          await onSuccessResume();
-          return;
+
+          if (result.status === 'complete') {
+            if (setSignUpActive) {
+              await setSignUpActive({ session: result.createdSessionId });
+            }
+            await refreshSession();
+            showToast({
+              title: 'Account created',
+              description: `Welcome, ${displayName.trim() || pendingVerificationEmail || email.trim()}.`,
+              tone: 'success'
+            });
+            await onSuccessResume();
+            return;
+          }
         }
 
         setFormError('Verification could not be completed. Please check your code.');
@@ -366,19 +410,33 @@ export function AuthModal({
 
       // Flow 4: Forgot Password Request
       if (mode === 'forgot') {
-        if (!isSignInLoaded || !signIn) return;
-        await signIn.create({
-          strategy: 'reset_password_email_code',
-          identifier: email.trim()
-        });
+        if (isSignInLoaded && signIn) {
+          await signIn.create({
+            strategy: 'reset_password_email_code',
+            identifier: email.trim()
+          });
 
+          setPendingResetEmail(email.trim());
+          setResetCode('');
+          setNewPassword('');
+          setMode('reset');
+          showToast({
+            title: 'Reset code sent',
+            description: `Enter the code sent to ${email.trim()} to choose a new password.`,
+            tone: 'info'
+          });
+          return;
+        }
+
+        const res = await v3Api.auth.forgotPassword({
+          email: email.trim(),
+          next: nextUrl
+        });
         setPendingResetEmail(email.trim());
-        setResetCode('');
-        setNewPassword('');
         setMode('reset');
         showToast({
-          title: 'Reset code sent',
-          description: `Enter the code sent to ${email.trim()} to choose a new password.`,
+          title: 'Reset code requested',
+          description: res.message,
           tone: 'info'
         });
         return;
@@ -386,33 +444,47 @@ export function AuthModal({
 
       // Flow 5: Reset Password with Code
       if (mode === 'reset') {
-        if (!isSignInLoaded || !signIn) return;
-        const result = await signIn.attemptFirstFactor({
-          strategy: 'reset_password_email_code',
-          code: resetCode.trim(),
-          password: newPassword
-        });
-
-        if (result.status === 'complete') {
-          if (setSignInActive) {
-            await setSignInActive({ session: result.createdSessionId });
-          }
-          await refreshSession();
-          showToast({
-            title: 'Password updated',
-            description: 'Your password has been reset successfully.',
-            tone: 'success'
+        if (isSignInLoaded && signIn) {
+          const result = await signIn.attemptFirstFactor({
+            strategy: 'reset_password_email_code',
+            code: resetCode.trim(),
+            password: newPassword
           });
-          await onSuccessResume();
-          return;
+
+          if (result.status === 'complete') {
+            if (setSignInActive) {
+              await setSignInActive({ session: result.createdSessionId });
+            }
+            await refreshSession();
+            showToast({
+              title: 'Password updated',
+              description: 'Your password has been reset successfully.',
+              tone: 'success'
+            });
+            await onSuccessResume();
+            return;
+          }
         }
 
-        setFormError('Password reset could not be completed. Please check your code and try again.');
+        const res = await v3Api.auth.updatePassword({ password: newPassword });
+        await refreshSession();
+        showToast({
+          title: 'Password updated',
+          description: res.message,
+          tone: 'success'
+        });
+        await onSuccessResume();
+        return;
       }
     } catch (err) {
-      const { message, code } = extractClerkErrorMessage(err);
-      setFormError(message);
-      setFormErrorCode(code ?? null);
+      if (isV3ClientError(err)) {
+        setFormError(err.message);
+        setFormErrorCode(err.code);
+      } else {
+        const { message, code } = extractClerkErrorMessage(err);
+        setFormError(message);
+        setFormErrorCode(code ?? null);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -540,7 +612,7 @@ export function AuthModal({
               <button
                 type="button"
                 onClick={() => void (mode === 'signup' ? handleGoogleSignUp() : handleGoogleSignIn())}
-                disabled={isSubmitting || !isSignInLoaded || !isSignUpLoaded}
+                disabled={isSubmitting}
                 className="dmc-press inline-flex w-full items-center justify-center gap-2.5 min-h-[44px] px-4 py-2.5 rounded-[var(--radius-control)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] border border-[var(--color-border-strong)] text-sm font-semibold text-[var(--color-ink)] shadow-xs disabled:opacity-50"
               >
                 <GoogleMarkSvg />

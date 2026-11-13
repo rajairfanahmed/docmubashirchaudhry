@@ -347,8 +347,7 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={handleSignInClick}
-                  disabled={status === 'loading'}
-                  className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] min-w-[96px] px-3.5 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap disabled:opacity-70"
+                  className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] min-w-[96px] px-3.5 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap"
                 >
                   <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
                   <span>Sign In</span>
