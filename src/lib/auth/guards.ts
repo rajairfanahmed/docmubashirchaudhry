@@ -79,7 +79,9 @@ export async function getOptionalSessionUser(): Promise<{
       email,
       displayName: displayName || null,
       authProvider,
-      isAdmin: isAdminEmail(email),
+      isAdmin:
+        (clerkUser?.publicMetadata as { role?: string } | undefined)?.role === 'admin' ||
+        isAdminEmail(email),
       applyAuthCookies: <T extends NextResponse>(res: T) => res
     };
   } catch {

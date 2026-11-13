@@ -31,6 +31,7 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
   const { isLoaded, isSignedIn, user } = useUser();
   const clerk = useClerk();
   const [serverSession, setServerSession] = useState<AuthSessionState | null>(null);
+  const [hasCheckedServerSession, setHasCheckedServerSession] = useState(false);
 
   const refreshSession = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -39,16 +40,24 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
       return nextSession;
     } catch {
       return null;
+    } finally {
+      setHasCheckedServerSession(true);
     }
   }, []);
 
+  // Check server session on initial mount
+  useEffect(() => {
+    const controller = new AbortController();
+    void refreshSession(controller.signal);
+    return () => controller.abort();
+  }, [refreshSession]);
+
+  // Also refresh whenever Clerk auth state changes
   useEffect(() => {
     if (isSignedIn && user?.id) {
       const controller = new AbortController();
       void refreshSession(controller.signal);
       return () => controller.abort();
-    } else {
-      setServerSession(null);
     }
   }, [isSignedIn, user?.id, refreshSession]);
 
@@ -76,54 +85,65 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const session: AuthSessionState = useMemo(() => {
-    if (!isLoaded) {
-      return DEFAULT_SESSION_STATE;
-    }
-    if (!isSignedIn || !user) {
+    // 1. If Clerk client SDK reports signed-in user
+    if (isSignedIn && user) {
+      const primaryEmail =
+        user.primaryEmailAddress?.emailAddress ?? user.emailAddresses?.[0]?.emailAddress ?? '';
+      const email = primaryEmail.trim().toLowerCase();
+      const displayName =
+        user.fullName?.trim() ||
+        [user.firstName, user.lastName].filter(Boolean).join(' ').trim() ||
+        (email ? email.split('@')[0] : null);
+
+      const isGoogle = user.externalAccounts?.some((acc) =>
+        acc.provider?.toLowerCase().includes('google')
+      );
+
+      const clerkRole = (user.publicMetadata as { role?: string } | undefined)?.role;
+      const isAdmin =
+        clerkRole === 'admin' ||
+        Boolean(serverSession?.user?.isAdmin);
+
       return {
         configured: true,
-        authenticated: false,
-        user: null,
+        authenticated: true,
         providers: {
           email: true,
           google: true
+        },
+        user: {
+          id: user.id,
+          email,
+          displayName: displayName || null,
+          authProvider: isGoogle ? 'google' : 'email',
+          isAdmin
         }
       };
     }
 
-    const primaryEmail =
-      user.primaryEmailAddress?.emailAddress ?? user.emailAddresses?.[0]?.emailAddress ?? '';
-    const email = primaryEmail.trim().toLowerCase();
-    const displayName =
-      user.fullName?.trim() ||
-      [user.firstName, user.lastName].filter(Boolean).join(' ').trim() ||
-      (email ? email.split('@')[0] : null);
+    // 2. If server session reports signed-in user
+    if (serverSession?.authenticated && serverSession.user) {
+      return serverSession;
+    }
 
-    const isGoogle = user.externalAccounts?.some((acc) =>
-      acc.provider?.toLowerCase().includes('google')
-    );
+    // 3. Still loading
+    if (!isLoaded && !hasCheckedServerSession) {
+      return DEFAULT_SESSION_STATE;
+    }
 
-    const isAdmin =
-      serverSession?.user?.id === user.id ? Boolean(serverSession.user.isAdmin) : false;
-
+    // 4. Anonymous user
     return {
       configured: true,
-      authenticated: true,
+      authenticated: false,
+      user: null,
       providers: {
         email: true,
         google: true
-      },
-      user: {
-        id: user.id,
-        email,
-        displayName: displayName || null,
-        authProvider: isGoogle ? 'google' : 'email',
-        isAdmin
       }
     };
-  }, [isLoaded, isSignedIn, user, serverSession]);
+  }, [isLoaded, isSignedIn, user, serverSession, hasCheckedServerSession]);
 
-  const status: AuthStatus = isLoaded ? 'ready' : 'loading';
+  const status: AuthStatus = isLoaded || hasCheckedServerSession ? 'ready' : 'loading';
 
   return (
     <AuthSessionContext.Provider

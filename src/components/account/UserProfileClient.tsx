@@ -59,7 +59,7 @@ export function UserProfileClient() {
   }, [user?.firstName, session.user?.displayName]);
 
   useEffect(() => {
-    if (!isSignedIn) return;
+    if (!isSignedIn && !session.authenticated) return;
 
     let isMounted = true;
     async function loadStats() {
@@ -150,7 +150,11 @@ export function UserProfileClient() {
     user?.emailAddresses?.[0]?.emailAddress ??
     session.user?.email ??
     '';
-  const role = session.user?.isAdmin ? 'admin' : 'user';
+  const role =
+    (user?.publicMetadata as { role?: string } | undefined)?.role === 'admin' ||
+    session.user?.isAdmin
+      ? 'admin'
+      : 'user';
   const name =
     user?.fullName ||
     user?.firstName ||

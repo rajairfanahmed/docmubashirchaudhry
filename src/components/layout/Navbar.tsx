@@ -23,6 +23,7 @@ import { DmcLogo } from '@/components/branding/DmcLogo';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { useAuthSession } from '@/components/auth/AuthSessionProvider';
 import { useAuthModal } from '@/components/auth/AuthModalProvider';
+import { useUser } from '@clerk/nextjs';
 import { notifyNavigationStart } from '@/lib/motion/navigation-events';
 import { cn } from '@/lib/utils';
 
@@ -39,6 +40,7 @@ export function Navbar() {
   const pathname = usePathname() ?? '/';
   const prefersReduced = useReducedMotion();
   const { session, status, logout } = useAuthSession();
+  const { isSignedIn: isClerkSignedIn, user: clerkUser } = useUser();
   const { openAuthModal } = useAuthModal();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
@@ -171,7 +173,28 @@ export function Navbar() {
     await logout();
   };
 
-  const user = session.authenticated ? session.user : null;
+  const user =
+    session.authenticated && session.user
+      ? session.user
+      : isClerkSignedIn && clerkUser
+      ? {
+          id: clerkUser.id,
+          email:
+            clerkUser.primaryEmailAddress?.emailAddress ??
+            clerkUser.emailAddresses?.[0]?.emailAddress ??
+            '',
+          displayName:
+            clerkUser.fullName?.trim() ||
+            clerkUser.firstName?.trim() ||
+            (clerkUser.primaryEmailAddress?.emailAddress
+              ? clerkUser.primaryEmailAddress.emailAddress.split('@')[0]
+              : 'Student Aspirant'),
+          authProvider: (clerkUser.externalAccounts?.length ? 'google' : 'email') as 'google' | 'email',
+          isAdmin:
+            (clerkUser.publicMetadata as { role?: string } | undefined)?.role === 'admin' ||
+            Boolean(session.user?.isAdmin)
+        }
+      : null;
   const studentDisplayLabel =
     user?.displayName?.trim() || user?.email?.split('@')[0] || 'Student';
   const studentInitials = user ? getInitials(user.displayName, user.email) : '';
