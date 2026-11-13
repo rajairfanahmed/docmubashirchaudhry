@@ -2,13 +2,14 @@
 
 import React, { useEffect, useId, useState } from 'react';
 import { ArrowLeft, Eye, EyeOff, KeyRound, Lock, MailCheck, ShieldCheck } from 'lucide-react';
+import { useSignIn, useSignUp } from '@clerk/nextjs/legacy';
+import { useClerk } from '@clerk/nextjs';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { FieldWrapper, TextInput } from '@/components/ui/FormPrimitives';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useAuthSession } from '@/components/auth/AuthSessionProvider';
 import type { AuthModalMode } from '@/components/auth/AuthModalProvider';
-import { buildGoogleOAuthUrl, isV3ClientError, v3Api } from '@/lib/v3/client';
 import { cn } from '@/lib/utils';
 
 export interface AuthModalProps {
@@ -47,6 +48,74 @@ function GoogleMarkSvg() {
   );
 }
 
+function extractClerkErrorMessage(err: unknown): { message: string; code?: string } {
+  if (err && typeof err === 'object') {
+    const clerkErr = err as {
+      errors?: Array<{ code?: string; message?: string; longMessage?: string }>;
+      message?: string;
+    };
+
+    if (Array.isArray(clerkErr.errors) && clerkErr.errors.length > 0) {
+      const first = clerkErr.errors[0];
+      const code = first.code ?? '';
+
+      if (code === 'form_identifier_exists') {
+        return {
+          code: 'ACCOUNT_ALREADY_EXISTS',
+          message: 'An account with this email is already created. Please sign in instead.'
+        };
+      }
+      if (code === 'form_password_pwned') {
+        return {
+          code,
+          message: 'This password has been flagged in security breaches. Please choose a different, secure password.'
+        };
+      }
+      if (code === 'form_password_length_too_short') {
+        return {
+          code,
+          message: 'Password must be at least 8 characters long.'
+        };
+      }
+      if (code === 'form_code_incorrect') {
+        return {
+          code,
+          message: 'The verification code entered is incorrect. Please check your inbox and try again.'
+        };
+      }
+      if (code === 'verification_expired') {
+        return {
+          code,
+          message: 'This verification code has expired. Please request a new code.'
+        };
+      }
+      if (code === 'form_identifier_not_found') {
+        return {
+          code,
+          message: 'No account found with this email address. Please check your spelling or create an account.'
+        };
+      }
+      if (code === 'strategy_for_user_invalid') {
+        return {
+          code,
+          message: 'Incorrect email or password. Please try again.'
+        };
+      }
+
+      return {
+        code,
+        message: first.longMessage || first.message || 'Unable to complete request right now.'
+      };
+    }
+
+    if (typeof clerkErr.message === 'string' && clerkErr.message) {
+      return { message: clerkErr.message };
+    }
+  }
+
+  return { message: 'Unable to complete request right now. Please try again.' };
+}
+
 export function AuthModal({
   isOpen,
   reasonTitle = 'Sign in to continue',
@@ -57,16 +126,23 @@ export function AuthModal({
   onSuccessResume,
   onClose
 }: AuthModalProps) {
-  const { session, setAuthenticatedUser, refreshSession } = useAuthSession();
+  const { isLoaded: isSignInLoaded, signIn, setActive: setSignInActive } = useSignIn();
+  const { isLoaded: isSignUpLoaded, signUp, setActive: setSignUpActive } = useSignUp();
+  const clerk = useClerk();
+  const { refreshSession } = useAuthSession();
   const { showToast } = useToast();
   const baseId = useId();
 
-  const [mode, setMode] = useState<AuthModalMode>(initialMode);
-  const [verificationEmailSentTo, setVerificationEmailSentTo] = useState<string | null>(null);
-  const [resetEmailSentTo, setResetEmailSentTo] = useState<string | null>(null);
+  const [mode, setMode] = useState<AuthModalMode | 'verify'>(initialMode);
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
+  const [pendingResetEmail, setPendingResetEmail] = useState<string | null>(null);
+
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
@@ -77,13 +153,17 @@ export function AuthModal({
     displayName?: string;
     email?: string;
     password?: string;
+    code?: string;
   }>({});
 
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode);
-      setVerificationEmailSentTo(null);
-      setResetEmailSentTo(null);
+      setPendingVerificationEmail(null);
+      setPendingResetEmail(null);
+      setVerificationCode('');
+      setResetCode('');
+      setNewPassword('');
       setResendMessage(null);
       setFormError(initialError ?? null);
       setFormErrorCode(null);
@@ -92,82 +172,100 @@ export function AuthModal({
     }
   }, [isOpen, initialMode, initialError]);
 
-  const validateFields = (): boolean => {
-    const nextErrors: { displayName?: string; email?: string; password?: string } = {};
-    const trimmedEmail = email.trim();
-    const trimmedName = displayName.trim();
-
-    if (mode === 'signup' && trimmedName.length > 0 && trimmedName.length < 2) {
-      nextErrors.displayName = 'Display name must be at least 2 characters.';
-    }
-    if (mode !== 'reset' && (!trimmedEmail || !EMAIL_PATTERN.test(trimmedEmail))) {
-      nextErrors.email = 'Please enter a valid email address.';
-    }
-    if (mode === 'login' && !password) {
-      nextErrors.password = 'Password is required.';
-    } else if ((mode === 'signup' || mode === 'reset') && password.length < 8) {
-      nextErrors.password = 'Password must be at least 8 characters.';
-    }
-
-    setFieldErrors(nextErrors);
-    return Object.keys(nextErrors).length === 0;
-  };
-
-  const handleModeSwitch = (nextMode: AuthModalMode) => {
+  const handleModeSwitch = (nextMode: AuthModalMode | 'verify') => {
     setMode(nextMode);
-    setVerificationEmailSentTo(null);
-    setResetEmailSentTo(null);
     setResendMessage(null);
     setFormError(null);
     setFormErrorCode(null);
     setFieldErrors({});
   };
 
-  const applyServerValidationDetails = (details: unknown) => {
-    if (!Array.isArray(details)) return;
-    const nextFieldErrors: { displayName?: string; email?: string; password?: string } = {};
-    for (const item of details) {
-      const path = (item as { path?: unknown })?.path;
-      const msg = (item as { message?: unknown })?.message;
-      if (typeof msg !== 'string') continue;
-      if (path === 'displayName') nextFieldErrors.displayName = msg;
-      if (path === 'email') nextFieldErrors.email = msg;
-      if (path === 'password') nextFieldErrors.password = msg;
+  const validateFields = (): boolean => {
+    const nextErrors: { displayName?: string; email?: string; password?: string; code?: string } = {};
+    const trimmedEmail = email.trim();
+    const trimmedName = displayName.trim();
+
+    if (mode === 'signup' && trimmedName.length > 0 && trimmedName.length < 2) {
+      nextErrors.displayName = 'Display name must be at least 2 characters.';
     }
-    if (Object.keys(nextFieldErrors).length > 0) {
-      setFieldErrors(nextFieldErrors);
+    if ((mode === 'login' || mode === 'signup' || mode === 'forgot') && (!trimmedEmail || !EMAIL_PATTERN.test(trimmedEmail))) {
+      nextErrors.email = 'Please enter a valid email address.';
+    }
+    if (mode === 'login' && !password) {
+      nextErrors.password = 'Password is required.';
+    } else if (mode === 'signup' && password.length < 8) {
+      nextErrors.password = 'Password must be at least 8 characters.';
+    }
+    if (mode === 'verify' && !verificationCode.trim()) {
+      nextErrors.code = 'Please enter the 6-digit verification code.';
+    }
+    if (mode === 'reset') {
+      if (!resetCode.trim()) {
+        nextErrors.code = 'Reset code is required.';
+      }
+      if (newPassword.length < 8) {
+        nextErrors.password = 'New password must be at least 8 characters.';
+      }
+    }
+
+    setFieldErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleGoogleSignIn = async () => {
+    if (!isSignInLoaded || !signIn) return;
+    setIsSubmitting(true);
+    setFormError(null);
+    setFormErrorCode(null);
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: nextUrl || '/'
+      });
+    } catch (err) {
+      const { message, code } = extractClerkErrorMessage(err);
+      setFormError(message);
+      setFormErrorCode(code ?? null);
+      setIsSubmitting(false);
     }
   };
 
-  const handleResendVerification = async (targetEmail?: string) => {
-    const cleanEmail = (targetEmail ?? email).trim();
-    if (!cleanEmail || !EMAIL_PATTERN.test(cleanEmail)) {
-      setFieldErrors((prev) => ({ ...prev, email: 'Enter a valid email address first.' }));
-      return;
+  const handleGoogleSignUp = async () => {
+    if (!isSignUpLoaded || !signUp) return;
+    setIsSubmitting(true);
+    setFormError(null);
+    setFormErrorCode(null);
+    try {
+      await signUp.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: nextUrl || '/'
+      });
+    } catch (err) {
+      const { message, code } = extractClerkErrorMessage(err);
+      setFormError(message);
+      setFormErrorCode(code ?? null);
+      setIsSubmitting(false);
     }
+  };
 
+  const handleResendCode = async () => {
+    if (!isSignUpLoaded || !signUp) return;
     setIsResending(true);
     setResendMessage(null);
     try {
-      const res = await v3Api.auth.resendVerification({
-        email: cleanEmail,
-        next: nextUrl
-      });
-      setResendMessage(res.message);
-      setVerificationEmailSentTo(cleanEmail);
-      setFormError(null);
-      setFormErrorCode(null);
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      const msg = 'A fresh verification code has been sent to your email.';
+      setResendMessage(msg);
       showToast({
-        title: 'Verification email sent',
-        description: res.message,
+        title: 'Code resent',
+        description: msg,
         tone: 'info'
       });
-    } catch (error) {
-      const msg = isV3ClientError(error)
-        ? error.message
-        : 'Unable to resend verification email right now.';
-      setFormError(msg);
-      setResendMessage(msg);
+    } catch (err) {
+      const { message } = extractClerkErrorMessage(err);
+      setResendMessage(message);
     } finally {
       setIsResending(false);
     }
@@ -184,90 +282,146 @@ export function AuthModal({
     }
 
     setIsSubmitting(true);
+
     try {
-      if (mode === 'forgot') {
-        const res = await v3Api.auth.forgotPassword({
-          email: email.trim(),
-          next: nextUrl
-        });
-        setResetEmailSentTo(email.trim());
-        showToast({
-          title: 'Reset email requested',
-          description: res.message,
-          tone: 'info'
-        });
-        return;
-      }
-
-      if (mode === 'reset') {
-        const res = await v3Api.auth.updatePassword({ password });
-        await refreshSession();
-        showToast({
-          title: 'Password updated',
-          description: res.message,
-          tone: 'success'
-        });
-        await onSuccessResume();
-        return;
-      }
-
+      // Flow 1: Login
       if (mode === 'login') {
-        const res = await v3Api.auth.login({
-          email: email.trim(),
+        if (!isSignInLoaded || !signIn) return;
+        const result = await signIn.create({
+          identifier: email.trim(),
           password
         });
-        setAuthenticatedUser(res.user);
-        showToast({
-          title: 'Signed in cleanly',
-          description: `Welcome back, ${res.user.displayName || res.user.email}.`,
-          tone: 'success'
-        });
-        await onSuccessResume();
+
+        if (result.status === 'complete') {
+          if (setSignInActive) {
+            await setSignInActive({ session: result.createdSessionId });
+          }
+          await refreshSession();
+          showToast({
+            title: 'Signed in cleanly',
+            description: `Welcome back, ${email.trim()}.`,
+            tone: 'success'
+          });
+          await onSuccessResume();
+          return;
+        }
+
+        if (result.status === 'needs_first_factor') {
+          setFormError('Additional authentication factor required.');
+          return;
+        }
+
+        setFormError('Authentication could not be completed. Please try again.');
         return;
       }
 
-      const res = await v3Api.auth.signup({
-        email: email.trim(),
-        password,
-        displayName: displayName.trim() || undefined,
-        next: nextUrl
-      });
+      // Flow 2: Signup
+      if (mode === 'signup') {
+        if (!isSignUpLoaded || !signUp) return;
+        await signUp.create({
+          emailAddress: email.trim(),
+          password,
+          firstName: displayName.trim() || undefined
+        });
 
-      if (res.requiresEmailVerification || !res.user) {
-        setVerificationEmailSentTo(email.trim());
+        await signUp.prepareEmailAddressVerification({
+          strategy: 'email_code'
+        });
+
+        setPendingVerificationEmail(email.trim());
+        setVerificationCode('');
+        setMode('verify');
         showToast({
-          title: 'Verification email sent',
-          description: 'Please confirm your inbox link to finish activating your account.',
+          title: 'Verification code sent',
+          description: `We sent a 6-digit code to ${email.trim()}.`,
           tone: 'info'
         });
         return;
       }
 
-      setAuthenticatedUser(res.user);
-      showToast({
-        title: 'Account created',
-        description: `Welcome, ${res.user.displayName || res.user.email}.`,
-        tone: 'success'
-      });
-      await onSuccessResume();
-    } catch (error) {
-      if (isV3ClientError(error)) {
-        setFormError(error.message);
-        setFormErrorCode(error.code);
-        applyServerValidationDetails(error.details);
-      } else {
-        setFormError('Unable to complete request right now. Please try again.');
+      // Flow 3: Verify Email Code
+      if (mode === 'verify') {
+        if (!isSignUpLoaded || !signUp) return;
+        const result = await signUp.attemptEmailAddressVerification({
+          code: verificationCode.trim()
+        });
+
+        if (result.status === 'complete') {
+          if (setSignUpActive) {
+            await setSignUpActive({ session: result.createdSessionId });
+          }
+          await refreshSession();
+          showToast({
+            title: 'Account created',
+            description: `Welcome, ${displayName.trim() || pendingVerificationEmail || email.trim()}.`,
+            tone: 'success'
+          });
+          await onSuccessResume();
+          return;
+        }
+
+        setFormError('Verification could not be completed. Please check your code.');
+        return;
       }
+
+      // Flow 4: Forgot Password Request
+      if (mode === 'forgot') {
+        if (!isSignInLoaded || !signIn) return;
+        await signIn.create({
+          strategy: 'reset_password_email_code',
+          identifier: email.trim()
+        });
+
+        setPendingResetEmail(email.trim());
+        setResetCode('');
+        setNewPassword('');
+        setMode('reset');
+        showToast({
+          title: 'Reset code sent',
+          description: `Enter the code sent to ${email.trim()} to choose a new password.`,
+          tone: 'info'
+        });
+        return;
+      }
+
+      // Flow 5: Reset Password with Code
+      if (mode === 'reset') {
+        if (!isSignInLoaded || !signIn) return;
+        const result = await signIn.attemptFirstFactor({
+          strategy: 'reset_password_email_code',
+          code: resetCode.trim(),
+          password: newPassword
+        });
+
+        if (result.status === 'complete') {
+          if (setSignInActive) {
+            await setSignInActive({ session: result.createdSessionId });
+          }
+          await refreshSession();
+          showToast({
+            title: 'Password updated',
+            description: 'Your password has been reset successfully.',
+            tone: 'success'
+          });
+          await onSuccessResume();
+          return;
+        }
+
+        setFormError('Password reset could not be completed. Please check your code and try again.');
+      }
+    } catch (err) {
+      const { message, code } = extractClerkErrorMessage(err);
+      setFormError(message);
+      setFormErrorCode(code ?? null);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const googleHref = buildGoogleOAuthUrl(nextUrl);
-  const isGoogleDisabled = session.providers?.google === false;
-
   const modalTitle =
-    mode === 'forgot'
+    mode === 'verify'
+      ? 'Verify Your Email'
+      : mode === 'forgot'
       ? 'Reset Your Password'
       : mode === 'reset'
       ? 'Set a New Password'
@@ -281,7 +435,7 @@ export function AuthModal({
       labelledBy={`${baseId}-heading`}
       className="max-w-md"
     >
-      {verificationEmailSentTo ? (
+      {mode === 'verify' ? (
         <div className="text-center space-y-5 py-2">
           <div className="w-14 h-14 rounded-2xl mx-auto bg-[var(--color-surface-soft)] border border-[var(--color-border)] text-[var(--color-brand-deep)] flex items-center justify-center">
             <MailCheck className="w-7 h-7" aria-hidden="true" />
@@ -289,13 +443,22 @@ export function AuthModal({
           <div className="space-y-2">
             <h3 className="type-card-title text-[var(--dmc-ink-primary)]">Check your inbox</h3>
             <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
-              We sent a verification link to{' '}
+              We sent a 6-digit verification code to{' '}
               <span className="font-bold text-[var(--dmc-ink-primary)]">
-                {verificationEmailSentTo}
+                {pendingVerificationEmail || email}
               </span>
-              . Open that link in this browser to verify your email and sign in automatically.
+              . Enter it below to activate your account.
             </p>
           </div>
+
+          {formError && (
+            <div
+              role="alert"
+              className="rounded-[var(--radius-control)] bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] px-3.5 py-2.5 text-xs sm:text-sm font-medium text-[var(--color-danger-ink)]"
+            >
+              <p>{formError}</p>
+            </div>
+          )}
 
           {resendMessage && (
             <p
@@ -306,50 +469,51 @@ export function AuthModal({
             </p>
           )}
 
-          <div className="flex flex-col gap-2.5 pt-2">
+          <form onSubmit={(e) => void handleSubmit(e)} noValidate className="space-y-4 text-left">
+            <FieldWrapper
+              id={`${baseId}-code`}
+              label="Verification Code"
+              required
+              error={fieldErrors.code}
+            >
+              <TextInput
+                id={`${baseId}-code`}
+                type="text"
+                autoComplete="one-time-code"
+                placeholder="123456"
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                hasError={Boolean(fieldErrors.code)}
+                aria-describedby={fieldErrors.code ? `${baseId}-code-error` : undefined}
+                className="text-center tracking-widest text-lg font-bold"
+              />
+            </FieldWrapper>
+
+            <Button
+              type="submit"
+              variant="primary"
+              isLoading={isSubmitting}
+              className="w-full"
+            >
+              Verify & Complete Sign In
+            </Button>
+          </form>
+
+          <div className="flex flex-col gap-2 pt-2">
             <Button
               variant="secondary"
               className="w-full"
               isLoading={isResending}
-              onClick={() => void handleResendVerification(verificationEmailSentTo)}
+              onClick={() => void handleResendCode()}
             >
-              Resend Verification Email
+              Resend Verification Code
             </Button>
             <Button
-              variant="primary"
+              variant="ghost"
               className="w-full"
               onClick={() => handleModeSwitch('login')}
             >
               Back to Sign In
-            </Button>
-            <Button variant="ghost" className="w-full" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        </div>
-      ) : resetEmailSentTo ? (
-        <div className="text-center space-y-5 py-2">
-          <div className="w-14 h-14 rounded-2xl mx-auto bg-[var(--color-surface-soft)] border border-[var(--color-border)] text-[var(--color-brand-deep)] flex items-center justify-center">
-            <KeyRound className="w-7 h-7" aria-hidden="true" />
-          </div>
-          <div className="space-y-2">
-            <h3 className="type-card-title text-[var(--dmc-ink-primary)]">Check your email</h3>
-            <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
-              If an account exists for{' '}
-              <span className="font-bold text-[var(--dmc-ink-primary)]">{resetEmailSentTo}</span>, we
-              sent a password reset link. Open it in this browser to choose a new password.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2.5 pt-2">
-            <Button
-              variant="primary"
-              className="w-full"
-              onClick={() => handleModeSwitch('login')}
-            >
-              Back to Sign In
-            </Button>
-            <Button variant="ghost" className="w-full" onClick={onClose}>
-              Close
             </Button>
           </div>
         </div>
@@ -363,44 +527,25 @@ export function AuthModal({
             />
             <p className="leading-snug">
               {mode === 'forgot'
-                ? 'Enter your account email and we will send you a password recovery link.'
+                ? 'Enter your account email and we will send you a verification code to reset your password.'
                 : mode === 'reset'
-                ? 'Enter a new password of at least 8 characters to finish resetting your account.'
+                ? `Enter the reset code sent to ${pendingResetEmail || 'your email'} and choose a new password.`
                 : reasonDescription}
             </p>
           </div>
 
           {(mode === 'login' || mode === 'signup') && (
             <>
-              {/* Primary OAuth Action */}
-              {isGoogleDisabled ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setFormError(
-                      'Google Sign-In is not enabled in Supabase yet. Sign in or create an account with your email below.'
-                    );
-                    setFormErrorCode('PROVIDER_DISABLED');
-                  }}
-                  className="inline-flex w-full items-center justify-between gap-2.5 min-h-[44px] px-4 py-2.5 rounded-[var(--radius-control)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] text-sm font-medium text-[var(--color-ink-secondary)] hover:border-[var(--color-border-strong)]"
-                >
-                  <span className="inline-flex items-center gap-2.5">
-                    <GoogleMarkSvg />
-                    <span>Continue with Google</span>
-                  </span>
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-ink-muted)]">
-                    Not enabled
-                  </span>
-                </button>
-              ) : (
-                <a
-                  href={googleHref}
-                  className="dmc-press inline-flex w-full items-center justify-center gap-2.5 min-h-[44px] px-4 py-2.5 rounded-[var(--radius-control)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] border border-[var(--color-border-strong)] text-sm font-semibold text-[var(--color-ink)] shadow-xs"
-                >
-                  <GoogleMarkSvg />
-                  <span>Continue with Google</span>
-                </a>
-              )}
+              {/* Primary OAuth Action via Clerk */}
+              <button
+                type="button"
+                onClick={() => void (mode === 'signup' ? handleGoogleSignUp() : handleGoogleSignIn())}
+                disabled={isSubmitting || !isSignInLoaded || !isSignUpLoaded}
+                className="dmc-press inline-flex w-full items-center justify-center gap-2.5 min-h-[44px] px-4 py-2.5 rounded-[var(--radius-control)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] border border-[var(--color-border-strong)] text-sm font-semibold text-[var(--color-ink)] shadow-xs disabled:opacity-50"
+              >
+                <GoogleMarkSvg />
+                <span>Continue with Google</span>
+              </button>
 
               {/* Hairline Divider */}
               <div className="relative flex items-center justify-center" aria-hidden="true">
@@ -479,20 +624,10 @@ export function AuthModal({
                   Switch to Sign In with {email.trim() || 'this email'}
                 </button>
               )}
-              {formErrorCode === 'EMAIL_NOT_CONFIRMED' && (
-                <button
-                  type="button"
-                  disabled={isResending}
-                  onClick={() => void handleResendVerification(email)}
-                  className="text-xs font-bold underline underline-offset-2 hover:opacity-80 disabled:opacity-50"
-                >
-                  {isResending ? 'Sending verification link...' : 'Resend verification email'}
-                </button>
-              )}
             </div>
           )}
 
-          {/* Email / Password / Recovery Form */}
+          {/* Email / Password Form */}
           <form onSubmit={(e) => void handleSubmit(e)} noValidate className="space-y-4">
             {mode === 'signup' && (
               <FieldWrapper
@@ -514,7 +649,7 @@ export function AuthModal({
               </FieldWrapper>
             )}
 
-            {mode !== 'reset' && (
+            {(mode === 'login' || mode === 'signup' || mode === 'forgot') && (
               <FieldWrapper
                 id={`${baseId}-email`}
                 label="Email Address"
@@ -534,16 +669,70 @@ export function AuthModal({
               </FieldWrapper>
             )}
 
-            {mode !== 'forgot' && (
+            {mode === 'reset' && (
+              <>
+                <FieldWrapper
+                  id={`${baseId}-reset-code`}
+                  label="Password Reset Code"
+                  required
+                  error={fieldErrors.code}
+                >
+                  <TextInput
+                    id={`${baseId}-reset-code`}
+                    type="text"
+                    autoComplete="one-time-code"
+                    placeholder="Enter code from email"
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value.trim())}
+                    hasError={Boolean(fieldErrors.code)}
+                    aria-describedby={fieldErrors.code ? `${baseId}-reset-code-error` : undefined}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper
+                  id={`${baseId}-new-password`}
+                  label="New Password"
+                  required
+                  helperText="Minimum 8 characters required."
+                  error={fieldErrors.password}
+                >
+                  <div className="relative">
+                    <TextInput
+                      id={`${baseId}-new-password`}
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="new-password"
+                      placeholder="At least 8 characters"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      hasError={Boolean(fieldErrors.password)}
+                      aria-describedby={
+                        fieldErrors.password ? `${baseId}-new-password-error` : undefined
+                      }
+                      className="pr-11"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg inline-flex items-center justify-center text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" aria-hidden="true" />
+                      ) : (
+                        <Eye className="w-4 h-4" aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                </FieldWrapper>
+              </>
+            )}
+
+            {(mode === 'login' || mode === 'signup') && (
               <FieldWrapper
                 id={`${baseId}-password`}
-                label={mode === 'reset' ? 'New Password' : 'Password'}
+                label="Password"
                 required
-                helperText={
-                  mode === 'signup' || mode === 'reset'
-                    ? 'Minimum 8 characters required.'
-                    : undefined
-                }
+                helperText={mode === 'signup' ? 'Minimum 8 characters required.' : undefined}
                 error={fieldErrors.password}
               >
                 <div className="space-y-1.5">
@@ -551,21 +740,15 @@ export function AuthModal({
                     <TextInput
                       id={`${baseId}-password`}
                       type={showPassword ? 'text' : 'password'}
-                      autoComplete={
-                        mode === 'login' ? 'current-password' : 'new-password'
-                      }
-                      placeholder={
-                        mode === 'signup' || mode === 'reset'
-                          ? 'At least 8 characters'
-                          : 'Enter your password'
-                      }
+                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                      placeholder={mode === 'signup' ? 'At least 8 characters' : 'Enter your password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       hasError={Boolean(fieldErrors.password)}
                       aria-describedby={
                         fieldErrors.password
                           ? `${baseId}-password-error`
-                          : mode === 'signup' || mode === 'reset'
+                          : mode === 'signup'
                           ? `${baseId}-password-hint`
                           : undefined
                       }
@@ -610,11 +793,11 @@ export function AuthModal({
                 : mode === 'signup'
                 ? 'Create Account'
                 : mode === 'forgot'
-                ? 'Send Password Reset Link'
+                ? 'Send Password Reset Code'
                 : 'Save New Password'}
             </Button>
 
-            {mode === 'forgot' && (
+            {(mode === 'forgot' || mode === 'reset') && (
               <button
                 type="button"
                 onClick={() => handleModeSwitch('login')}
@@ -628,7 +811,7 @@ export function AuthModal({
 
           <p className="flex items-center justify-center gap-1.5 text-[11px] text-[var(--dmc-ink-muted)]">
             <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-brand-deep)]" aria-hidden="true" />
-            <span>Session secured via httpOnly cookies. Zero ads or spam.</span>
+            <span>Session secured via Clerk authentication. Zero ads or spam.</span>
           </p>
         </div>
       )}

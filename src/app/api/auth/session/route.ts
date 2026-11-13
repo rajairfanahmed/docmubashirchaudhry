@@ -8,12 +8,24 @@ export const dynamic = 'force-dynamic';
 export async function GET(): Promise<NextResponse> {
   try {
     const session = await getOptionalSessionUser();
+    const authSettings = await fetchSupabaseAuthSettings();
+    const providers = authSettings
+      ? {
+          email: authSettings.emailEnabled,
+          google: authSettings.googleEnabled
+        }
+      : {
+          email: true,
+          google: true
+        };
+
     if (!session) {
       return NextResponse.json(
         {
           configured: false,
           authenticated: false,
-          user: null
+          user: null,
+          providers
         },
         {
           status: 200,
@@ -22,19 +34,11 @@ export async function GET(): Promise<NextResponse> {
       );
     }
 
-    const authSettings = await fetchSupabaseAuthSettings();
-    const providers = authSettings
-      ? {
-          email: authSettings.emailEnabled,
-          google: authSettings.googleEnabled
-        }
-      : undefined;
-
     const response = NextResponse.json(
       {
         configured: true,
         authenticated: Boolean(session.user),
-        ...(providers ? { providers } : {}),
+        providers,
         user: session.user
           ? {
               id: session.user.id,
@@ -56,4 +60,3 @@ export async function GET(): Promise<NextResponse> {
     return handleRouteError(error, 'GET /api/auth/session');
   }
 }
-

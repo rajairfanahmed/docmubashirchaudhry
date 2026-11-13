@@ -1,13 +1,7 @@
-import type { NextRequest } from 'next/server';
-import type { User } from '@supabase/supabase-js';
-import { isAdminEmail, parsePublicSupabaseConfig } from '@/lib/env';
+import type { NextRequest, NextResponse } from 'next/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { isAdminEmail, parseClerkConfig } from '@/lib/env';
 import { resolveSiteUrl } from '@/lib/seo/metadata';
-import {
-  createSupabaseServerClient,
-  resolveAuthProvider,
-  syncUserProfile,
-  type ServerSupabaseContext
-} from '@/lib/supabase/server';
 import type { ProfileRow } from '@/lib/supabase/database.types';
 
 export class ApiError extends Error {
@@ -24,63 +18,94 @@ export class ApiError extends Error {
   }
 }
 
-export interface AuthenticatedContext extends ServerSupabaseContext {
-  user: User;
+export interface AuthenticatedContext {
+  user: { id: string };
   email: string;
+  displayName: string | null;
+  authProvider: 'google' | 'email' | 'unknown';
   isAdmin: boolean;
   profile: ProfileRow | null;
+  applyAuthCookies: <T extends NextResponse>(response: T) => T;
 }
 
 export async function getOptionalSessionUser(): Promise<{
-  user: User | null;
+  user: { id: string } | null;
   email: string | null;
   displayName: string | null;
   authProvider: 'google' | 'email' | 'unknown' | null;
   isAdmin: boolean;
-  applyAuthCookies: ServerSupabaseContext['applyAuthCookies'];
+  applyAuthCookies: <T extends NextResponse>(response: T) => T;
 } | null> {
-  if (!parsePublicSupabaseConfig()) {
+  const clerkConfig = parseClerkConfig();
+  if (!clerkConfig) {
     return null;
   }
 
-  const ctx = await createSupabaseServerClient();
-  const { data, error } = await ctx.supabase.auth.getUser();
-  if (error || !data.user) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return {
+        user: null,
+        email: null,
+        displayName: null,
+        authProvider: null,
+        isAdmin: false,
+        applyAuthCookies: <T extends NextResponse>(res: T) => res
+      };
+    }
+
+    const clerkUser = await currentUser();
+    const primaryEmail =
+      clerkUser?.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+      clerkUser?.emailAddresses[0]?.emailAddress ??
+      '';
+    const email = primaryEmail.trim().toLowerCase() || null;
+    const displayName =
+      clerkUser?.fullName?.trim() ||
+      [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(' ').trim() ||
+      (email ? email.split('@')[0] : null);
+
+    const isGoogle = clerkUser?.externalAccounts?.some(
+      (acc) => acc.provider?.toLowerCase().includes('google')
+    );
+    const authProvider: 'google' | 'email' | 'unknown' = isGoogle
+      ? 'google'
+      : email
+      ? 'email'
+      : 'unknown';
+
+    return {
+      user: { id: userId },
+      email,
+      displayName: displayName || null,
+      authProvider,
+      isAdmin: isAdminEmail(email),
+      applyAuthCookies: <T extends NextResponse>(res: T) => res
+    };
+  } catch {
     return {
       user: null,
       email: null,
       displayName: null,
       authProvider: null,
       isAdmin: false,
-      applyAuthCookies: ctx.applyAuthCookies
+      applyAuthCookies: <T extends NextResponse>(res: T) => res
     };
   }
-
-  const user = data.user;
-  const email = (user.email ?? '').trim().toLowerCase() || null;
-  const rawName =
-    user.user_metadata?.full_name ??
-    user.user_metadata?.name ??
-    user.user_metadata?.display_name ??
-    (email ? email.split('@')[0] : null);
-
-  return {
-    user,
-    email,
-    displayName: typeof rawName === 'string' && rawName.trim() ? rawName.trim() : null,
-    authProvider: resolveAuthProvider(user),
-    isAdmin: isAdminEmail(email),
-    applyAuthCookies: ctx.applyAuthCookies
-  };
 }
 
 export async function requireAuthenticatedUser(options?: {
   syncProfile?: boolean;
 }): Promise<AuthenticatedContext> {
-  const ctx = await createSupabaseServerClient();
-  const { data, error } = await ctx.supabase.auth.getUser();
+  let userId: string | null = null;
+  try {
+    const authState = await auth();
+    userId = authState.userId;
+  } catch {
+    userId = null;
+  }
 
-  if (error || !data.user) {
+  if (!userId) {
     throw new ApiError(
       401,
       'UNAUTHORIZED',
@@ -88,7 +113,12 @@ export async function requireAuthenticatedUser(options?: {
     );
   }
 
-  const email = (data.user.email ?? '').trim().toLowerCase();
+  const clerkUser = await currentUser();
+  const primaryEmail =
+    clerkUser?.emailAddresses.find((e) => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+    clerkUser?.emailAddresses[0]?.emailAddress ??
+    '';
+  const email = primaryEmail.trim().toLowerCase();
   if (!email) {
     throw new ApiError(
       401,
@@ -97,22 +127,29 @@ export async function requireAuthenticatedUser(options?: {
     );
   }
 
-  let profile: ProfileRow | null = null;
-  if (options?.syncProfile !== false) {
-    profile = await syncUserProfile(data.user);
-  }
+  const displayName =
+    clerkUser?.fullName?.trim() ||
+    [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(' ').trim() ||
+    (email ? email.split('@')[0] : null);
+
+  const isGoogle = clerkUser?.externalAccounts?.some(
+    (acc) => acc.provider?.toLowerCase().includes('google')
+  );
+  const authProvider: 'google' | 'email' | 'unknown' = isGoogle ? 'google' : 'email';
 
   return {
-    ...ctx,
-    user: data.user,
+    user: { id: userId },
     email,
+    displayName: displayName || null,
+    authProvider,
     isAdmin: isAdminEmail(email),
-    profile
+    profile: null,
+    applyAuthCookies: <T extends NextResponse>(res: T) => res
   };
 }
 
 export async function requireAdminUser(): Promise<AuthenticatedContext> {
-  const auth = await requireAuthenticatedUser({ syncProfile: true });
+  const auth = await requireAuthenticatedUser({ syncProfile: false });
   if (!auth.isAdmin) {
     throw new ApiError(
       403,
@@ -176,4 +213,3 @@ export function resolveRequestOrigin(request: NextRequest): string {
 
   return canonicalOrigin;
 }
-

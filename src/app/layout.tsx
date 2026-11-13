@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { ClerkProvider } from '@clerk/nextjs';
 import './globals.css';
 import { Providers } from './providers';
 import { Navbar } from '@/components/layout/Navbar';
@@ -110,30 +111,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${plusJakartaSans.variable} ${inter.variable}`}>
-      <head>
-        <link rel="dns-prefetch" href="https://img.logo.dev" />
-        <link rel="dns-prefetch" href="https://flagcdn.com" />
-        <JsonLd data={buildRootSchema()} />
-      </head>
-      <body className="bg-[var(--color-page)] text-[var(--color-ink)] antialiased min-h-screen flex flex-col justify-between overflow-x-clip selection:bg-[var(--color-accent)] selection:text-[var(--color-accent-ink)]">
-        <Providers>
-          <div id="dmc-app-shell" className="flex-1 flex flex-col justify-between min-h-screen">
-            <RouteChromeGate>
-              <Navbar />
-            </RouteChromeGate>
-            <main id="main-content" role="main" className="flex-1 w-full">
-              {children}
-            </main>
-            <RouteChromeGate hideOnPractice>
-              <PreFooterCta />
-            </RouteChromeGate>
-            <RouteChromeGate>
-              <Footer />
-            </RouteChromeGate>
-          </div>
-        </Providers>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className={`${plusJakartaSans.variable} ${inter.variable}`}>
+        <head>
+          <link rel="dns-prefetch" href="https://img.logo.dev" />
+          <link rel="dns-prefetch" href="https://flagcdn.com" />
+          <JsonLd data={buildRootSchema()} />
+        </head>
+        <body className="bg-[var(--color-page)] text-[var(--color-ink)] antialiased min-h-screen flex flex-col justify-between overflow-x-clip selection:bg-[var(--color-accent)] selection:text-[var(--color-accent-ink)]">
+          <Providers>
+            <div id="dmc-app-shell" className="flex-1 flex flex-col justify-between min-h-screen">
+              <RouteChromeGate>
+                <Navbar />
+              </RouteChromeGate>
+              <main id="main-content" role="main" className="flex-1 w-full">
+                {children}
+              </main>
+              <RouteChromeGate hideOnPractice>
+                <PreFooterCta />
+              </RouteChromeGate>
+              <RouteChromeGate>
+                <Footer />
+              </RouteChromeGate>
+            </div>
+          </Providers>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

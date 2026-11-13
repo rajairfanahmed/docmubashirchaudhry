@@ -6,6 +6,11 @@ const DEFAULT_SIGNED_URL_TTL_SECONDS = 180;
 
 const OptionalNonEmpty = z.string().trim().min(1).optional();
 
+const ClerkEnvSchema = z.object({
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().trim().min(1),
+  CLERK_SECRET_KEY: OptionalNonEmpty
+});
+
 const SupabasePublicEnvSchema = z.object({
   NEXT_PUBLIC_SUPABASE_URL: z.string().trim().url(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: OptionalNonEmpty,
@@ -30,6 +35,11 @@ const R2EnvSchema = z.object({
     .trim()
     .regex(/^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/, 'Invalid CLOUDFLARE_R2_BUCKET_NAME')
 });
+
+export interface ClerkConfig {
+  publishableKey: string;
+  secretKey?: string;
+}
 
 export interface PublicSupabaseConfig {
   url: string;
@@ -57,6 +67,34 @@ export class BackendConfigError extends Error {
     super(message);
     this.name = 'BackendConfigError';
   }
+}
+
+export function parseClerkConfig(
+  env: Record<string, string | undefined> = process.env
+): ClerkConfig | null {
+  const parsed = ClerkEnvSchema.safeParse({
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    CLERK_SECRET_KEY: env.CLERK_SECRET_KEY
+  });
+
+  if (!parsed.success) return null;
+
+  return {
+    publishableKey: parsed.data.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    secretKey: parsed.data.CLERK_SECRET_KEY
+  };
+}
+
+export function requireClerkConfig(
+  env: Record<string, string | undefined> = process.env
+): ClerkConfig {
+  const config = parseClerkConfig(env);
+  if (!config) {
+    throw new BackendConfigError(
+      'Clerk configuration is incomplete. Set NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.'
+    );
+  }
+  return config;
 }
 
 export function parsePublicSupabaseConfig(
@@ -198,12 +236,14 @@ export function isAdminEmail(
 export function getV3RuntimeReadiness(
   env: Record<string, string | undefined> = process.env
 ): {
+  clerkConfigured: boolean;
   supabasePublicConfigured: boolean;
   supabaseSecretConfigured: boolean;
   r2Configured: boolean;
   adminAllowListConfigured: boolean;
 } {
   return {
+    clerkConfigured: parseClerkConfig(env) !== null,
     supabasePublicConfigured: parsePublicSupabaseConfig(env) !== null,
     supabaseSecretConfigured: parseSecretSupabaseConfig(env) !== null,
     r2Configured: parseR2Config(env) !== null,
