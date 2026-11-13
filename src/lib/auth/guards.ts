@@ -3,6 +3,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { isAdminEmail, parseClerkConfig } from '@/lib/env';
 import { resolveSiteUrl } from '@/lib/seo/metadata';
 import type { ProfileRow } from '@/lib/supabase/database.types';
+import { syncClerkUserProfile } from '@/lib/supabase/admin';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -138,13 +139,23 @@ export async function requireAuthenticatedUser(options?: {
     (acc) => acc.provider?.toLowerCase().includes('google')
   );
   const authProvider: 'google' | 'email' | 'unknown' = isGoogle ? 'google' : 'email';
+  const isAdmin = isAdminEmail(email);
+
+  if (options?.syncProfile !== false) {
+    void syncClerkUserProfile({
+      clerkUserId: userId,
+      email,
+      displayName,
+      role: isAdmin ? 'admin' : 'user'
+    }).catch(() => {});
+  }
 
   return {
     user: { id: userId },
     email,
     displayName: displayName || null,
     authProvider,
-    isAdmin: isAdminEmail(email),
+    isAdmin,
     profile: null,
     applyAuthCookies: <T extends NextResponse>(res: T) => res
   };

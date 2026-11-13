@@ -1,7 +1,7 @@
 import { Webhook } from 'svix';
 import { clerkClient } from '@clerk/nextjs/server';
 import { isAdminEmail } from '@/lib/env';
-import { syncClerkUserProfile } from '@/lib/supabase/admin';
+import { getOptionalAdminClient, syncClerkUserProfile } from '@/lib/supabase/admin';
 
 export async function POST(req: Request): Promise<Response> {
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
@@ -77,6 +77,11 @@ export async function POST(req: Request): Promise<Response> {
         displayName,
         role
       });
+    }
+  } else if (event.type === 'user.deleted') {
+    const client = getOptionalAdminClient();
+    if (client && event.data.id) {
+      await client.from('profiles').delete().eq('clerk_user_id', event.data.id);
     }
   }
 

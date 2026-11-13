@@ -216,11 +216,12 @@ export function AuthModal({
     setFormError(null);
     setFormErrorCode(null);
     try {
+      const targetNext = nextUrl ? `/post-auth?next=${encodeURIComponent(nextUrl)}` : '/post-auth';
       if (isSignInLoaded && signIn) {
         await signIn.authenticateWithRedirect({
           strategy: 'oauth_google',
           redirectUrl: '/sso-callback',
-          redirectUrlComplete: nextUrl || '/'
+          redirectUrlComplete: targetNext
         });
         return;
       }
@@ -238,11 +239,12 @@ export function AuthModal({
     setFormError(null);
     setFormErrorCode(null);
     try {
+      const targetNext = nextUrl ? `/post-auth?next=${encodeURIComponent(nextUrl)}` : '/post-auth';
       if (isSignUpLoaded && signUp) {
         await signUp.authenticateWithRedirect({
           strategy: 'oauth_google',
           redirectUrl: '/sso-callback',
-          redirectUrlComplete: nextUrl || '/'
+          redirectUrlComplete: targetNext
         });
         return;
       }
@@ -311,6 +313,7 @@ export function AuthModal({
               tone: 'success'
             });
             await onSuccessResume();
+            window.location.href = nextUrl ? `/post-auth?next=${encodeURIComponent(nextUrl)}` : '/post-auth';
             return;
           }
 
@@ -400,6 +403,7 @@ export function AuthModal({
               tone: 'success'
             });
             await onSuccessResume();
+            window.location.href = nextUrl ? `/post-auth?next=${encodeURIComponent(nextUrl)}` : '/post-auth';
             return;
           }
         }

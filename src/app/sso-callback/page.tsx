@@ -20,7 +20,11 @@ export default function SsoCallbackPage() {
         <ShieldCheck className="w-3.5 h-3.5 text-[var(--color-brand-deep)]" aria-hidden="true" />
         <span>Secure authentication handoff</span>
       </p>
-      <AuthenticateWithRedirectCallback />
+      <AuthenticateWithRedirectCallback
+        signInForceRedirectUrl="/post-auth"
+        signUpForceRedirectUrl="/post-auth"
+        continueSignUpUrl="/post-auth"
+      />
     </div>
   );
 }

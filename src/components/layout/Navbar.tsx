@@ -23,7 +23,7 @@ import { DmcLogo } from '@/components/branding/DmcLogo';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { useAuthSession } from '@/components/auth/AuthSessionProvider';
 import { useAuthModal } from '@/components/auth/AuthModalProvider';
-import { useUser } from '@clerk/nextjs';
+import { Show, UserButton, useUser } from '@clerk/nextjs';
 import { notifyNavigationStart } from '@/lib/motion/navigation-events';
 import { cn } from '@/lib/utils';
 
@@ -274,153 +274,193 @@ export function Navbar() {
             {/* Right Slot: Student Auth Slot (Desktop) + Compact Controls (Mobile) */}
             <div className="flex items-center justify-end gap-2.5 shrink-0 lg:justify-self-end">
               <div className="hidden lg:flex items-center gap-2.5 shrink-0">
-
-              {user ? (
-                <div ref={accountMenuRef} className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsAccountMenuOpen((prev) => !prev)}
-                    aria-expanded={isAccountMenuOpen}
-                    aria-controls={accountMenuId}
-                    className="dmc-press inline-flex items-center gap-2 min-h-[40px] pl-1.5 pr-3 rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] text-sm font-medium text-[var(--color-ink)] whitespace-nowrap"
-                  >
-                    <span
-                      aria-hidden="true"
-                      className="w-7 h-7 rounded-full bg-[var(--color-brand-deep)] text-white text-xs font-bold inline-flex items-center justify-center shrink-0"
+                <Show when="signed-in">
+                  <div className="flex items-center gap-2">
+                    <UserButton
+                      appearance={{
+                        elements: {
+                          avatarBox: 'w-8 h-8 rounded-full border border-[var(--color-border-strong)]'
+                        }
+                      }}
                     >
-                      {studentInitials}
-                    </span>
-                    <span className="max-w-[110px] truncate">{studentDisplayLabel}</span>
-                    <ChevronDown
-                      className={cn(
-                        'w-4 h-4 text-[var(--color-ink-secondary)] transition-transform duration-150',
-                        isAccountMenuOpen && 'rotate-180'
-                      )}
-                      aria-hidden="true"
-                    />
-                  </button>
-
-                  <AnimatePresence>
-                    {isAccountMenuOpen && (
-                      <m.div
-                        id={accountMenuId}
-                        initial={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                        transition={{ duration: prefersReduced ? 0.08 : 0.18, ease: [0.22, 1, 0.36, 1] }}
-                        className="absolute right-0 mt-2 w-60 rounded-[var(--radius-panel)] bg-[var(--color-surface)] border border-[var(--color-border)] elevation-2 py-2 z-50"
+                      <UserButton.MenuItems>
+                        <UserButton.Link
+                          label="Student Profile"
+                          href="/account"
+                          labelIcon={<User className="w-4 h-4 text-[var(--color-brand-deep)]" />}
+                        />
+                        <UserButton.Link
+                          label="My Quiz Attempts"
+                          href="/my-attempts"
+                          labelIcon={<History className="w-4 h-4 text-[var(--color-brand-deep)]" />}
+                        />
+                        <UserButton.Link
+                          label="My Downloads"
+                          href="/my-downloads"
+                          labelIcon={<FileText className="w-4 h-4 text-[var(--color-brand-deep)]" />}
+                        />
+                        <UserButton.Link
+                          label="Privacy & Data"
+                          href="/privacy"
+                          labelIcon={<ShieldCheck className="w-4 h-4 text-[var(--color-brand-deep)]" />}
+                        />
+                      </UserButton.MenuItems>
+                    </UserButton>
+                  </div>
+                </Show>
+                <Show when="signed-out">
+                  {user ? (
+                    <div ref={accountMenuRef} className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsAccountMenuOpen((prev) => !prev)}
+                        aria-expanded={isAccountMenuOpen}
+                        aria-controls={accountMenuId}
+                        className="dmc-press inline-flex items-center gap-2 min-h-[40px] pl-1.5 pr-3 rounded-full border border-[var(--color-border-strong)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-soft)] text-sm font-medium text-[var(--color-ink)] whitespace-nowrap"
                       >
-                        <div className="px-4 py-2 border-b border-[var(--color-border)]">
-                          <p className="text-xs font-semibold text-[var(--color-ink)] truncate">
-                            {studentDisplayLabel}
-                          </p>
-                          <p className="text-[11px] text-[var(--color-ink-secondary)] truncate">
-                            {user.email}
-                          </p>
-                        </div>
-                        <div className="py-1">
-                          <Link
-                            href="/account"
-                            onClick={() => {
-                              notifyNavigationStart();
-                              setIsAccountMenuOpen(false);
-                            }}
-                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
-                          >
-                            <User className="w-4 h-4 shrink-0" aria-hidden="true" />
-                            <span>Student Profile</span>
-                          </Link>
-                          <Link
-                            href="/my-attempts"
-                            onClick={() => {
-                              notifyNavigationStart();
-                              setIsAccountMenuOpen(false);
-                            }}
-                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
-                          >
-                            <History className="w-4 h-4 shrink-0" aria-hidden="true" />
-                            <span>My Quiz Attempts</span>
-                          </Link>
-                          <Link
-                            href="/my-downloads"
-                            onClick={() => {
-                              notifyNavigationStart();
-                              setIsAccountMenuOpen(false);
-                            }}
-                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
-                          >
-                            <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />
-                            <span>My Downloads</span>
-                          </Link>
-                          <Link
-                            href="/privacy"
-                            onClick={() => {
-                              notifyNavigationStart();
-                              setIsAccountMenuOpen(false);
-                            }}
-                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
-                          >
-                            <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />
-                            <span>Privacy &amp; Data</span>
-                          </Link>
-                        </div>
-                        <div className="pt-1 border-t border-[var(--color-border)]">
-                          <button
-                            type="button"
-                            onClick={() => void handleLogoutClick()}
-                            className="flex w-full items-center gap-2.5 px-4 py-2 text-sm font-semibold text-[var(--color-danger-ink)] hover:bg-[var(--color-danger-bg)] text-left"
-                          >
-                            <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
-                            <span>Sign Out</span>
-                          </button>
-                        </div>
-                      </m.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleSignInClick}
-                  className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] min-w-[96px] px-3.5 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap"
-                >
-                  <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
-                  <span>Sign In</span>
-                </button>
-              )}
-            </div>
+                        <span
+                          aria-hidden="true"
+                          className="w-7 h-7 rounded-full bg-[var(--color-brand-deep)] text-white text-xs font-bold inline-flex items-center justify-center shrink-0"
+                        >
+                          {studentInitials}
+                        </span>
+                        <span className="max-w-[110px] truncate">{studentDisplayLabel}</span>
+                        <ChevronDown
+                          className={cn(
+                            'w-4 h-4 text-[var(--color-ink-secondary)] transition-transform duration-150',
+                            isAccountMenuOpen && 'rotate-180'
+                          )}
+                          aria-hidden="true"
+                        />
+                      </button>
 
-            {/* Mobile / Tablet Compact Controls (< lg) */}
-            <div className="flex lg:hidden items-center gap-1.5">
-              {!user && (
-                <button
-                  type="button"
-                  onClick={handleSignInClick}
-                  className="dmc-press hidden sm:inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap"
-                >
-                  <LogIn className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span>Sign In</span>
-                </button>
-              )}
+                      <AnimatePresence>
+                        {isAccountMenuOpen && (
+                          <m.div
+                            id={accountMenuId}
+                            initial={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                            transition={{ duration: prefersReduced ? 0.08 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+                            className="absolute right-0 mt-2 w-60 rounded-[var(--radius-panel)] bg-[var(--color-surface)] border border-[var(--color-border)] elevation-2 py-2 z-50"
+                          >
+                            <div className="px-4 py-2 border-b border-[var(--color-border)]">
+                              <p className="text-xs font-semibold text-[var(--color-ink)] truncate">
+                                {studentDisplayLabel}
+                              </p>
+                              <p className="text-[11px] text-[var(--color-ink-secondary)] truncate">
+                                {user.email}
+                              </p>
+                            </div>
+                            <div className="py-1">
+                              <Link
+                                href="/account"
+                                onClick={() => {
+                                  notifyNavigationStart();
+                                  setIsAccountMenuOpen(false);
+                                }}
+                                className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
+                              >
+                                <User className="w-4 h-4 shrink-0" aria-hidden="true" />
+                                <span>Student Profile</span>
+                              </Link>
+                              <Link
+                                href="/my-attempts"
+                                onClick={() => {
+                                  notifyNavigationStart();
+                                  setIsAccountMenuOpen(false);
+                                }}
+                                className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
+                              >
+                                <History className="w-4 h-4 shrink-0" aria-hidden="true" />
+                                <span>My Quiz Attempts</span>
+                              </Link>
+                              <Link
+                                href="/my-downloads"
+                                onClick={() => {
+                                  notifyNavigationStart();
+                                  setIsAccountMenuOpen(false);
+                                }}
+                                className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
+                              >
+                                <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />
+                                <span>My Downloads</span>
+                              </Link>
+                              <Link
+                                href="/privacy"
+                                onClick={() => {
+                                  notifyNavigationStart();
+                                  setIsAccountMenuOpen(false);
+                                }}
+                                className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
+                              >
+                                <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />
+                                <span>Privacy &amp; Data</span>
+                              </Link>
+                            </div>
+                            <div className="pt-1 border-t border-[var(--color-border)]">
+                              <button
+                                type="button"
+                                onClick={() => void handleLogoutClick()}
+                                className="flex w-full items-center gap-2.5 px-4 py-2 text-sm font-semibold text-[var(--color-danger-ink)] hover:bg-[var(--color-danger-bg)] text-left"
+                              >
+                                <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
+                                <span>Sign Out</span>
+                              </button>
+                            </div>
+                          </m.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleSignInClick}
+                      className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] min-w-[96px] px-3.5 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap"
+                    >
+                      <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <span>Sign In</span>
+                    </button>
+                  )}
+                </Show>
+              </div>
 
-              <button
-                ref={mobileMenuTriggerRef}
-                type="button"
-                onClick={() => {
-                  setIsMobileMenuOpen((prev) => !prev);
-                }}
-                aria-expanded={isMobileMenuOpen}
-                aria-controls="mobile-nav-drawer"
-                aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-                className="dmc-press p-2 rounded-[var(--radius-control)] text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
-              >
-                <span className="dmc-hamburger" data-open={isMobileMenuOpen} aria-hidden="true">
-                  <span className="dmc-hamburger-line dmc-hamburger-line-1" />
-                  <span className="dmc-hamburger-line dmc-hamburger-line-2" />
-                  <span className="dmc-hamburger-line dmc-hamburger-line-3" />
-                </span>
-              </button>
-            </div>
+              {/* Mobile / Tablet Compact Controls (< lg) */}
+              <div className="flex lg:hidden items-center gap-1.5">
+                <Show when="signed-in">
+                  <UserButton />
+                </Show>
+                <Show when="signed-out">
+                  {!user && (
+                    <button
+                      type="button"
+                      onClick={handleSignInClick}
+                      className="dmc-press hidden sm:inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap"
+                    >
+                      <LogIn className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      <span>Sign In</span>
+                    </button>
+                  )}
+                </Show>
+
+                <button
+                  ref={mobileMenuTriggerRef}
+                  type="button"
+                  onClick={() => {
+                    setIsMobileMenuOpen((prev) => !prev);
+                  }}
+                  aria-expanded={isMobileMenuOpen}
+                  aria-controls="mobile-nav-drawer"
+                  aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+                  className="dmc-press p-2 rounded-[var(--radius-control)] text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-w-[44px] min-h-[44px] inline-flex items-center justify-center"
+                >
+                  <span className="dmc-hamburger" data-open={isMobileMenuOpen} aria-hidden="true">
+                    <span className="dmc-hamburger-line dmc-hamburger-line-1" />
+                    <span className="dmc-hamburger-line dmc-hamburger-line-2" />
+                    <span className="dmc-hamburger-line dmc-hamburger-line-3" />
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </PageContainer>
@@ -530,21 +570,16 @@ export function Navbar() {
                 <div className="text-xs font-semibold text-[var(--color-ink-secondary)] px-1">
                   Student Account
                 </div>
-                {user ? (
+                <Show when="signed-in">
                   <div className="space-y-1.5">
-                    <div className="flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-panel)] bg-[var(--color-surface-soft)]">
-                      <span
-                        aria-hidden="true"
-                        className="w-8 h-8 rounded-full bg-[var(--color-brand-deep)] text-white text-xs font-bold inline-flex items-center justify-center shrink-0"
-                      >
-                        {studentInitials}
-                      </span>
+                    <div className="flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-panel)] bg-[var(--color-surface-soft)] mb-2">
+                      <UserButton />
                       <div className="min-w-0">
                         <div className="text-xs font-semibold text-[var(--color-ink)] truncate">
-                          {studentDisplayLabel}
+                          Student Account
                         </div>
-                        <div className="text-[11px] text-[var(--color-ink-secondary)] truncate">
-                          {user.email}
+                        <div className="text-[11px] text-emerald-700 font-semibold">
+                          Active &amp; Verified
                         </div>
                       </div>
                     </div>
@@ -581,25 +616,80 @@ export function Navbar() {
                       <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />
                       <span>My Downloads</span>
                     </Link>
+                  </div>
+                </Show>
+                <Show when="signed-out">
+                  {user ? (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2.5 px-3 py-2 rounded-[var(--radius-panel)] bg-[var(--color-surface-soft)]">
+                        <span
+                          aria-hidden="true"
+                          className="w-8 h-8 rounded-full bg-[var(--color-brand-deep)] text-white text-xs font-bold inline-flex items-center justify-center shrink-0"
+                        >
+                          {studentInitials}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="text-xs font-semibold text-[var(--color-ink)] truncate">
+                            {studentDisplayLabel}
+                          </div>
+                          <div className="text-[11px] text-[var(--color-ink-secondary)] truncate">
+                            {user.email}
+                          </div>
+                        </div>
+                      </div>
+                      <Link
+                        href="/account"
+                        onClick={() => {
+                          notifyNavigationStart();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
+                      >
+                        <User className="w-4 h-4 shrink-0 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                        <span>Student Profile</span>
+                      </Link>
+                      <Link
+                        href="/my-attempts"
+                        onClick={() => {
+                          notifyNavigationStart();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
+                      >
+                        <History className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <span>My Quiz Attempts</span>
+                      </Link>
+                      <Link
+                        href="/my-downloads"
+                        onClick={() => {
+                          notifyNavigationStart();
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
+                      >
+                        <FileText className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <span>My Downloads</span>
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => void handleLogoutClick()}
+                        className="flex w-full items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-semibold text-[var(--color-danger-ink)] hover:bg-[var(--color-danger-bg)] min-h-[44px]"
+                      >
+                        <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       type="button"
-                      onClick={() => void handleLogoutClick()}
-                      className="flex w-full items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-semibold text-[var(--color-danger-ink)] hover:bg-[var(--color-danger-bg)] min-h-[44px]"
+                      onClick={handleSignInClick}
+                      className="w-full min-h-[44px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold inline-flex items-center justify-center gap-2"
                     >
-                      <LogOut className="w-4 h-4 shrink-0" aria-hidden="true" />
-                      <span>Sign Out</span>
+                      <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <span>Sign In / Free Student Account</span>
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleSignInClick}
-                    className="w-full min-h-[44px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold inline-flex items-center justify-center gap-2"
-                  >
-                    <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
-                    <span>Sign In / Free Student Account</span>
-                  </button>
-                )}
+                  )}
+                </Show>
               </div>
             </div>
 

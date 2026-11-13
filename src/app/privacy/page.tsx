@@ -1,16 +1,16 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Database, EyeOff, Lock, RotateCcw } from 'lucide-react';
+import { Database, EyeOff, Lock, RotateCcw, ShieldCheck, UserCheck } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
 import { ClearSavedProgressControl } from '@/components/privacy/ClearSavedProgressControl';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Privacy Policy & Local Storage Notice',
+  title: 'Privacy Policy & Student Data Governance',
   description:
-    'Learn why docmubashirchaudhry requires no accounts or tracking cookies, and how browser localStorage saves only your local quiz progress.',
+    'Learn how docmubashirchaudhary protects student privacy, uses Clerk for identity, Supabase for saved attempt scores, and Cloudflare R2 for watermarked downloads.',
   path: '/privacy'
 });
 
@@ -23,13 +23,13 @@ export default function PrivacyPage() {
 
           <div className="space-y-2 pb-4 border-b border-[var(--dmc-border-subtle)]">
             <span className="pill-badge bg-emerald-50 text-[var(--dmc-brand-emerald)] border border-emerald-200">
-              ZERO ADS &middot; ZERO ACCOUNTS
+              ZERO ADVERTISEMENTS &middot; STRICT DATA PRIVACY
             </span>
             <h1 id="privacy-heading" className="type-page-title text-[var(--dmc-ink-primary)]">
-              Privacy &amp; Browser Local Storage Notice
+              Privacy &amp; Student Data Governance
             </h1>
             <p className="type-body-base text-[var(--dmc-ink-secondary)]">
-              No personal profiles, no analytics beacons, and clear disclosure of browser-side storage.
+              Transparent disclosure of identity management, student attempt records, secure watermarked PDF delivery, and browser storage.
             </p>
           </div>
         </div>
@@ -38,42 +38,56 @@ export default function PrivacyPage() {
       <SectionBand surface="muted" size="reading" density="standard" labelledBy="privacy-details">
         <div className="space-y-6">
           <h2 id="privacy-details" className="sr-only">
-            Privacy Practices and Local Storage Details
+            Privacy Practices and Data Governance
           </h2>
 
           <article className="bg-white border border-[var(--dmc-border-subtle)] rounded-2xl p-6 elevation-1 space-y-3">
             <div className="flex items-center gap-2 text-sm font-bold text-[var(--dmc-brand-emerald)]">
               <EyeOff className="w-4 h-4" aria-hidden="true" />
-              <span>1. Zero Tracking &amp; Zero User Accounts</span>
+              <span>1. Zero Advertising Trackers &amp; No Data Monetization</span>
             </div>
             <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
-              docmubashirchaudhary does not ask you to create an account, enter an email address to download PDFs, or accept third-party advertising trackers. Page views and PDF downloads are never monetized through ad networks.
+              docmubashirchaudhary does not display third-party advertisements, sell student data, or install cross-site tracking pixels. Your reading history, syllabus searches, and reference reviews are never monetized through commercial ad networks.
+            </p>
+          </article>
+
+          <article className="bg-white border border-[var(--dmc-border-subtle)] rounded-2xl p-6 elevation-1 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-bold text-[var(--dmc-ink-primary)]">
+              <UserCheck className="w-4 h-4 text-[var(--dmc-brand-emerald)]" aria-hidden="true" />
+              <span>2. Student Accounts &amp; Authentication via Clerk</span>
+            </div>
+            <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
+              To save your timed mock exam attempts, track personal accuracy percentages, and access watermarked PDF past papers, the portal provides optional free student accounts managed through Clerk. Authentication credentials (including Google OAuth and password hashes) are securely processed by Clerk; our database never stores raw passwords.
             </p>
           </article>
 
           <article className="bg-white border border-[var(--dmc-border-subtle)] rounded-2xl p-6 elevation-1 space-y-3">
             <div className="flex items-center gap-2 text-sm font-bold text-[var(--dmc-ink-primary)]">
               <Database className="w-4 h-4 text-[var(--dmc-accent-gold)]" aria-hidden="true" />
-              <span>2. What Browser localStorage Means</span>
+              <span>3. Relational Data Storage in Supabase PostgreSQL</span>
             </div>
             <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
-              To remember your score and missed questions between browser refreshes during MCQ and World Geography quizzes, the site stores lightweight progress data inside your own device using standard browser `localStorage` (`dmc:v1:geography-quiz` and `dmc:v1:mcq`).
-            </p>
-            <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
-              This storage remains strictly on your browser and is never uploaded to external databases or shared with any third party.
+              Your saved attempt scores, completion timestamps, question accuracy metrics, and downloaded booklet logs are stored in private PostgreSQL tables protected by Row Level Security (RLS). Your academic records are strictly private and accessible only to your account.
             </p>
           </article>
 
-          <article
-            id="privacy-clear-storage-slot"
-            className="bg-white border border-[var(--dmc-border-subtle)] rounded-2xl p-6 elevation-1 space-y-3"
-          >
-            <div className="flex items-center gap-2 text-sm font-bold text-[var(--dmc-ink-primary)]">
-              <Lock className="w-4 h-4 text-[var(--dmc-brand-emerald)]" aria-hidden="true" />
-              <span>3. Clearing Your Saved Quiz Data</span>
+          <article className="bg-white border border-[var(--dmc-border-subtle)] rounded-2xl p-6 elevation-1 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-bold text-[var(--dmc-brand-emerald)]">
+              <ShieldCheck className="w-4 h-4 text-[var(--dmc-brand-emerald)]" aria-hidden="true" />
+              <span>4. Private Cloudflare R2 Storage for PDF Booklets</span>
             </div>
             <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
-              You can clear local quiz state directly below, via the &ldquo;Clear my progress&rdquo; control in the Geography quiz header bar, or by clearing site data in your browser settings.
+              All PDF exam past papers and study notes are hosted inside private, non-public Cloudflare R2 buckets. Download links are short-lived, signed URLs generated per authenticated request to prevent unauthorized hotlinking.
+            </p>
+          </article>
+
+          <article className="bg-white border border-[var(--dmc-border-subtle)] rounded-2xl p-6 elevation-1 space-y-3">
+            <div className="flex items-center gap-2 text-sm font-bold text-[var(--dmc-ink-primary)]">
+              <Lock className="w-4 h-4 text-[var(--dmc-brand-emerald)]" aria-hidden="true" />
+              <span>5. Browser Local Storage &amp; Progress Reset</span>
+            </div>
+            <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
+              When attempting practice questions anonymously, your in-progress answers are cached locally in your browser storage (`dmc:v1:geography-quiz` and `dmc:v1:mcq`) so accidental reloads do not wipe your progress. You can reset local data at any time below.
             </p>
             <ClearSavedProgressControl />
             <div className="flex flex-wrap gap-4 pt-1 text-xs font-bold">

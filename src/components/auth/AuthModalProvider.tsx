@@ -76,25 +76,6 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
     if (typeof window === 'undefined') return;
     const url = new URL(window.location.href);
 
-    // Fallback: if an email verification or OAuth callback landed on a non-callback route,
-    // forward the query parameters cleanly to /api/auth/callback to exchange cookies.
-    const hasCallbackCode = Boolean(url.searchParams.get('code')?.trim());
-    const hasCallbackTokenHash =
-      Boolean(url.searchParams.get('token_hash')?.trim()) &&
-      Boolean(url.searchParams.get('type')?.trim());
-
-    if ((hasCallbackCode || hasCallbackTokenHash) && url.pathname !== '/api/auth/callback') {
-      const callbackUrl = new URL('/api/auth/callback', url.origin);
-      url.searchParams.forEach((value, key) => {
-        callbackUrl.searchParams.set(key, value);
-      });
-      if (!callbackUrl.searchParams.has('next')) {
-        callbackUrl.searchParams.set('next', url.pathname);
-      }
-      window.location.replace(callbackUrl.toString());
-      return;
-    }
-
     const authRequired = url.searchParams.get('auth') === 'required';
     const nextParam = url.searchParams.get('next');
     const authError = url.searchParams.get('authError');

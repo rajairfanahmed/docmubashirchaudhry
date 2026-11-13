@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { resolveRequestOrigin } from '@/lib/auth/guards';
+import { isAdminEmail } from '@/lib/env';
 
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
 const isAdminApiRoute = createRouteMatcher(['/api/admin(.*)']);
@@ -18,7 +19,13 @@ export default clerkMiddleware(async (auth, request) => {
       );
     }
     const role = (sessionClaims?.publicMetadata as { role?: string } | undefined)?.role;
-    if (role !== 'admin') {
+    const claimsEmail =
+      (sessionClaims as Record<string, unknown> | undefined)?.email ??
+      (sessionClaims as Record<string, unknown> | undefined)?.primary_email_address ??
+      (sessionClaims as Record<string, unknown> | undefined)?.email_address;
+    const isEmailAdmin = typeof claimsEmail === 'string' && isAdminEmail(claimsEmail);
+
+    if (role === 'user' && !isEmailAdmin) {
       return NextResponse.json(
         { error: 'Not found.' },
         { status: 404, headers: { 'Cache-Control': 'no-store' } }
@@ -37,7 +44,13 @@ export default clerkMiddleware(async (auth, request) => {
     }
 
     const role = (sessionClaims?.publicMetadata as { role?: string } | undefined)?.role;
-    if (role !== 'admin') {
+    const claimsEmail =
+      (sessionClaims as Record<string, unknown> | undefined)?.email ??
+      (sessionClaims as Record<string, unknown> | undefined)?.primary_email_address ??
+      (sessionClaims as Record<string, unknown> | undefined)?.email_address;
+    const isEmailAdmin = typeof claimsEmail === 'string' && isAdminEmail(claimsEmail);
+
+    if (role === 'user' && !isEmailAdmin) {
       // Stealth 404 rewrite: non-admins never receive confirmation that an admin console exists
       return NextResponse.rewrite(new URL('/404', request.url));
     }

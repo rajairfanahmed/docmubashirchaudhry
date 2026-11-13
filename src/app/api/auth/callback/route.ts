@@ -92,6 +92,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       if (error?.message?.toLowerCase().includes('code verifier')) {
         failureMessage =
           'Confirmation link was opened in a different browser session. Try signing in with your email and password.';
+      } else if (
+        error?.message?.toLowerCase().includes('provider is not enabled') ||
+        error?.message?.toLowerCase().includes('unsupported provider')
+      ) {
+        failureMessage =
+          'OAuth provider was handled by an alternate flow. Please sign in via the portal.';
       }
     } else if (tokenHash && otpType && ALLOWED_OTP_TYPES.has(otpType)) {
       const { data, error } = await supabase.auth.verifyOtp({

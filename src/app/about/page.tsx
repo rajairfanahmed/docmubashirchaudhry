@@ -86,7 +86,7 @@ export default async function AboutPage() {
                 100% Free
               </div>
               <div className="text-[11px] text-[var(--dmc-ink-muted)] mt-0.5">
-                No Ads, No Login
+                Zero Ads &amp; Free Access
               </div>
             </div>
           </div>
