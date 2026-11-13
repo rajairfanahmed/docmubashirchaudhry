@@ -10,14 +10,16 @@ import { clearRateLimitBuckets } from '@/lib/v3/rate-limit';
 
 const clerkMockState = vi.hoisted(() => ({
   userId: null as string | null,
+  sessionClaims: null as { publicMetadata?: Record<string, unknown> } | null,
   user: null as {
     id: string;
     emailAddresses: Array<{ id: string; emailAddress: string }>;
-    primaryEmailAddressId: string;
+    primaryEmailAddressId?: string;
     fullName?: string;
     firstName?: string;
     lastName?: string;
     externalAccounts?: Array<{ provider: string }>;
+    publicMetadata?: Record<string, unknown>;
   } | null,
   backendUsers: [] as Array<{
     id: string;
@@ -27,16 +29,55 @@ const clerkMockState = vi.hoisted(() => ({
     firstName?: string;
     lastName?: string;
     externalAccounts?: Array<{ provider: string }>;
+    publicMetadata?: Record<string, unknown>;
     password?: string;
   }>
 }));
 
+const mockRedirect = vi.fn();
+const mockNotFound = vi.fn();
+vi.mock('next/navigation', () => ({
+  redirect: (url: string) => mockRedirect(url),
+  notFound: () => mockNotFound()
+}));
+
+const mockSyncClerkUserProfile = vi.fn((_args?: any) => Promise.resolve({ ok: true }));
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: vi.fn(),
+  getOptionalAdminClient: vi.fn(),
+  syncClerkUserProfile: (args: unknown) => mockSyncClerkUserProfile(args)
+}));
+
+vi.mock('svix', () => {
+  class MockWebhook {
+    constructor(public secret: string) {}
+    verify(payload: string, headers: Record<string, string>) {
+      if (headers['svix-signature'] === 'invalid_signature') {
+        throw new Error('Invalid signature');
+      }
+      return JSON.parse(payload);
+    }
+  }
+  return { Webhook: MockWebhook };
+});
+
 vi.mock('@clerk/nextjs/server', () => ({
-  auth: vi.fn(async () => ({ userId: clerkMockState.userId })),
+  auth: vi.fn(async () => ({
+    userId: clerkMockState.userId,
+    sessionClaims: clerkMockState.sessionClaims
+  })),
   currentUser: vi.fn(async () => clerkMockState.user),
   clerkMiddleware: vi.fn(() => vi.fn()),
+  createRouteMatcher: vi.fn(() => vi.fn(() => false)),
   clerkClient: vi.fn(async () => ({
     users: {
+      updateUserMetadata: vi.fn(async (userId: string, { publicMetadata }: { publicMetadata?: Record<string, unknown> }) => {
+        const found = clerkMockState.backendUsers.find((u) => u.id === userId);
+        if (found) {
+          found.publicMetadata = { ...found.publicMetadata, ...publicMetadata };
+        }
+        return { id: userId, publicMetadata };
+      }),
       getUserList: vi.fn(async ({ emailAddress }: { emailAddress?: string[] }) => {
         const email = emailAddress?.[0]?.toLowerCase();
         const matches = clerkMockState.backendUsers.filter((u) =>
@@ -83,10 +124,15 @@ vi.mock('@clerk/nextjs/server', () => ({
 describe('Clerk Authentication Configuration & Server Guards', () => {
   beforeEach(() => {
     clearRateLimitBuckets();
+    mockRedirect.mockClear();
+    mockNotFound.mockClear();
+    mockSyncClerkUserProfile.mockClear();
     delete process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
     delete process.env.CLERK_SECRET_KEY;
+    delete process.env.CLERK_WEBHOOK_SECRET;
     process.env.ADMIN_EMAILS = 'docmubashir@example.com,owner@domain.com';
     clerkMockState.userId = null;
+    clerkMockState.sessionClaims = null;
     clerkMockState.user = null;
     clerkMockState.backendUsers = [
       {
@@ -297,5 +343,144 @@ describe('Clerk Authentication Configuration & Server Guards', () => {
       })
     );
     expect(resendRes.status).toBe(200);
+  });
+
+  it('getRole resolves role via session token claims and falls back to allow-list', async () => {
+    const { getRole } = await import('@/lib/auth/get-role');
+
+    // 1. Unauthenticated -> returns 'user'
+    clerkMockState.userId = null;
+    expect(await getRole()).toBe('user');
+
+    // 2. Token claims explicit admin
+    clerkMockState.userId = 'user_admin_claim';
+    clerkMockState.sessionClaims = { publicMetadata: { role: 'admin' } };
+    expect(await getRole()).toBe('admin');
+
+    // 3. Token claims regular user, not on allow-list
+    clerkMockState.userId = 'user_student';
+    clerkMockState.sessionClaims = { publicMetadata: { role: 'user' } };
+    clerkMockState.user = {
+      id: 'user_student',
+      emailAddresses: [{ id: 'e1', emailAddress: 'student@example.com' }],
+      primaryEmailAddressId: 'e1'
+    };
+    expect(await getRole()).toBe('user');
+
+    // 4. Fallback check: token claim missing role, but email is in ADMIN_EMAILS
+    clerkMockState.userId = 'user_owner';
+    clerkMockState.sessionClaims = {};
+    clerkMockState.user = {
+      id: 'user_owner',
+      emailAddresses: [{ id: 'e2', emailAddress: 'owner@domain.com' }],
+      primaryEmailAddressId: 'e2'
+    };
+    expect(await getRole()).toBe('admin');
+  });
+
+  it('PostAuthPage routes admins to /admin and normal users to destination next path', async () => {
+    const PostAuthPage = (await import('@/app/post-auth/page')).default;
+
+    // Admin user scenario
+    clerkMockState.userId = 'user_admin_post';
+    clerkMockState.sessionClaims = { publicMetadata: { role: 'admin' } };
+    await PostAuthPage({ searchParams: Promise.resolve({ next: '/library' }) });
+    expect(mockRedirect).toHaveBeenCalledWith('/admin');
+
+    mockRedirect.mockClear();
+
+    // Regular student scenario with next target
+    clerkMockState.userId = 'user_student_post';
+    clerkMockState.sessionClaims = { publicMetadata: { role: 'user' } };
+    clerkMockState.user = {
+      id: 'user_student_post',
+      emailAddresses: [{ id: 'e3', emailAddress: 'student@example.com' }]
+    };
+    await PostAuthPage({ searchParams: Promise.resolve({ next: '/account/attempts' }) });
+    expect(mockRedirect).toHaveBeenCalledWith('/account/attempts');
+
+    mockRedirect.mockClear();
+
+    // Regular student with external phishing URL falls back safely to '/'
+    await PostAuthPage({ searchParams: Promise.resolve({ next: 'https://evil.example.com' }) });
+    expect(mockRedirect).toHaveBeenCalledWith('/');
+  });
+
+  it('handles Clerk webhook signatures, role assignments, and profile synchronization', async () => {
+    const { POST: clerkWebhook } = await import('@/app/api/webhooks/clerk/route');
+
+    // 1. Missing webhook secret -> 500
+    delete process.env.CLERK_WEBHOOK_SECRET;
+    const noSecretRes = await clerkWebhook(
+      new Request('http://localhost:3000/api/webhooks/clerk', {
+        method: 'POST',
+        headers: {
+          'svix-id': 'msg_123',
+          'svix-timestamp': '1234567890',
+          'svix-signature': 'valid_sig'
+        },
+        body: JSON.stringify({ type: 'user.created', data: {} })
+      })
+    );
+    expect(noSecretRes.status).toBe(500);
+
+    process.env.CLERK_WEBHOOK_SECRET = 'whsec_test_secret_123';
+
+    // 2. Missing svix headers -> 400
+    const missingHeadersRes = await clerkWebhook(
+      new Request('http://localhost:3000/api/webhooks/clerk', {
+        method: 'POST',
+        body: JSON.stringify({ type: 'user.created', data: {} })
+      })
+    );
+    expect(missingHeadersRes.status).toBe(400);
+
+    // 3. Invalid signature -> 400
+    const invalidSigRes = await clerkWebhook(
+      new Request('http://localhost:3000/api/webhooks/clerk', {
+        method: 'POST',
+        headers: {
+          'svix-id': 'msg_123',
+          'svix-timestamp': '1234567890',
+          'svix-signature': 'invalid_signature'
+        },
+        body: JSON.stringify({ type: 'user.created', data: {} })
+      })
+    );
+    expect(invalidSigRes.status).toBe(400);
+
+    // 4. Valid signature on user.created with owner email -> role admin & sync
+    clerkMockState.backendUsers = [{
+      id: 'user_created_owner',
+      emailAddresses: [{ id: 'em_wh1', emailAddress: 'owner@domain.com' }]
+    }];
+
+    const validOwnerRes = await clerkWebhook(
+      new Request('http://localhost:3000/api/webhooks/clerk', {
+        method: 'POST',
+        headers: {
+          'svix-id': 'msg_123',
+          'svix-timestamp': '1234567890',
+          'svix-signature': 'valid_sig'
+        },
+        body: JSON.stringify({
+          type: 'user.created',
+          data: {
+            id: 'user_created_owner',
+            email_addresses: [{ id: 'em_wh1', email_address: 'owner@domain.com' }],
+            primary_email_address_id: 'em_wh1',
+            first_name: 'Portal',
+            last_name: 'Owner'
+          }
+        })
+      })
+    );
+    expect(validOwnerRes.status).toBe(200);
+    expect(mockSyncClerkUserProfile).toHaveBeenCalledWith({
+      clerkUserId: 'user_created_owner',
+      email: 'owner@domain.com',
+      displayName: 'Portal Owner',
+      role: 'admin'
+    });
   });
 });

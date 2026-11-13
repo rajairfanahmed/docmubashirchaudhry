@@ -16,6 +16,7 @@ import {
   LogOut,
   Search,
   ShieldCheck,
+  User,
   X
 } from 'lucide-react';
 import { DmcLogo } from '@/components/branding/DmcLogo';
@@ -296,6 +297,17 @@ export function Navbar() {
                         </div>
                         <div className="py-1">
                           <Link
+                            href="/account"
+                            onClick={() => {
+                              notifyNavigationStart();
+                              setIsAccountMenuOpen(false);
+                            }}
+                            className="flex items-center gap-2.5 px-4 py-2 text-sm font-medium text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]"
+                          >
+                            <User className="w-4 h-4 shrink-0" aria-hidden="true" />
+                            <span>Student Profile</span>
+                          </Link>
+                          <Link
                             href="/my-attempts"
                             onClick={() => {
                               notifyNavigationStart();
@@ -513,6 +525,17 @@ export function Navbar() {
                         </div>
                       </div>
                     </div>
+                    <Link
+                      href="/account"
+                      onClick={() => {
+                        notifyNavigationStart();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
+                    >
+                      <User className="w-4 h-4 shrink-0 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                      <span>Student Profile</span>
+                    </Link>
                     <Link
                       href="/my-attempts"
                       onClick={() => {
