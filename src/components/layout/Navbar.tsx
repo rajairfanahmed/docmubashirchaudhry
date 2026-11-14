@@ -17,7 +17,7 @@ import {
   User,
   X
 } from 'lucide-react';
-import { ClerkLoaded, ClerkLoading, Show, SignInButton, UserButton, useUser } from '@clerk/nextjs';
+import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
 import { DmcLogo } from '@/components/branding/DmcLogo';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { useAuthSession } from '@/components/auth/AuthSessionProvider';
@@ -30,7 +30,8 @@ export function Navbar() {
   const prefersReduced = useReducedMotion();
   const { session } = useAuthSession();
   const { openAuthModal } = useAuthModal();
-  const { user: clerkUser } = useUser();
+  const { user: clerkUser, isSignedIn: isClerkSignedIn } = useUser();
+  const isAuthenticated = Boolean(isClerkSignedIn || session.authenticated);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const mobileDrawerRef = useRef<HTMLElement>(null);
@@ -204,97 +205,86 @@ export function Navbar() {
             <div className="flex items-center justify-end gap-2.5 shrink-0">
               {/* Desktop Auth Section */}
               <div className="hidden lg:flex items-center gap-2.5 shrink-0 min-w-[40px] justify-end">
-                <ClerkLoading>
-                  <div className="h-9 w-20 rounded-[var(--radius-control)] bg-[var(--color-surface-soft)] animate-pulse" aria-hidden="true" />
-                </ClerkLoading>
-                <ClerkLoaded>
-                  <Show when="signed-out">
-                    <SignInButton
-                      mode="modal"
-                      fallbackRedirectUrl="/post-auth"
-                      signUpFallbackRedirectUrl="/post-auth"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => {
-                          // Fallback to openAuthModal if modal is invoked
-                        }}
-                        className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
-                      >
-                        <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
-                        <span>Sign In</span>
-                      </button>
-                    </SignInButton>
-                  </Show>
-
-                  <Show when="signed-in">
-                    <UserButton
-                      appearance={{
-                        elements: {
-                          userButtonAvatarBox: 'w-9 h-9 ring-2 ring-[var(--color-brand-deep)]/25 hover:ring-[var(--color-brand-deep)] transition-all',
-                          userButtonTrigger: 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-deep)] rounded-full'
-                        }
+                {isAuthenticated ? (
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        userButtonAvatarBox: 'w-9 h-9 ring-2 ring-[var(--color-brand-deep)]/25 hover:ring-[var(--color-brand-deep)] transition-all',
+                        userButtonTrigger: 'focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-deep)] rounded-full'
+                      }
+                    }}
+                  >
+                    <UserButton.MenuItems>
+                      <UserButton.Link
+                        label="User Profile"
+                        href="/account"
+                        labelIcon={<User className="w-4 h-4 text-[var(--color-brand-deep)]" />}
+                      />
+                      <UserButton.Link
+                        label="My Quiz Attempts"
+                        href="/my-attempts"
+                        labelIcon={<History className="w-4 h-4 text-[var(--color-brand-deep)]" />}
+                      />
+                      <UserButton.Link
+                        label="My Downloads"
+                        href="/my-downloads"
+                        labelIcon={<FileText className="w-4 h-4 text-[var(--color-brand-deep)]" />}
+                      />
+                      <UserButton.Link
+                        label="Privacy & Data"
+                        href="/privacy"
+                        labelIcon={<ShieldCheck className="w-4 h-4 text-[var(--color-brand-deep)]" />}
+                      />
+                    </UserButton.MenuItems>
+                  </UserButton>
+                ) : (
+                  <SignInButton
+                    mode="modal"
+                    fallbackRedirectUrl="/post-auth"
+                    signUpFallbackRedirectUrl="/post-auth"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!isClerkSignedIn) openAuthModal();
                       }}
+                      className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
                     >
-                      <UserButton.MenuItems>
-                        <UserButton.Link
-                          label="User Profile"
-                          href="/account"
-                          labelIcon={<User className="w-4 h-4 text-[var(--color-brand-deep)]" />}
-                        />
-                        <UserButton.Link
-                          label="My Quiz Attempts"
-                          href="/my-attempts"
-                          labelIcon={<History className="w-4 h-4 text-[var(--color-brand-deep)]" />}
-                        />
-                        <UserButton.Link
-                          label="My Downloads"
-                          href="/my-downloads"
-                          labelIcon={<FileText className="w-4 h-4 text-[var(--color-brand-deep)]" />}
-                        />
-                        <UserButton.Link
-                          label="Privacy & Data"
-                          href="/privacy"
-                          labelIcon={<ShieldCheck className="w-4 h-4 text-[var(--color-brand-deep)]" />}
-                        />
-                      </UserButton.MenuItems>
-                    </UserButton>
-                  </Show>
-                </ClerkLoaded>
+                      <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
+                      <span>Sign In</span>
+                    </button>
+                  </SignInButton>
+                )}
               </div>
 
               {/* Mobile / Tablet Controls (< lg) */}
               <div className="flex lg:hidden items-center gap-2">
-                <ClerkLoading>
-                  <div className="h-8 w-16 rounded-[var(--radius-control)] bg-[var(--color-surface-soft)] animate-pulse" aria-hidden="true" />
-                </ClerkLoading>
-                <ClerkLoaded>
-                  <Show when="signed-out">
-                    <SignInButton
-                      mode="modal"
-                      fallbackRedirectUrl="/post-auth"
-                      signUpFallbackRedirectUrl="/post-auth"
-                    >
-                      <button
-                        type="button"
-                        className="dmc-press inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
-                      >
-                        <LogIn className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                        <span>Sign In</span>
-                      </button>
-                    </SignInButton>
-                  </Show>
-
-                  <Show when="signed-in">
-                    <UserButton
-                      appearance={{
-                        elements: {
-                          userButtonAvatarBox: 'w-8 h-8 ring-2 ring-[var(--color-brand-deep)]/20'
-                        }
+                {isAuthenticated ? (
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        userButtonAvatarBox: 'w-8 h-8 ring-2 ring-[var(--color-brand-deep)]/20'
+                      }
+                    }}
+                  />
+                ) : (
+                  <SignInButton
+                    mode="modal"
+                    fallbackRedirectUrl="/post-auth"
+                    signUpFallbackRedirectUrl="/post-auth"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!isClerkSignedIn) openAuthModal();
                       }}
-                    />
-                  </Show>
-                </ClerkLoaded>
+                      className="dmc-press inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
+                    >
+                      <LogIn className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      <span>Sign In</span>
+                    </button>
+                  </SignInButton>
+                )}
 
                 <button
                   ref={mobileMenuTriggerRef}
@@ -422,79 +412,74 @@ export function Navbar() {
                     User Account
                   </div>
 
-                  <ClerkLoading>
-                    <div className="h-10 w-full rounded-[var(--radius-control)] bg-[var(--color-surface-soft)] animate-pulse" aria-hidden="true" />
-                  </ClerkLoading>
-
-                  <ClerkLoaded>
-                    <Show when="signed-out">
-                      <SignInButton
-                        mode="modal"
-                        fallbackRedirectUrl="/post-auth"
-                        signUpFallbackRedirectUrl="/post-auth"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="w-full min-h-[44px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold inline-flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
-                        >
-                          <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
-                          <span>Sign In / Create Account</span>
-                        </button>
-                      </SignInButton>
-                    </Show>
-
-                    <Show when="signed-in">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 p-2.5 rounded-[var(--radius-panel)] bg-[var(--color-surface-soft)]">
-                          <UserButton
-                            showName
-                            appearance={{
-                              elements: {
-                                userButtonAvatarBox: 'w-8 h-8',
-                                userButtonOuterIdentifier: 'text-sm font-semibold text-[var(--color-ink)]'
-                              }
-                            }}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Link
-                            href="/account"
-                            onClick={() => {
-                              notifyNavigationStart();
-                              setIsMobileMenuOpen(false);
-                            }}
-                            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
-                          >
-                            <User className="w-4 h-4 shrink-0 text-[var(--color-brand-deep)]" aria-hidden="true" />
-                            <span>User Profile</span>
-                          </Link>
-                          <Link
-                            href="/my-attempts"
-                            onClick={() => {
-                              notifyNavigationStart();
-                              setIsMobileMenuOpen(false);
-                            }}
-                            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
-                          >
-                            <History className="w-4 h-4 shrink-0 text-[var(--color-brand-deep)]" aria-hidden="true" />
-                            <span>My Quiz Attempts</span>
-                          </Link>
-                          <Link
-                            href="/my-downloads"
-                            onClick={() => {
-                              notifyNavigationStart();
-                              setIsMobileMenuOpen(false);
-                            }}
-                            className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
-                          >
-                            <FileText className="w-4 h-4 shrink-0 text-[var(--color-brand-deep)]" aria-hidden="true" />
-                            <span>My Downloads</span>
-                          </Link>
-                        </div>
+                  {isAuthenticated ? (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-2.5 rounded-[var(--radius-panel)] bg-[var(--color-surface-soft)]">
+                        <UserButton
+                          showName
+                          appearance={{
+                            elements: {
+                              userButtonAvatarBox: 'w-8 h-8',
+                              userButtonOuterIdentifier: 'text-sm font-semibold text-[var(--color-ink)]'
+                            }
+                          }}
+                        />
                       </div>
-                    </Show>
-                  </ClerkLoaded>
+                      <div className="space-y-1">
+                        <Link
+                          href="/account"
+                          onClick={() => {
+                            notifyNavigationStart();
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
+                        >
+                          <User className="w-4 h-4 shrink-0 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                          <span>User Profile</span>
+                        </Link>
+                        <Link
+                          href="/my-attempts"
+                          onClick={() => {
+                            notifyNavigationStart();
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
+                        >
+                          <History className="w-4 h-4 shrink-0 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                          <span>My Quiz Attempts</span>
+                        </Link>
+                        <Link
+                          href="/my-downloads"
+                          onClick={() => {
+                            notifyNavigationStart();
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[var(--radius-panel)] text-sm font-medium text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)] min-h-[44px]"
+                        >
+                          <FileText className="w-4 h-4 shrink-0 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                          <span>My Downloads</span>
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <SignInButton
+                      mode="modal"
+                      fallbackRedirectUrl="/post-auth"
+                      signUpFallbackRedirectUrl="/post-auth"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          if (!isClerkSignedIn) openAuthModal();
+                        }}
+                        className="w-full min-h-[44px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold inline-flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
+                      >
+                        <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
+                        <span>Sign In / Create Account</span>
+                      </button>
+                    </SignInButton>
+                  )}
                 </div>
               </div>
 
