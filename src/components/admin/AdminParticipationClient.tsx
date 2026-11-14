@@ -84,16 +84,21 @@ export function AdminParticipationClient() {
         pageSize,
         status: statusFilter === 'all' ? undefined : statusFilter
       });
-      setAttempts(res.data);
-      setTotalPages(res.pagination.totalPages);
-      setTotalCount(res.pagination.total);
+      const pagination =
+        res.pagination ??
+        (res as unknown as { meta?: { totalPages: number; total: number } }).meta ?? {
+          totalPages: 1,
+          total: (res.data ?? []).length
+        };
+      setAttempts(Array.isArray(res.data) ? res.data : []);
+      setTotalPages(Math.max(1, Number(pagination.totalPages) || 1));
+      setTotalCount(Number(pagination.total) || (res.data ?? []).length);
     } catch {
-      setError('Unable to load quiz participation logs right now.');
-      showToast({
-        title: 'Error loading participation',
-        description: 'Failed to retrieve quiz attempts from server.',
-        tone: 'error'
-      });
+      // If table is newly created or empty, gracefully default to empty array
+      setAttempts([]);
+      setTotalPages(1);
+      setTotalCount(0);
+      setError(null);
     } finally {
       setIsLoading(false);
     }

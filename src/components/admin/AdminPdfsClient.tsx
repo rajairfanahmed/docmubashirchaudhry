@@ -534,16 +534,61 @@ export function AdminPdfsClient() {
             </div>
 
             {isUploading ? (
-              <div className="space-y-2 rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-3" aria-live="polite">
-                <div className="flex items-center justify-between gap-2 text-xs font-semibold text-[var(--color-brand-deep)]">
-                  <span>{uploadStage || 'Uploading...'}</span>
-                  <span className="tabular-nums">{uploadProgress}%</span>
+              <div
+                className="flex flex-col items-center justify-center gap-3.5 rounded-[var(--radius-panel)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-6"
+                aria-live="polite"
+              >
+                {/* SVG circular progress ring matching the quiz runner ring */}
+                <div
+                  className="relative inline-flex items-center justify-center shrink-0"
+                  style={{ width: 116, height: 116 }}
+                  role="progressbar"
+                  aria-valuenow={Math.max(0, Math.min(100, uploadProgress ?? 0))}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <svg
+                    width={116}
+                    height={116}
+                    viewBox="0 0 116 116"
+                    className="-rotate-90"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx={58}
+                      cy={58}
+                      r={48}
+                      fill="none"
+                      stroke="var(--color-border)"
+                      strokeWidth={9}
+                    />
+                    <circle
+                      cx={58}
+                      cy={58}
+                      r={48}
+                      fill="none"
+                      stroke="var(--color-brand-deep, #0d4a28)"
+                      strokeWidth={9}
+                      strokeDasharray={2 * Math.PI * 48}
+                      strokeDashoffset={
+                        2 * Math.PI * 48 * (1 - Math.max(0, Math.min(100, uploadProgress ?? 0)) / 100)
+                      }
+                      strokeLinecap="round"
+                      className="transition-[stroke-dashoffset] duration-200 ease-out motion-reduce:transition-none"
+                    />
+                  </svg>
+                  <span className="absolute font-extrabold text-2xl tabular-nums text-[var(--color-ink)] tracking-tight select-none">
+                    {Math.max(0, Math.min(100, uploadProgress ?? 0))}%
+                  </span>
                 </div>
-                <div className="h-2 rounded-full bg-[var(--color-border)] overflow-hidden">
-                  <div
-                    className="h-full w-full origin-left bg-[var(--color-brand-deep)] transition-transform duration-150 ease-out motion-reduce:transition-none"
-                    style={{ transform: `scaleX(${Math.max(0, Math.min(100, uploadProgress ?? 0)) / 100})` }}
-                  />
+
+                <div className="text-center space-y-1">
+                  <div className="text-sm font-bold text-[var(--color-ink)]">
+                    {uploadStage || 'Uploading PDF to Cloudflare R2...'}
+                  </div>
+                  <p className="text-xs text-[var(--color-ink-secondary)]">
+                    Secure multipart transfer to private cloud storage
+                  </p>
                 </div>
               </div>
             ) : null}

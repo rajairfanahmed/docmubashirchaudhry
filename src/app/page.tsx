@@ -17,11 +17,13 @@ import { AuthorityExamTiles } from '@/components/home/AuthorityExamTiles';
 import { McqLauncherWidget } from '@/components/home/McqLauncherWidget';
 import { McqSubjectStrip } from '@/components/home/McqSubjectStrip';
 import { StandingTrustNotice } from '@/components/layout/StandingTrustNotice';
-import { PdfResourceCard } from '@/components/library/PdfResourceCard';
+import { GatedPdfDownloadButton } from '@/components/library/GatedPdfDownloadButton';
 import { CountryCard } from '@/components/geography/CountryCard';
 import { getContentRepository } from '@/lib/data';
 import { parseSecretSupabaseConfig } from '@/lib/env';
+import { formatBytes } from '@/lib/format';
 import { buildPageMetadata, SITE_NAME } from '@/lib/seo/metadata';
+import type { PdfResourceRow } from '@/lib/supabase/database.types';
 import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 export const revalidate = 60;
@@ -33,33 +35,102 @@ export const metadata: Metadata = buildPageMetadata({
   path: '/'
 });
 
-async function getSafeDbCounts(): Promise<{
+interface PortalLiveMetrics {
   quizzes: number;
   pdfs: number;
   questions: number;
-}> {
+  subjectCounts: Record<string, number>;
+  latestPdfs: Array<{
+    id: string;
+    title: string;
+    description: string | null;
+    subject: string;
+    examTag: string;
+    fileSize: number;
+    downloadCount: number;
+    isPublished: boolean;
+  }>;
+}
+
+const SUBJECT_KEYWORD_MAP: Record<string, string[]> = {
+  'sub-gk': ['general knowledge', 'geography', 'world', 'gk'],
+  'sub-pak-studies': ['pakistan affairs', 'pakistan', 'history', 'constitution'],
+  'sub-islamic-studies': ['islamic studies', 'islam', 'ethics', 'islamiat'],
+  'sub-everyday-science': ['everyday science', 'science', 'biology', 'physics', 'chemistry'],
+  'sub-english': ['english', 'vocabulary', 'grammar'],
+  'sub-urdu': ['urdu', 'adab', 'literature'],
+  'sub-math': ['basic mathematics', 'mathematics', 'math', 'arithmetic', 'ability'],
+  'sub-computer': ['computer', 'it', 'information technology', 'cs'],
+  'sub-sports': ['sports', 'physical education', 'olympic']
+};
+
+async function getSafeDbCounts(): Promise<PortalLiveMetrics> {
+  const empty: PortalLiveMetrics = {
+    quizzes: 0,
+    pdfs: 0,
+    questions: 0,
+    subjectCounts: {},
+    latestPdfs: []
+  };
+
   if (!parseSecretSupabaseConfig()) {
-    return { quizzes: 0, pdfs: 0, questions: 0 };
+    return empty;
   }
 
   try {
     const admin = createSupabaseAdminClient();
-    const [quizRes, pdfRes, qRes] = await Promise.all([
+    const [quizRes, pdfRes, qRes, qSubjectRowsRes, latestPdfsRes] = await Promise.all([
       admin.from('quizzes').select('id', { count: 'exact', head: true }).eq('is_published', true),
       admin
         .from('pdf_resources')
         .select('id', { count: 'exact', head: true })
         .eq('is_published', true),
-      admin.from('quiz_questions').select('id', { count: 'exact', head: true })
+      admin.from('quiz_questions').select('id', { count: 'exact', head: true }),
+      admin.from('quiz_questions').select('subject'),
+      admin
+        .from('pdf_resources')
+        .select('*')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false })
+        .limit(6)
     ]);
+
+    const subjectCounts: Record<string, number> = {};
+    const rows = qSubjectRowsRes.data ?? [];
+    for (const r of rows) {
+      const s = (r.subject || '').trim().toLowerCase();
+      let matchedId: string | null = null;
+      for (const [subId, keywords] of Object.entries(SUBJECT_KEYWORD_MAP)) {
+        if (keywords.some((k) => s.includes(k))) {
+          matchedId = subId;
+          break;
+        }
+      }
+      if (matchedId) {
+        subjectCounts[matchedId] = (subjectCounts[matchedId] ?? 0) + 1;
+      }
+    }
+
+    const latestPdfs = ((latestPdfsRes.data ?? []) as PdfResourceRow[]).map((p) => ({
+      id: p.id,
+      title: p.title,
+      description: p.description,
+      subject: p.subject,
+      examTag: p.exam_tag,
+      fileSize: p.file_size,
+      downloadCount: p.download_count,
+      isPublished: p.is_published
+    }));
 
     return {
       quizzes: quizRes.count ?? 0,
       pdfs: pdfRes.count ?? 0,
-      questions: qRes.count ?? 0
+      questions: qRes.count ?? 0,
+      subjectCounts,
+      latestPdfs
     };
   } catch {
-    return { quizzes: 0, pdfs: 0, questions: 0 };
+    return empty;
   }
 }
 
@@ -76,33 +147,6 @@ export default async function HomePage() {
       repo.getGeographyReference(),
       getSafeDbCounts()
     ]);
-
-  const topicMap = new Map(topics.map((topic) => [topic.id, topic]));
-  const subjectMap = new Map(subjects.map((subject) => [subject.id, subject]));
-  const questionCountsBySubject = questions.reduce<Record<string, number>>((acc, q) => {
-    const matchedSubjects = new Set<string>();
-    for (const topicId of q.topicIds) {
-      const subjectId = topicMap.get(topicId)?.subjectId;
-      if (subjectId) {
-        matchedSubjects.add(subjectId);
-      }
-    }
-    for (const subjectId of matchedSubjects) {
-      acc[subjectId] = (acc[subjectId] ?? 0) + 1;
-    }
-    return acc;
-  }, {});
-
-  const resolvePdfSubjectLabel = (topicIds: string[]): string | undefined => {
-    for (const topicId of topicIds) {
-      const subjectId = topicMap.get(topicId)?.subjectId;
-      if (subjectId) {
-        const subject = subjectMap.get(subjectId);
-        if (subject) return subject.name;
-      }
-    }
-    return undefined;
-  };
 
   const featuredCountry =
     countries.find((country) => country.slug === 'pakistan') ?? countries[0] ?? null;
@@ -122,13 +166,13 @@ export default async function HomePage() {
     },
     {
       label: 'Solved PDF Booklets',
-      value: String(Math.max(pdfs.length, dbCounts.pdfs)),
+      value: String(dbCounts.pdfs),
       href: '/library',
       icon: FileText
     },
     {
       label: 'Published MCQs',
-      value: String(questions.length + dbCounts.questions),
+      value: String(dbCounts.questions),
       href: '/mcq',
       icon: BookOpen
     },
@@ -225,7 +269,7 @@ export default async function HomePage() {
         density="compact"
         className="py-5 sm:py-6"
       >
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 min-[340px]:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
           {quickStats.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -300,15 +344,76 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {pdfs.slice(0, 6).map((pdf) => (
-              <PdfResourceCard
-                key={pdf.id}
-                pdf={pdf}
-                subjectLabel={resolvePdfSubjectLabel(pdf.topicIds)}
-              />
-            ))}
-          </div>
+          {dbCounts.latestPdfs.length === 0 ? (
+            <div className="rounded-[var(--radius-panel)] bg-[var(--color-surface)] border border-[var(--color-border)] p-8 text-center space-y-3">
+              <div className="w-12 h-12 rounded-[var(--radius-control)] bg-[var(--color-surface-soft)] text-[var(--color-brand-deep)] flex items-center justify-center mx-auto">
+                <FileText className="w-6 h-6" aria-hidden="true" />
+              </div>
+              <h3 className="font-display font-bold text-lg text-[var(--color-ink)]">
+                Solved Past Paper Booklets Under Academic Review
+              </h3>
+              <p className="text-sm text-[var(--color-ink-secondary)] max-w-lg mx-auto">
+                Verified solved booklets and past papers uploaded by Doc Mubashir Chaudhry will appear here with instant signed downloads.
+              </p>
+              <div className="pt-2">
+                <Link
+                  href="/corrections"
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-brand-deep)] hover:underline"
+                >
+                  <span>Request a specific past paper</span>
+                  <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {dbCounts.latestPdfs.map((pdf) => (
+                <article
+                  key={pdf.id}
+                  className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-5 sm:p-6 elevation-1 flex flex-col justify-between space-y-5 min-w-0"
+                >
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <span className="font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border border-[var(--color-success-border)]">
+                        {pdf.subject}
+                      </span>
+                      <span className="font-semibold text-slate-700 bg-[var(--color-surface-soft)] border border-[var(--color-border)] px-2.5 py-0.5 rounded-full">
+                        {pdf.examTag}
+                      </span>
+                    </div>
+
+                    <h3 className="type-card-title text-[var(--color-ink)]">{pdf.title}</h3>
+
+                    {pdf.description && (
+                      <p className="text-xs sm:text-sm text-[var(--color-ink-secondary)] leading-relaxed line-clamp-3">
+                        {pdf.description}
+                      </p>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-600 tabular-nums font-medium">
+                      <span className="inline-flex items-center gap-1">
+                        <FileText className="w-3.5 h-3.5" aria-hidden="true" />
+                        <span>{formatBytes(pdf.fileSize)}</span>
+                      </span>
+                      <span>&middot;</span>
+                      <span>{pdf.downloadCount} downloads</span>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-3">
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      Verified Watermarked PDF
+                    </span>
+                    <GatedPdfDownloadButton
+                      pdfId={pdf.id}
+                      title={pdf.title}
+                      fileSizeBytes={pdf.fileSize}
+                    />
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </SectionBand>
 
@@ -392,7 +497,7 @@ export default async function HomePage() {
             <McqSubjectStrip
               subjects={subjects}
               topics={topics}
-              questionCountsBySubject={questionCountsBySubject}
+              questionCountsBySubject={dbCounts.subjectCounts}
             />
           </div>
         </div>

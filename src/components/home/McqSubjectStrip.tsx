@@ -28,7 +28,7 @@ export function McqSubjectStrip({
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
+    <div className="grid grid-cols-1 min-[380px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
       {subjects.slice(0, 10).map((subject) => {
         const subjectTopics = topicsBySubject.get(subject.id) ?? [];
         const qCount = questionCountsBySubject?.[subject.id] ?? 0;
@@ -59,12 +59,10 @@ export function McqSubjectStrip({
                 <div className="text-xs min-[360px]:text-[13px] font-bold text-[var(--color-ink)] leading-tight break-words [overflow-wrap:anywhere]">
                   {subject.name}
                 </div>
-                <div className="text-[11px] text-[var(--color-ink-muted)] mt-0.5 truncate tabular-nums">
+                <div className="text-[11px] font-semibold text-slate-600 mt-0.5 truncate tabular-nums">
                   {qCount > 0
                     ? `${qCount} MCQ${qCount === 1 ? '' : 's'}`
-                    : subjectTopics.length > 0
-                      ? `${subjectTopics.length} topic${subjectTopics.length === 1 ? '' : 's'}`
-                      : 'Topic Archive'}
+                    : '0 MCQs'}
                 </div>
               </div>
             </div>

@@ -194,47 +194,8 @@ async function seed() {
     else console.log(`  ✓ Question ready: ${q.text_en.slice(0, 45)}...`);
   }
 
-  // 3. PDF Resources
-  const pdfs = [
-    {
-      id: 'c1d2e3f4-0001-4000-8000-000000000001',
-      slug: 'ppsc-intelligence-officer-past-paper-2023-solved',
-      title: 'PPSC Intelligence Officer Past Paper 2023 (Verified Solved)',
-      description: 'Complete authentic 100-question past paper with verified answers, official syllabus notes, and candidate guidance.',
-      subject: 'Pakistan Affairs',
-      exam_tag: 'PPSC',
-      year: 2023,
-      language: 'en',
-      page_count: 14,
-      file_bytes: 1420500,
-      file_key: 'pdfs/ppsc/ppsc-intelligence-officer-2023-solved.pdf',
-      sha256: 'a1b2c3d4e5f6',
-      is_published: true,
-      download_count: 0
-    },
-    {
-      id: 'c1d2e3f4-0002-4000-8000-000000000002',
-      slug: 'world-geography-country-capitals-reference-handbook',
-      title: 'World Geography: Comprehensive Country Capitals Handbook',
-      description: 'Reference handbook listing all 250 ISO 3166-1 sovereign states, official capitals, currency designations, and UN M49 regions.',
-      subject: 'Geography',
-      exam_tag: 'PPSC',
-      year: 2026,
-      language: 'en',
-      page_count: 22,
-      file_bytes: 2150000,
-      file_key: 'pdfs/geography/world-geography-handbook-2026.pdf',
-      sha256: 'f6e5d4c3b2a1',
-      is_published: true,
-      download_count: 0
-    }
-  ];
-
-  for (const p of pdfs) {
-    const { error } = await client.from('pdf_resources').upsert(p, { onConflict: 'slug' });
-    if (error) console.error('PDF upsert error:', error.message);
-    else console.log(`  ✓ PDF ready: ${p.title}`);
-  }
+  // 3. PDF Resources: Kept strictly clean for real admin uploads to Cloudflare R2
+  console.log('  ✓ PDF repository reserved for real administrative uploads');
 
   console.log('\nSeed completed successfully!');
 }

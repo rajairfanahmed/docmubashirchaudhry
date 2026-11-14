@@ -122,6 +122,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             pageSize,
             total,
             totalPages
+          },
+          pagination: {
+            page,
+            pageSize,
+            total,
+            totalPages
           }
         },
         {

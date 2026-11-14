@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { FileText } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
-import { PdfFilterToolbar } from '@/components/library/PdfFilterToolbar';
 import { CloudPdfCatalogSection } from '@/components/library/CloudPdfCatalogSection';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
@@ -93,12 +92,6 @@ export default async function PdfLibraryPage() {
             Available PDF Resources
           </h2>
           <CloudPdfCatalogSection />
-          <PdfFilterToolbar
-            resources={pdfs}
-            exams={exams}
-            subjects={subjects}
-            topics={topics}
-          />
         </div>
       </SectionBand>
     </>

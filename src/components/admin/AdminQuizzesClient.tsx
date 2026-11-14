@@ -294,17 +294,17 @@ export function AdminQuizzesClient() {
                                   <Badge variant="neutral">Draft</Badge>
                                 ) : null}
                               </div>
-                              <div className="text-xs text-[var(--color-ink-muted)]">
-                                {quiz.subject} - {quiz.exam_tag} ({quiz.language.toUpperCase()})
+                              <div className="text-xs font-semibold text-slate-600 mt-0.5">
+                                {quiz.subject} &middot; {quiz.exam_tag} ({quiz.language.toUpperCase()})
                               </div>
                             </td>
-                            <td className="py-3.5 px-4 text-xs text-[var(--color-ink-secondary)]">
+                            <td className="py-3.5 px-4 text-xs">
                               <div className="mb-1">
                                 <Badge variant={quiz.type === 'mock' ? 'prepare' : 'feature'}>
-                                  {quiz.type === 'mock' ? 'Mock Exam' : 'Practice'}
+                                  {quiz.type === 'mock' ? 'MOCK EXAM' : 'Practice'}
                                 </Badge>
                               </div>
-                              <div>
+                              <div className="font-semibold text-slate-700">
                                 {quiz.time_limit_seconds
                                   ? `${Math.round(quiz.time_limit_seconds / 60)}m timer`
                                   : 'Untimed'}

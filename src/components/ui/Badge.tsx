@@ -10,21 +10,21 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 
 const BADGE_CLASSES: Record<NonNullable<BadgeProps['variant']>, string> = {
   prepare:
-    'bg-[var(--color-warning-bg)] text-[var(--color-warning-ink)] border border-[var(--color-warning-border)] text-xs font-semibold tracking-wider uppercase px-3 py-1',
+    'bg-amber-100 text-amber-950 border border-amber-300 text-xs font-bold tracking-wider uppercase px-2.5 py-0.5',
   feature:
-    'bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border border-[var(--color-success-border)] text-xs sm:text-sm px-3 py-1',
+    'bg-emerald-100 text-emerald-950 border border-emerald-300 text-xs font-bold px-2.5 py-0.5',
   verified:
-    'bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border border-[var(--color-success-border)] text-[11px] font-semibold px-2.5 py-0.5 rounded-md',
+    'bg-emerald-100 text-emerald-950 border border-emerald-300 text-[11px] font-bold px-2.5 py-0.5 rounded-md',
   success:
-    'bg-[var(--color-success-bg)] text-[var(--color-success-ink)] border border-[var(--color-success-border)] text-xs font-semibold px-2.5 py-0.5',
+    'bg-emerald-100 text-emerald-950 border border-emerald-300 text-xs font-bold px-2.5 py-0.5',
   warning:
-    'bg-[var(--color-warning-bg)] text-[var(--color-warning-ink)] border border-[var(--color-warning-border)] text-xs font-semibold px-2.5 py-0.5',
+    'bg-amber-100 text-amber-950 border border-amber-300 text-xs font-bold px-2.5 py-0.5',
   error:
-    'bg-[var(--color-danger-bg)] text-[var(--color-danger-ink)] border border-[var(--color-danger-border)] text-xs font-semibold px-2.5 py-0.5',
+    'bg-rose-100 text-rose-950 border border-rose-300 text-xs font-bold px-2.5 py-0.5',
   info:
-    'bg-[var(--color-info-bg)] text-[var(--color-info-ink)] border border-[var(--color-info-border)] text-xs font-semibold px-2.5 py-0.5',
+    'bg-sky-100 text-sky-950 border border-sky-300 text-xs font-bold px-2.5 py-0.5',
   neutral:
-    'bg-[var(--color-surface-soft)] text-[var(--color-ink-secondary)] border border-[var(--color-border)] text-xs px-2.5 py-1'
+    'bg-slate-100 text-slate-800 border border-slate-300 text-xs font-medium px-2.5 py-0.5'
 };
 
 export function Badge({

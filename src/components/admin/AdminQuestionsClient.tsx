@@ -38,6 +38,18 @@ import type { AdminQuestionInventoryResponse } from '@/lib/v3/types';
 
 const OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
+export const CANONICAL_SUBJECTS = [
+  'General Knowledge & World Geography',
+  'Pakistan Affairs & History',
+  'Islamic Studies & Ethics',
+  'Everyday Science',
+  'English Grammar & Vocabulary',
+  'Urdu Literature & Grammar',
+  'Basic Mathematics & Mental Ability',
+  'Basic Computer Studies & IT',
+  'Sports & Physical Education'
+] as const;
+
 function createDefaultOptions(): QuizQuestionOptionRow[] {
   return [
     { key: 'A', textEn: '', textUr: '' },
@@ -325,16 +337,22 @@ export function AdminQuestionsClient() {
           </SelectField>
         </FieldWrapper>
 
-        <FieldWrapper id="filter-subject" label="Subject Contains">
-          <TextInput
+        <FieldWrapper id="filter-subject" label="Subject Filter">
+          <SelectField
             id="filter-subject"
             value={filterSubject}
             onChange={(e) => {
               setFilterSubject(e.target.value);
               setPage(1);
             }}
-            placeholder="e.g., Geography, Biology"
-          />
+          >
+            <option value="">All 9 Official Subjects</option>
+            {CANONICAL_SUBJECTS.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </SelectField>
         </FieldWrapper>
 
         <FieldWrapper id="filter-difficulty" label="Difficulty">
@@ -504,12 +522,22 @@ export function AdminQuestionsClient() {
 
             <div className="grid grid-cols-2 gap-3">
               <FieldWrapper id="q-subject" label="Subject" required error={formErrors.subject}>
-                <TextInput
+                <SelectField
                   id="q-subject"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   hasError={Boolean(formErrors.subject)}
-                />
+                >
+                  {CANONICAL_SUBJECTS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                  {subject &&
+                  !CANONICAL_SUBJECTS.includes(subject as (typeof CANONICAL_SUBJECTS)[number]) ? (
+                    <option value={subject}>{subject}</option>
+                  ) : null}
+                </SelectField>
               </FieldWrapper>
               <FieldWrapper id="q-exam" label="Exam Tag" required error={formErrors.examTag}>
                 <SelectField

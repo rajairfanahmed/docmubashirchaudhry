@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/FormPrimitives';
 import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/ToastProvider';
+import { CANONICAL_SUBJECTS } from '@/components/admin/AdminQuestionsClient';
 import type { QuizRow } from '@/lib/supabase/database.types';
 import { v3Api } from '@/lib/v3/client';
 import type { CreateQuestionInput } from '@/lib/v3/types';
@@ -259,11 +260,17 @@ export function CsvQuestionImporterModal({
           </FieldWrapper>
 
           <FieldWrapper id="import-default-subject" label="Fallback Subject">
-            <TextInput
+            <SelectField
               id="import-default-subject"
               value={defaultSubject}
               onChange={(e) => setDefaultSubject(e.target.value)}
-            />
+            >
+              {CANONICAL_SUBJECTS.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </SelectField>
           </FieldWrapper>
 
           <FieldWrapper id="import-default-exam" label="Fallback Exam Tag">
