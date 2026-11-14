@@ -243,13 +243,18 @@ export function Navbar() {
                     fallbackRedirectUrl="/post-auth"
                     signUpFallbackRedirectUrl="/post-auth"
                   >
-                    <button
-                      type="button"
+                    <Link
+                      href="/sign-in"
+                      onClick={(e) => {
+                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
+                          e.preventDefault();
+                        }
+                      }}
                       className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
                     >
                       <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
                       <span>Sign In</span>
-                    </button>
+                    </Link>
                   </SignInButton>
                 )}
               </div>
@@ -270,13 +275,18 @@ export function Navbar() {
                     fallbackRedirectUrl="/post-auth"
                     signUpFallbackRedirectUrl="/post-auth"
                   >
-                    <button
-                      type="button"
+                    <Link
+                      href="/sign-in"
+                      onClick={(e) => {
+                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
+                          e.preventDefault();
+                        }
+                      }}
                       className="dmc-press inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
                     >
                       <LogIn className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                       <span>Sign In</span>
-                    </button>
+                    </Link>
                   </SignInButton>
                 )}
 
@@ -461,14 +471,19 @@ export function Navbar() {
                       fallbackRedirectUrl="/post-auth"
                       signUpFallbackRedirectUrl="/post-auth"
                     >
-                      <button
-                        type="button"
-                        onClick={() => setIsMobileMenuOpen(false)}
+                      <Link
+                        href="/sign-in"
+                        onClick={(e) => {
+                          setIsMobileMenuOpen(false);
+                          if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
+                            e.preventDefault();
+                          }
+                        }}
                         className="w-full min-h-[44px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold inline-flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
                       >
                         <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
                         <span>Sign In / Create Account</span>
-                      </button>
+                      </Link>
                     </SignInButton>
                   )}
                 </div>
