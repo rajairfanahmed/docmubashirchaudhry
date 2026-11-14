@@ -1,7 +1,7 @@
 {
-  "datasetVersion": "v1-c443a959fb0d",
+  "datasetVersion": "v1-d6cfe0083e79",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-14T07:46:37.663Z",
+  "generatedAt": "2026-11-14T08:30:07.983Z",
   "counts": {
     "sources": 8,
     "continents": 6,
@@ -13,8 +13,8 @@
     "exams": 1,
     "recruitmentPosts": 2,
     "blueprints": 1,
-    "questions": 4,
-    "pdfResources": 2
+    "questions": 0,
+    "pdfResources": 0
   },
   "files": {
     "sources.json": {
@@ -90,8 +90,8 @@
       "sha256": "46b6b1ee4d602ec01f224d97415c9303d78dbd1a0231f01658363977c124f9b7"
     },
     "examinations/posts-ppsc.json": {
-      "bytes": 2073,
-      "sha256": "58faf10ad8ebb81fb3944fff7719a0f8e0eaaae464a72d68494bc240bd8bb27e"
+      "bytes": 2042,
+      "sha256": "e557cb6f181777342ec8976aa722b11cbacba4cfd4b5e3aea26ebd88bb53c0bc"
     },
     "examinations/blueprints-ppsc.json": {
       "bytes": 3367,
@@ -106,24 +106,24 @@
       "sha256": "961e6dc6f45ab709b973d7902ff5caac33b2020bc89fa994aad903b0bd33b928"
     },
     "questions/ppsc-samples.json": {
-      "bytes": 3334,
-      "sha256": "fac35359393923b718d27982f67fdd1c4d4f2be14a8c2c379b9cc8cddf921097"
+      "bytes": 16,
+      "sha256": "5c9253d29ca1fc9c4f7683bfe5dadd87e2dbce3e46af6ee80404bc7259b41e1e"
     },
     "questions/pages/page-1.json": {
-      "bytes": 3442,
-      "sha256": "4f80933625caec5f826b55f6ce8f8d17ac0327b2a45ba54b9aa2b1c58f42a8d6"
+      "bytes": 124,
+      "sha256": "a0aa54788809d52a3399cc7bc95d300d4e7ab4bb0208eb16b3626b0e9d4fe954"
     },
     "questions/pages/index.json": {
-      "bytes": 94,
-      "sha256": "aac29648dbeae051c7f9b25b8a4e99c43f993e3113fc5d786448d94727906313"
+      "bytes": 56,
+      "sha256": "1e1ceb4e510c4b2ba35ece610c3a49f958aa479a83d214f995c8674d85ea0c62"
     },
     "resources/pdfs.json": {
-      "bytes": 2580,
-      "sha256": "d059627452f8a18a83d12b7d59a6a533edfd7ba2772f7dfcda0103d0fbc79b02"
+      "bytes": 19,
+      "sha256": "b2dc734ce2305f6a36ffdc8f6cd7ef605bb4f1589cf43ef9c597c1f2bc1c0858"
     },
     "search-index/all.json": {
-      "bytes": 122466,
-      "sha256": "2fb58fd9091d0222fd7571723109487943c004455402e5c42810bb3c457ad678"
+      "bytes": 115463,
+      "sha256": "0bfef8bd72e3c8121c6ee964c418ae2e02fe9fe9c389ea2d6f576c9f3007cb29"
     }
   }
 }

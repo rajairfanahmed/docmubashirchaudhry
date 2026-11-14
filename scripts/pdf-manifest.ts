@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import type { PdfResource } from '../src/lib/schemas';
 import pdfResourcesData from '../src/data/resources/pdf-resources.json';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -26,7 +27,7 @@ function walkPdfFiles(dir: string): string[] {
 
 function main(): void {
   const registeredByPath = new Map(
-    pdfResourcesData.pdfResources.map((p) => [p.filePath, p])
+    (pdfResourcesData.pdfResources as PdfResource[]).map((p) => [p.filePath, p])
   );
   const diskFiles = walkPdfFiles(docsDir);
   const seenHashes = new Map<string, string[]>();

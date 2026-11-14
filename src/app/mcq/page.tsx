@@ -8,6 +8,7 @@ import { McqSetupForm } from '@/components/mcq/McqSetupForm';
 import { SubjectIconChip } from '@/components/branding/SubjectIconChip';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
+import { getLiveDatabaseQuestions } from '@/lib/data/live-questions';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 import { SUBJECT_PASTEL_TOKENS } from '@/lib/tokens/visual-tokens';
@@ -21,12 +22,16 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function McqHubPage() {
   const repo = getContentRepository();
-  const [exams, subjects, topics, questions] = await Promise.all([
+  const [exams, subjects, topics] = await Promise.all([
     repo.getExams(),
     repo.getSubjects(),
-    repo.getTopics(),
-    repo.getQuestions({ includeDrafts: false })
+    repo.getTopics()
   ]);
+  const [staticQuestions, liveQuestions] = await Promise.all([
+    repo.getQuestions({ includeDrafts: false }),
+    getLiveDatabaseQuestions(topics)
+  ]);
+  const questions = liveQuestions.length > 0 ? liveQuestions : staticQuestions;
   const posts = (await Promise.all(exams.map((exam) => repo.getRecruitmentPosts(exam.slug)))).flat();
   const subjById = new Map(subjects.map((s) => [s.id, s]));
 

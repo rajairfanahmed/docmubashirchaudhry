@@ -8,7 +8,12 @@ import type { PublicPdfItem } from '@/lib/v3/types';
 import { GatedPdfDownloadButton } from '@/components/library/GatedPdfDownloadButton';
 import { SkeletonBlock, TextInput } from '@/components/ui/FormPrimitives';
 
-export function CloudPdfCatalogSection() {
+export interface CloudPdfCatalogSectionProps {
+  examTag?: string;
+  subject?: string;
+}
+
+export function CloudPdfCatalogSection({ examTag, subject }: CloudPdfCatalogSectionProps = {}) {
   const [items, setItems] = useState<PublicPdfItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [configured, setConfigured] = useState(true);
@@ -23,7 +28,7 @@ export function CloudPdfCatalogSection() {
       setErrorMsg(null);
       try {
         const res = await v3Api.pdfs.list(
-          { page: 1, pageSize: 24, search: search.trim() || undefined },
+          { page: 1, pageSize: 24, search: search.trim() || undefined, examTag, subject },
           controller.signal
         );
         setConfigured(res.configured !== false);
@@ -43,7 +48,7 @@ export function CloudPdfCatalogSection() {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [search, reloadNonce]);
+  }, [search, reloadNonce, examTag, subject]);
 
   if (!configured) {
     return null;

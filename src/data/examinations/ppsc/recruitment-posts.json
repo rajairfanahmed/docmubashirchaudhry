@@ -24,7 +24,7 @@
         "top-computer-basics"
       ],
       "blueprintId": "bp-io-study-guide-v1",
-      "pdfResourceIds": ["pdf-io-set-01"],
+      "pdfResourceIds": [],
       "status": "draft",
       "verification": {
         "status": "unverified",
@@ -51,7 +51,7 @@
         "top-science-fundamentals",
         "top-english-usage"
       ],
-      "pdfResourceIds": ["pdf-tso-set-01"],
+      "pdfResourceIds": [],
       "status": "draft",
       "verification": {
         "status": "unverified",

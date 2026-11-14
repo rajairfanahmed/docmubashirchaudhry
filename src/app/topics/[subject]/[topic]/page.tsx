@@ -11,6 +11,7 @@ import { SubjectIconChip } from '@/components/branding/SubjectIconChip';
 import { EmptyStateCard } from '@/components/ui/EmptyStateCard';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
+import { getLiveDatabaseQuestions } from '@/lib/data/live-questions';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildLearningResourceSchema } from '@/lib/seo/structured-data';
 import { SUBJECT_PASTEL_TOKENS } from '@/lib/tokens/visual-tokens';
@@ -73,10 +74,12 @@ export default async function TopicLandingPage({
   }
 
   const { subject, topic } = resolved;
-  const [questions, relatedPdfs] = await Promise.all([
+  const [staticQuestions, liveQuestions, relatedPdfs] = await Promise.all([
     repo.getQuestions({ topicIds: [topic.id], includeDrafts: false }),
+    getLiveDatabaseQuestions([topic]),
     repo.getPdfResources({ topicId: topic.id, includeDrafts: false })
   ]);
+  const questions = liveQuestions.length > 0 ? liveQuestions : staticQuestions;
 
   const token = SUBJECT_PASTEL_TOKENS[subject.id] ?? {
     bgVar: 'var(--dmc-subject-gk-bg)',

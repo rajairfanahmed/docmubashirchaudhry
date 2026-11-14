@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type { Question } from '../src/lib/schemas';
 import questionsData from '../src/data/questions/ppsc/general-knowledge.json';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -36,7 +37,7 @@ function main(): void {
     'sourceIds'
   ];
 
-  const rows = questionsData.questions.map((q) => {
+  const rows = (questionsData.questions as Question[]).map((q) => {
     const byId = new Map(q.options.map((o) => [o.id, o.text]));
     return [
       q.id,

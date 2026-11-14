@@ -77,13 +77,33 @@ describe('SEO Metadata & Structured Data Utilities', () => {
     ]);
   });
 
-  it('builds DigitalDocument JSON-LD and adds expires only when PDF status is archived', async () => {
-    const repo = getContentRepository();
-    const pdfs = await repo.getPdfResources({ includeDrafts: true });
-    expect(pdfs.length).toBeGreaterThan(0);
+  it('builds DigitalDocument JSON-LD and adds expires only when PDF status is archived', () => {
+    const samplePdf = {
+      id: 'pdf-sample',
+      slug: 'sample-booklet',
+      title: 'Sample Booklet',
+      author: 'Doc Mubashir Chaudhry',
+      edition: '2026 Edition',
+      gradeLabel: 'BS-16',
+      summary: 'Sample description',
+      highlights: ['Key booklet point'],
+      filePath: '/documents/sample.pdf',
+      fileSizeBytes: 2_500_000,
+      sha256: 'a'.repeat(64),
+      rights: 'author_original' as const,
+      topicIds: [],
+      postIds: [],
+      status: 'published' as const,
+      verification: {
+        status: 'verified' as const,
+        sourceIds: [],
+        lastCheckedAt: '2026-11-11',
+        reviewIntervalDays: 180
+      }
+    };
 
     const activeSchema = buildPdfDigitalDocumentSchema({
-      pdf: pdfs[0],
+      pdf: samplePdf,
       formatBytesLabel: '2.5 MB',
       sources: []
     });
@@ -92,12 +112,12 @@ describe('SEO Metadata & Structured Data Utilities', () => {
     expect(activeSchema.expires).toBeUndefined();
 
     const archivedSchema = buildPdfDigitalDocumentSchema({
-      pdf: { ...pdfs[0], status: 'archived' },
+      pdf: { ...samplePdf, status: 'archived' },
       formatBytesLabel: '2.5 MB',
       sources: []
     });
     expect(archivedSchema.creativeWorkStatus).toBe('Archived');
-    expect(archivedSchema.expires).toBe(pdfs[0].verification.lastCheckedAt);
+    expect(archivedSchema.expires).toBe(samplePdf.verification.lastCheckedAt);
   });
 });
 
@@ -112,7 +132,7 @@ describe('Dynamic Sitemap & Robots Configuration', () => {
     expect(urls.has(`${SITE_URL}/quizzes`)).toBe(true);
     expect(urls.has(`${SITE_URL}/ppsc/intelligent-officer`)).toBe(true);
     expect(urls.has(`${SITE_URL}/geography/pakistan`)).toBe(true);
-    expect(urls.has(`${SITE_URL}/library/resource/intelligence-officer-bs-14-set-01`)).toBe(true);
+    expect(urls.has(`${SITE_URL}/library/resource/intelligence-officer-bs-14-set-01`)).toBe(false);
     expect(urls.has(`${SITE_URL}/library/ppsc`)).toBe(true);
 
     // Excluded routes

@@ -55,15 +55,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8
     });
 
-    const examPdfs = await repo.getPdfResources({ examSlug: exam.slug, includeDrafts: false });
-    if (examPdfs.length > 0) {
-      entries.push({
-        url: buildCanonicalUrl(`/library/${exam.slug}`),
-        lastModified: examMod,
-        changeFrequency: 'weekly',
-        priority: 0.8
-      });
-    }
+    entries.push({
+      url: buildCanonicalUrl(`/library/${exam.slug}`),
+      lastModified: examMod,
+      changeFrequency: 'weekly',
+      priority: 0.8
+    });
 
     const posts = await repo.getRecruitmentPosts(exam.slug);
     for (const post of posts) {

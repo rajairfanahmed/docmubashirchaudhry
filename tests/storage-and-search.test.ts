@@ -62,6 +62,57 @@ describe('Versioned Storage, MiniSearch & Mailto Composer', () => {
 
   it('indexes and searches countries, PDFs, PPSC posts, and MCQs with typo tolerance and serialization round-trip', () => {
     const snapshot = loadDefaultSnapshot();
+    snapshot.pdfResources = [
+      {
+        id: 'pdf-search-test',
+        slug: 'intelligence-officer-bs-14-set-01',
+        title: 'Intelligence Officer Past Paper Set 01',
+        author: 'Doc Mubashir Chaudhry',
+        edition: '2026 Edition',
+        gradeLabel: 'BS-14',
+        summary: 'PPSC Intelligence Officer solved MCQs booklet',
+        highlights: ['Solved past papers', 'Editorial answer key'],
+        filePath: '/documents/ppsc/intelligent-officer/(Set 01) Intelligence Officer PPSC (BS-14) 500+ MCQS By Doc Mubashir Chaudhry (1).pdf',
+        fileSizeBytes: 1000,
+        sha256: 'a'.repeat(64),
+        rights: 'author_original',
+        topicIds: ['top-general-knowledge'],
+        postIds: [],
+        status: 'published',
+        verification: {
+          status: 'verified',
+          sourceIds: [snapshot.sources[0].id],
+          lastCheckedAt: '2026-11-11',
+          reviewIntervalDays: 180
+        }
+      } as any
+    ];
+    snapshot.questions = [
+      {
+        id: 'q-search-test',
+        slug: 'q-search-test',
+        stem: 'Which keyboard shortcut reverses an action with Ctrl + Z in Windows?',
+        options: [
+          { id: 'a', text: 'Ctrl + Y' },
+          { id: 'b', text: 'Ctrl + Z' },
+          { id: 'c', text: 'Ctrl + X' },
+          { id: 'd', text: 'Ctrl + U' }
+        ],
+        correctOptionId: 'b' as any,
+        explanation: 'Ctrl + Z performs undo',
+        difficulty: 'easy',
+        topicIds: ['top-general-knowledge'],
+        postIds: [],
+        attribution: 'self_written',
+        status: 'published',
+        verification: {
+          status: 'verified',
+          sourceIds: [snapshot.sources[0].id],
+          lastCheckedAt: '2026-11-11',
+          reviewIntervalDays: 180
+        }
+      } as any
+    ];
     const engine = PortalSearchEngine.fromDataset(snapshot);
     const serialized = engine.toJSON();
     const restored = PortalSearchEngine.fromSerializedJson(serialized);

@@ -21,7 +21,8 @@ describe('Dataset Validation Engine (15 PRD Rules)', () => {
     expect(report.valid).toBe(true);
     expect(report.errors).toEqual([]);
     expect(report.counts.countries).toBe(250);
-    expect(report.counts.pdfResources).toBe(2);
+    expect(report.counts.pdfResources).toBe(0);
+    expect(report.counts.questions).toBe(0);
   });
 
   it('rejects a published record marked unverified or lacking sourceIds', () => {
@@ -63,12 +64,32 @@ describe('Dataset Validation Engine (15 PRD Rules)', () => {
 
   it('rejects MCQ questions with invalid correctOptionId or duplicate option text', () => {
     const bundle = cloneBundle();
-    const q = bundle.questions[0] as {
-      correctOptionId: string;
-      options: Array<{ id: string; text: string }>;
-    };
-    q.correctOptionId = 'e';
-    q.options[1].text = q.options[0].text;
+    bundle.questions = [
+      {
+        id: 'q-test-invalid',
+        slug: 'q-test-invalid',
+        stem: 'Sample stem for validation?',
+        options: [
+          { id: 'a', text: 'Duplicate option' },
+          { id: 'b', text: 'Duplicate option' },
+          { id: 'c', text: 'Option C' },
+          { id: 'd', text: 'Option D' }
+        ],
+        correctOptionId: 'e' as any,
+        explanation: 'Sample explanation',
+        difficulty: 'easy',
+        topicIds: ['top-general-knowledge'],
+        postIds: [],
+        attribution: 'self_written',
+        status: 'published',
+        verification: {
+          status: 'verified',
+          sourceIds: [(bundle.sources[0] as { id: string }).id],
+          lastCheckedAt: '2026-11-11',
+          reviewIntervalDays: 180
+        }
+      } as any
+    ];
 
     const report = validateDatasetBundle(bundle);
     expect(report.valid).toBe(false);
@@ -103,16 +124,49 @@ describe('Dataset Validation Engine (15 PRD Rules)', () => {
   });
 
   it('rejects PDF size/SHA-256 mismatches against files on disk', () => {
-    const bundle = cloneBundle();
-    (bundle.pdfResources[0] as Record<string, unknown>).sha256 = '0'.repeat(64);
-    (bundle.pdfResources[0] as Record<string, unknown>).fileSizeBytes = 12345;
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'dmc-pdf-mismatch-'));
+    try {
+      const docsSubdir = path.join(tmpRoot, 'documents', 'test');
+      fs.mkdirSync(docsSubdir, { recursive: true });
+      const testFilePath = path.join(docsSubdir, 'sample.pdf');
+      fs.writeFileSync(testFilePath, '%PDF-1.4 dummy valid header and test body');
 
-    const report = validateDatasetBundle(bundle, {
-      publicRootDir: path.resolve(process.cwd(), 'public')
-    });
-    expect(report.valid).toBe(false);
-    expect(report.errors.some((e) => e.ruleId === 'R10_PDF_SIZE_MATCH')).toBe(true);
-    expect(report.errors.some((e) => e.ruleId === 'R10_PDF_SHA256_MATCH')).toBe(true);
+      const bundle = cloneBundle();
+      bundle.pdfResources = [
+        {
+          id: 'pdf-test-mismatch',
+          slug: 'pdf-test-mismatch',
+          title: 'Test Booklet',
+          author: 'Doc Mubashir Chaudhry',
+          edition: '2026 Edition',
+          gradeLabel: 'BS-16',
+          summary: 'Test summary',
+          highlights: ['Key point 1'],
+          filePath: '/documents/test/sample.pdf',
+          fileSizeBytes: 999999,
+          sha256: '0'.repeat(64),
+          rights: 'author_original',
+          topicIds: ['top-general-knowledge'],
+          postIds: [],
+          status: 'published',
+          verification: {
+            status: 'verified',
+            sourceIds: [(bundle.sources[0] as { id: string }).id],
+            lastCheckedAt: '2026-11-11',
+            reviewIntervalDays: 180
+          }
+        } as any
+      ];
+
+      const report = validateDatasetBundle(bundle, {
+        publicRootDir: tmpRoot
+      });
+      expect(report.valid).toBe(false);
+      expect(report.errors.some((e) => e.ruleId === 'R10_PDF_SIZE_MATCH')).toBe(true);
+      expect(report.errors.some((e) => e.ruleId === 'R10_PDF_SHA256_MATCH')).toBe(true);
+    } finally {
+      fs.rmSync(tmpRoot, { recursive: true, force: true });
+    }
   });
 
   it('rejects any dataset containing secret token patterns', () => {
@@ -151,14 +205,36 @@ describe('Dataset Validation Engine (15 PRD Rules)', () => {
     expect(post?.basicScale).toBe('BS-14');
     expect(post?.verification.status).toBe('unverified');
     expect(bp?.officialSections.every((s) => s.officialMarksPct === null)).toBe(true);
-    expect(pdfs.length).toBe(1);
-    expect(pdfs[0].slug).toBe('intelligence-officer-bs-14-set-01');
+    expect(pdfs.length).toBe(0);
   });
 
   it('rejects unsafe PDF path traversal or non-/documents paths (R12_SAFE_PDF_PATH)', () => {
     const bundle = cloneBundle();
-    (bundle.pdfResources[0] as Record<string, unknown>).filePath =
-      '/documents/../secrets/test.pdf?leak=1';
+    bundle.pdfResources = [
+      {
+        id: 'pdf-test-unsafe',
+        slug: 'pdf-test-unsafe',
+        title: 'Unsafe Path Booklet',
+        author: 'Doc Mubashir Chaudhry',
+        edition: '2026 Edition',
+        gradeLabel: 'BS-16',
+        summary: 'Testing path traversal check',
+        highlights: ['Key point 1'],
+        filePath: '/documents/../secrets/test.pdf?leak=1',
+        fileSizeBytes: 100,
+        sha256: '0'.repeat(64),
+        rights: 'author_original',
+        topicIds: ['top-general-knowledge'],
+        postIds: [],
+        status: 'published',
+        verification: {
+          status: 'verified',
+          sourceIds: [(bundle.sources[0] as { id: string }).id],
+          lastCheckedAt: '2026-11-11',
+          reviewIntervalDays: 180
+        }
+      } as any
+    ];
     const report = validateDatasetBundle(bundle);
     expect(report.valid).toBe(false);
     expect(report.errors.some((e) => e.ruleId === 'R12_SAFE_PDF_PATH')).toBe(true);
@@ -167,21 +243,15 @@ describe('Dataset Validation Engine (15 PRD Rules)', () => {
   it('rejects duplicate PDF binaries sharing identical SHA-256 digests under public/documents', () => {
     const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'dmc-pdf-dedup-'));
     try {
-      const docsSubdir = path.join(tmpRoot, 'documents', 'ppsc', 'intelligent-officer');
+      const docsSubdir = path.join(tmpRoot, 'documents', 'ppsc');
       fs.mkdirSync(docsSubdir, { recursive: true });
-      const realRoot = path.resolve(process.cwd(), 'public');
-      const snapshot = loadDefaultSnapshot();
-      for (const pdf of snapshot.pdfResources) {
-        const src = path.join(realRoot, pdf.filePath.replace(/^\/+/, ''));
-        const dst = path.join(tmpRoot, pdf.filePath.replace(/^\/+/, ''));
-        fs.copyFileSync(src, dst);
-      }
-      // Inject an extra duplicate binary copy on disk inside documents/
-      const firstPdf = snapshot.pdfResources[0];
-      const firstSrc = path.join(realRoot, firstPdf.filePath.replace(/^\/+/, ''));
-      fs.copyFileSync(firstSrc, path.join(docsSubdir, 'duplicate-copy.pdf'));
+      const f1 = path.join(docsSubdir, 'file1.pdf');
+      const f2 = path.join(docsSubdir, 'file2.pdf');
+      fs.writeFileSync(f1, '%PDF-1.4 identical content for dedup test');
+      fs.writeFileSync(f2, '%PDF-1.4 identical content for dedup test');
 
-      const report = validateDatasetBundle(snapshot, {
+      const bundle = cloneBundle();
+      const report = validateDatasetBundle(bundle, {
         publicRootDir: tmpRoot,
         referenceDate: new Date('2026-11-11T00:00:00Z')
       });

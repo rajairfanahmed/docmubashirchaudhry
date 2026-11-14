@@ -72,19 +72,15 @@ describe('Complete 250-Country Dataset & Non-Duplicated PDF Paths', () => {
     expect(fallbackItems.length).toBe(250);
   });
 
-  it('resolves non-duplicated PDF paths directly in public/documents/', () => {
+  it('verifies zero static PDFs in public/documents (reserved for live R2 storage)', () => {
     const snapshot = loadDefaultSnapshot();
-    expect(snapshot.pdfResources.length).toBe(2);
+    expect(snapshot.pdfResources.length).toBe(0);
 
-    const docsRoot = path.resolve(process.cwd(), 'public', 'documents', 'ppsc', 'intelligent-officer');
-    const onDiskPdfs = fs
-      .readdirSync(docsRoot)
-      .filter((name) => name.toLowerCase().endsWith('.pdf'));
-    expect(onDiskPdfs.length).toBe(2);
-
-    for (const pdf of snapshot.pdfResources) {
-      const fullPath = path.resolve(process.cwd(), 'public', pdf.filePath.replace(/^\/+/, ''));
-      expect(fs.existsSync(fullPath)).toBe(true);
+    const docsRoot = path.resolve(process.cwd(), 'public', 'documents');
+    if (fs.existsSync(docsRoot)) {
+      const allFiles = fs.readdirSync(docsRoot, { recursive: true });
+      const pdfs = (allFiles as string[]).filter((f) => String(f).toLowerCase().endsWith('.pdf'));
+      expect(pdfs.length).toBe(0);
     }
   });
 });
@@ -137,9 +133,9 @@ describe('Backend Pagination & API Route Handlers', () => {
     expect(alphaFirst.items[0].nameCommon).toBe('Afghanistan');
 
     const mcqPage1 = await repo.getQuestionsPaginated({ page: 1, pageSize: 2 });
-    expect(mcqPage1.items.length).toBe(2);
-    expect(mcqPage1.pagination.totalPages).toBe(2);
-    expect(mcqPage1.pagination.hasNextPage).toBe(true);
+    expect(mcqPage1.items.length).toBe(0);
+    expect(mcqPage1.pagination.totalItems).toBe(0);
+    expect(mcqPage1.pagination.hasNextPage).toBe(false);
   });
 
   it('serves GET /api/countries and GET /api/questions with Zod validation (200 & 400)', async () => {
@@ -167,8 +163,8 @@ describe('Backend Pagination & API Route Handlers', () => {
     );
     expect(okQuestionsRes.status).toBe(200);
     const questionsPayload = await okQuestionsRes.json();
-    expect(questionsPayload.items.length).toBe(2);
-    expect(questionsPayload.pagination.totalItems).toBe(4);
+    expect(questionsPayload.items.length).toBe(0);
+    expect(questionsPayload.pagination.totalItems).toBe(0);
 
     const badQuestionsRes = await getQuestionsRoute(
       new NextRequest('http://localhost/api/questions?difficulty=impossible')
@@ -184,7 +180,7 @@ describe('Backend Pagination & API Route Handlers', () => {
     expect(body.status).toBe('ok');
     expect(body.service).toBe('docmubashirchaudhry');
     expect(body.counts.countries).toBe(250);
-    expect(body.counts.pdfResources).toBe(2);
+    expect(body.counts.pdfResources).toBe(0);
     expect(typeof body.datasetVersion).toBe('string');
   });
 });

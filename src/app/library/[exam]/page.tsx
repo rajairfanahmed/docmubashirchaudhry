@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import { ArrowLeft, FileText } from 'lucide-react';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { SectionBand } from '@/components/layout/SectionBand';
-import { PdfFilterToolbar } from '@/components/library/PdfFilterToolbar';
+import { CloudPdfCatalogSection } from '@/components/library/CloudPdfCatalogSection';
 import { EmptyStateCard } from '@/components/ui/EmptyStateCard';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
@@ -144,25 +144,9 @@ export default async function ScopedLibraryPage({
       <SectionBand surface="muted" density="standard" labelledBy="scoped-results-title">
         <div className="space-y-6">
           <h2 id="scoped-results-title" className="type-section-heading text-[var(--dmc-ink-primary)]">
-            {pdfs.length} Published Resource{pdfs.length === 1 ? '' : 's'}
+            {label} Archive
           </h2>
-
-          {pdfs.length === 0 ? (
-            <EmptyStateCard
-              icon={FileText}
-              title="No Exam-Specific PDFs Archived Here Yet"
-              description={`Dedicated compilations for ${label} are still in curation. Browse shared General Knowledge and PPSC solved MCQ booklets in the full library.`}
-              primaryAction={{ label: 'View Full PDF Library', href: '/library' }}
-            />
-          ) : (
-            <PdfFilterToolbar
-              resources={pdfs}
-              exams={exams}
-              subjects={subjects}
-              topics={topics}
-              scopedExamSlug={exam}
-            />
-          )}
+          <CloudPdfCatalogSection examTag={meta?.label.replace(' Booklets', '').trim() ?? exam.toUpperCase()} />
         </div>
       </SectionBand>
     </>

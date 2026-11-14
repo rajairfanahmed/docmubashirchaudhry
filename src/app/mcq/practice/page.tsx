@@ -7,6 +7,7 @@ import { SectionBand } from '@/components/layout/SectionBand';
 import { McqPracticeRunner } from '@/components/mcq/McqPracticeRunner';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
+import { getLiveDatabaseQuestions } from '@/lib/data/live-questions';
 import { getServerDatasetVersion } from '@/lib/data/server-manifest';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildQuizResourceSchema } from '@/lib/seo/structured-data';
@@ -45,12 +46,24 @@ export default async function McqPracticePage({
   const subject = subjectSlug ? subjects.find((s) => s.slug === subjectSlug) : undefined;
   const topic = topicSlug ? topics.find((t) => t.slug === topicSlug) : undefined;
 
-  const questions = await repo.getQuestions({
-    examId: exam?.id,
-    subjectId: subject?.id,
-    topicIds: topic ? [topic.id] : undefined,
-    includeDrafts: false
-  });
+  const [staticQuestions, liveQuestions] = await Promise.all([
+    repo.getQuestions({
+      examId: exam?.id,
+      subjectId: subject?.id,
+      topicIds: topic ? [topic.id] : undefined,
+      includeDrafts: false
+    }),
+    getLiveDatabaseQuestions(topics)
+  ]);
+
+  const questions =
+    liveQuestions.length > 0
+      ? liveQuestions.filter((q) => {
+          if (exam && !q.postIds.some((p) => p.includes(exam.slug))) return false;
+          if (topic && !q.topicIds.includes(topic.id)) return false;
+          return true;
+        })
+      : staticQuestions;
 
   const datasetVersion = getServerDatasetVersion();
   const sessionKey = `exam=${exam?.slug ?? 'all'}&subject=${subject?.slug ?? 'all'}&topic=${topic?.slug ?? 'all'}`;
