@@ -245,9 +245,6 @@ export function Navbar() {
                   >
                     <button
                       type="button"
-                      onClick={() => {
-                        if (!isClerkSignedIn) openAuthModal();
-                      }}
                       className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
                     >
                       <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
@@ -275,9 +272,6 @@ export function Navbar() {
                   >
                     <button
                       type="button"
-                      onClick={() => {
-                        if (!isClerkSignedIn) openAuthModal();
-                      }}
                       className="dmc-press inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
                     >
                       <LogIn className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
@@ -469,10 +463,7 @@ export function Navbar() {
                     >
                       <button
                         type="button"
-                        onClick={() => {
-                          setIsMobileMenuOpen(false);
-                          if (!isClerkSignedIn) openAuthModal();
-                        }}
+                        onClick={() => setIsMobileMenuOpen(false)}
                         className="w-full min-h-[44px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold inline-flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
                       >
                         <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />

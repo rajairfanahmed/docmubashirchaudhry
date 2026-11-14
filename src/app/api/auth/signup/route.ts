@@ -43,10 +43,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           parsed.data.displayName?.trim() ||
           email.split('@')[0];
 
+        let signInToken: string | undefined;
+        try {
+          const tokenRes = await clerk.signInTokens.createSignInToken({
+            userId: user.id,
+            expiresInSeconds: 300
+          });
+          signInToken = tokenRes.token;
+        } catch {
+          // Token generation optional fallback
+        }
+
         return NextResponse.json(
           {
             ok: true,
             requiresEmailVerification: false,
+            signInToken,
             user: {
               id: user.id,
               email,

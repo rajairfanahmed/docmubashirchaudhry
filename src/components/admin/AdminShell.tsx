@@ -12,6 +12,7 @@ import {
   FileText,
   Flag,
   HelpCircle,
+  History,
   LogOut,
   Menu,
   ShieldCheck,
@@ -30,6 +31,7 @@ export interface AdminShellProps {
 const ADMIN_NAV_LINKS = [
   { href: '/admin', label: 'Overview', icon: BarChart3 },
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/participation', label: 'Participation', icon: History },
   { href: '/admin/quizzes', label: 'Quizzes', icon: ClipboardCheck },
   { href: '/admin/questions', label: 'Question Bank', icon: HelpCircle },
   { href: '/admin/pdfs', label: 'PDF Library', icon: FileText },

@@ -14,12 +14,8 @@ export const metadata: Metadata = {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getOptionalSessionUser();
 
-  if (!session || !session.user) {
-    redirect('/?auth=required&next=/admin');
-  }
-
-  if (!session.isAdmin) {
-    // Stealth 404: non-admins never receive confirmation that an admin console exists
+  if (!session || !session.user || !session.isAdmin) {
+    // Stealth 404: non-admins and signed-out persons receive the standard 404 page (AC-014)
     notFound();
   }
 

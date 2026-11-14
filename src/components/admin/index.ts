@@ -1,6 +1,7 @@
 export { AdminShell } from './AdminShell';
 export { AdminOverviewClient } from './AdminOverviewClient';
 export { AdminUsersClient } from './AdminUsersClient';
+export { AdminParticipationClient } from './AdminParticipationClient';
 export { QuizFormModal } from './QuizFormModal';
 export { AdminQuizzesClient } from './AdminQuizzesClient';
 export { CsvQuestionImporterModal } from './CsvQuestionImporterModal';

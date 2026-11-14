@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { usePathname, useRouter } from 'next/navigation';
+import { useClerk } from '@clerk/nextjs';
 import { sanitizeClientNextPath } from '@/lib/v3/client';
 import { useAuthSession } from '@/components/auth/AuthSessionProvider';
 import { useToast } from '@/components/ui/ToastProvider';
@@ -46,6 +47,7 @@ const AuthModalContext = createContext<AuthModalContextValue | null>(null);
 export function AuthModalProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname() ?? '/';
+  const clerk = useClerk();
   const { refreshSession } = useAuthSession();
   const { showToast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -53,6 +55,25 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
   const [request, setRequest] = useState<AuthPromptRequest | null>(null);
   const resumeCallbackRef = useRef<(() => void | Promise<void>) | undefined>(undefined);
   const openAuthModal = useCallback((nextRequest: AuthPromptRequest = {}) => {
+    const targetNext = sanitizeClientNextPath(
+      nextRequest.nextUrl ??
+        (typeof window !== 'undefined'
+          ? `${window.location.pathname}${window.location.search}`
+          : '/')
+    );
+
+    try {
+      if (typeof clerk.openSignIn === 'function') {
+        clerk.openSignIn({
+          fallbackRedirectUrl: `/post-auth?next=${encodeURIComponent(targetNext)}`,
+          signUpFallbackRedirectUrl: `/post-auth?next=${encodeURIComponent(targetNext)}`
+        });
+        return;
+      }
+    } catch {
+      // Fallback if clerk is not ready
+    }
+
     setHasLoadedModal(true);
     resumeCallbackRef.current = nextRequest.onAuthenticated;
     setRequest({
@@ -60,17 +81,12 @@ export function AuthModalProvider({ children }: { children: React.ReactNode }) {
       description:
         nextRequest.description ??
         'Sign in with a free account to download PDF booklets and save quiz attempts.',
-      nextUrl: sanitizeClientNextPath(
-        nextRequest.nextUrl ??
-          (typeof window !== 'undefined'
-            ? `${window.location.pathname}${window.location.search}`
-            : '/')
-      ),
+      nextUrl: targetNext,
       initialMode: nextRequest.initialMode ?? 'login',
       initialError: nextRequest.initialError ?? null
     });
     setIsOpen(true);
-  }, []);
+  }, [clerk]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;

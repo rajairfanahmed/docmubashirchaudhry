@@ -611,6 +611,43 @@ export const v3Api = {
           };
         }>('/api/admin/storage', { signal })
     },
+    attempts: {
+      list: (
+        query?: {
+          page?: number;
+          pageSize?: number;
+          quizId?: string;
+          userId?: string;
+          from?: string;
+          to?: string;
+          status?: 'all' | 'passed' | 'failed';
+        },
+        signal?: AbortSignal
+      ) =>
+        requestJson<{
+          data: Array<{
+            id: string;
+            userId: string;
+            userEmail: string;
+            userName: string | null;
+            quizId: string;
+            quizTitle: string;
+            score: number;
+            maxScore: number;
+            percentage: number;
+            passed: boolean;
+            correctCount: number;
+            incorrectCount: number;
+            unansweredCount: number;
+            timeTakenSeconds: number | null;
+            autoSubmitted: boolean;
+            createdAt: string;
+          }>;
+          pagination: { page: number; pageSize: number; total: number; totalPages: number };
+        }>(`/api/admin/attempts${buildQueryString(query as Record<string, string | number | undefined>)}`, {
+          signal
+        })
+    },
     users: {
       list: (
         query?: { page?: number; pageSize?: number; q?: string; status?: string; sort?: string },

@@ -69,6 +69,7 @@ export interface SignupResponse {
   requiresEmailVerification: boolean;
   user: AuthUser | null;
   message?: string;
+  signInToken?: string;
 }
 
 export interface LoginInput {
@@ -79,6 +80,7 @@ export interface LoginInput {
 export interface LoginResponse {
   ok: boolean;
   user: AuthUser;
+  signInToken?: string;
 }
 
 export interface ResendVerificationInput {

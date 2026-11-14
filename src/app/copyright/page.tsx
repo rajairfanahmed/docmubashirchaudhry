@@ -46,7 +46,7 @@ export default function CopyrightPage() {
               <span>1. Original Compilations &amp; Study Material</span>
             </div>
             <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
-              Solved MCQ booklets authored by Dr. Mubashir Chaudhry (`author_original`) are distributed free of charge for individual students and teachers for personal academic preparation, with attribution intact. Commercial repackaging or paywalling our open booklets is prohibited.
+              Solved MCQ booklets authored by Dr. Mubashir Chaudhry (`author_original`) are distributed free of charge for individual aspirants, learners, and teachers for personal academic preparation, with attribution intact. Commercial repackaging or paywalling our open booklets is prohibited.
             </p>
           </article>
 

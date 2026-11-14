@@ -210,7 +210,7 @@ export default async function AboutPage() {
               <span>Privacy &amp; Zero-Tracking Guarantee</span>
             </div>
             <p className="text-emerald-900 leading-relaxed">
-              We do not run ad networks, user accounts, or analytics beacons. Quiz practice progress lives exclusively on your own browser via localStorage.
+              We do not run ad networks or cross-site tracking beacons. The platform is completely open to explore anonymously, with optional free user accounts for saving timed quiz attempts and downloading past paper booklets.
             </p>
           </div>
         </div>

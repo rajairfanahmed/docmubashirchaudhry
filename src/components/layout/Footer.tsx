@@ -18,10 +18,11 @@ const EDITORIAL_POLICY_LINKS = [
   { label: 'Report a Correction', href: '/corrections' },
   { label: 'Accessibility', href: '/accessibility' },
   { label: 'Copyright Notice', href: '/copyright' },
+  { label: 'Terms of Use', href: '/terms' },
   { label: 'Privacy Policy', href: '/privacy' }
 ];
 
-const STUDENT_TOOL_LINKS = [
+const USER_TOOL_LINKS = [
   { label: 'Search Portal', href: '/search' },
   { label: 'Practice MCQs', href: '/mcq' },
   { label: 'My Quiz Attempts', href: '/my-attempts' },
@@ -106,13 +107,13 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Column 4: Student Tools (2 cols) */}
+          {/* Column 4: Aspirant Tools (2 cols) */}
           <div className="lg:col-span-2 space-y-3.5">
             <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-accent)]">
-              Student Tools
+              Aspirant Tools
             </h3>
             <ul className="space-y-1 text-sm">
-              {STUDENT_TOOL_LINKS.map((item) => (
+              {USER_TOOL_LINKS.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}

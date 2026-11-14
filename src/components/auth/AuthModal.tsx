@@ -119,7 +119,7 @@ function extractClerkErrorMessage(err: unknown): { message: string; code?: strin
 export function AuthModal({
   isOpen,
   reasonTitle = 'Sign in to continue',
-  reasonDescription = 'Sign in with a free student account to take graded quizzes and download watermarked PDFs.',
+  reasonDescription = 'Sign in with a free user account to take graded quizzes and download watermarked PDFs.',
   nextUrl,
   initialMode = 'login',
   initialError = null,
@@ -329,6 +329,20 @@ export function AuthModal({
           password
         });
 
+        if (backendRes.signInToken && isSignInLoaded && signIn) {
+          try {
+            const ticketRes = await signIn.create({
+              strategy: 'ticket',
+              ticket: backendRes.signInToken
+            });
+            if (ticketRes.status === 'complete' && setSignInActive) {
+              await setSignInActive({ session: ticketRes.createdSessionId });
+            }
+          } catch {
+            // Optional fallback
+          }
+        }
+
         setAuthenticatedUser(backendRes.user);
         await refreshSession();
         showToast({
@@ -337,6 +351,7 @@ export function AuthModal({
           tone: 'success'
         });
         await onSuccessResume();
+        window.location.href = nextUrl ? `/post-auth?next=${encodeURIComponent(nextUrl)}` : '/post-auth';
         return;
       }
 
@@ -372,6 +387,20 @@ export function AuthModal({
           next: nextUrl
         });
 
+        if (backendRes.signInToken && isSignInLoaded && signIn) {
+          try {
+            const ticketRes = await signIn.create({
+              strategy: 'ticket',
+              ticket: backendRes.signInToken
+            });
+            if (ticketRes.status === 'complete' && setSignInActive) {
+              await setSignInActive({ session: ticketRes.createdSessionId });
+            }
+          } catch {
+            // Optional fallback
+          }
+        }
+
         if (backendRes.user) {
           setAuthenticatedUser(backendRes.user);
         }
@@ -382,6 +411,7 @@ export function AuthModal({
           tone: 'success'
         });
         await onSuccessResume();
+        window.location.href = nextUrl ? `/post-auth?next=${encodeURIComponent(nextUrl)}` : '/post-auth';
         return;
       }
 
