@@ -15,6 +15,7 @@
     "data:export-csv": "tsx scripts/export-csv.ts",
     "data:import-csv": "tsx scripts/import-csv.ts",
     "check:links": "tsx scripts/check-links.ts",
+    "check:database": "tsx scripts/check-database.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },

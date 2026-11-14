@@ -71,13 +71,22 @@ export function handleRouteError(error: unknown, contextLabel: string): NextResp
       message: 'Referenced record does not exist.'
     });
   }
+  if (pgCode === '42P01' || pgCode === 'PGRST205') {
+    console.error(`[v3-api] ${contextLabel}: Database table not initialized (${pgCode})`);
+    return apiErrorResponse({
+      status: 503,
+      code: 'SERVICE_INITIALIZING',
+      message: 'The examination system is currently updating its database records. Your session is preserved; please retry in a moment.'
+    });
+  }
 
-  console.error(`[v3-api] ${contextLabel}:`, error instanceof Error ? error.message : 'Unexpected error');
+  const errorMessage = error instanceof Error ? error.message : typeof error === 'string' ? error : 'Internal error';
+  console.error(`[v3-api] ${contextLabel}:`, errorMessage);
 
   return apiErrorResponse({
     status: 500,
     code: 'INTERNAL_SERVER_ERROR',
-    message: 'An unexpected server error occurred.'
+    message: 'We could not complete your request at this moment. Please retry shortly or contact faculty@docmubashirchaudhry.com if this persists.'
   });
 }
 
