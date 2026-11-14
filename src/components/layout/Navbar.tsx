@@ -17,7 +17,7 @@ import {
   User,
   X
 } from 'lucide-react';
-import { SignInButton, UserButton, useUser } from '@clerk/nextjs';
+import { UserButton, useClerk, useUser } from '@clerk/nextjs';
 import { DmcLogo } from '@/components/branding/DmcLogo';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { useAuthSession } from '@/components/auth/AuthSessionProvider';
@@ -31,6 +31,7 @@ export function Navbar() {
   const { session } = useAuthSession();
   const { openAuthModal } = useAuthModal();
   const { user: clerkUser, isSignedIn: isClerkSignedIn } = useUser();
+  const clerk = useClerk();
   const isAuthenticated = Boolean(isClerkSignedIn || session.authenticated);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
@@ -238,16 +239,15 @@ export function Navbar() {
                     </UserButton.MenuItems>
                   </UserButton>
                 ) : (
-                  <SignInButton
-                    mode="modal"
-                    fallbackRedirectUrl="/post-auth"
-                    signUpFallbackRedirectUrl="/post-auth"
-                  >
-                    <Link
+                  <Link
                       href="/sign-in"
                       onClick={(e) => {
                         if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
                           e.preventDefault();
+                          clerk.openSignIn({
+                            fallbackRedirectUrl: '/post-auth',
+                            signUpFallbackRedirectUrl: '/post-auth'
+                          });
                         }
                       }}
                       className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
@@ -255,7 +255,6 @@ export function Navbar() {
                       <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
                       <span>Sign In</span>
                     </Link>
-                  </SignInButton>
                 )}
               </div>
 
@@ -270,16 +269,15 @@ export function Navbar() {
                     }}
                   />
                 ) : (
-                  <SignInButton
-                    mode="modal"
-                    fallbackRedirectUrl="/post-auth"
-                    signUpFallbackRedirectUrl="/post-auth"
-                  >
-                    <Link
+                  <Link
                       href="/sign-in"
                       onClick={(e) => {
                         if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
                           e.preventDefault();
+                          clerk.openSignIn({
+                            fallbackRedirectUrl: '/post-auth',
+                            signUpFallbackRedirectUrl: '/post-auth'
+                          });
                         }
                       }}
                       className="dmc-press inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
@@ -287,7 +285,6 @@ export function Navbar() {
                       <LogIn className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
                       <span>Sign In</span>
                     </Link>
-                  </SignInButton>
                 )}
 
                 <button
@@ -466,17 +463,16 @@ export function Navbar() {
                       </div>
                     </div>
                   ) : (
-                    <SignInButton
-                      mode="modal"
-                      fallbackRedirectUrl="/post-auth"
-                      signUpFallbackRedirectUrl="/post-auth"
-                    >
-                      <Link
+                    <Link
                         href="/sign-in"
                         onClick={(e) => {
                           setIsMobileMenuOpen(false);
                           if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
                             e.preventDefault();
+                            clerk.openSignIn({
+                              fallbackRedirectUrl: '/post-auth',
+                              signUpFallbackRedirectUrl: '/post-auth'
+                            });
                           }
                         }}
                         className="w-full min-h-[44px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold inline-flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
@@ -484,7 +480,6 @@ export function Navbar() {
                         <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
                         <span>Sign In / Create Account</span>
                       </Link>
-                    </SignInButton>
                   )}
                 </div>
               </div>
