@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, m, useReducedMotion } from 'motion/react';
@@ -17,7 +17,7 @@ import {
   User,
   X
 } from 'lucide-react';
-import { UserButton, useClerk, useUser } from '@clerk/nextjs';
+import { ClerkLoaded, UserButton, useClerk, useUser } from '@clerk/nextjs';
 import { DmcLogo } from '@/components/branding/DmcLogo';
 import { PageContainer } from '@/components/layout/PageContainer';
 import { useAuthSession } from '@/components/auth/AuthSessionProvider';
@@ -33,6 +33,24 @@ export function Navbar() {
   const { user: clerkUser, isSignedIn: isClerkSignedIn } = useUser();
   const clerk = useClerk();
   const isAuthenticated = Boolean(isClerkSignedIn || session.authenticated);
+
+  const handleSignInClick = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      // Allow modifier-key clicks to navigate to /sign-in page
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+      // Only prevent default and open modal if Clerk is loaded
+      if (clerk.loaded) {
+        e.preventDefault();
+        clerk.openSignIn({
+          fallbackRedirectUrl: '/post-auth',
+          signUpFallbackRedirectUrl: '/post-auth'
+        });
+      }
+      // If Clerk isn't loaded yet, let the Link navigate to /sign-in page as fallback
+    },
+    [clerk]
+  );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const mobileDrawerRef = useRef<HTMLElement>(null);
@@ -241,15 +259,7 @@ export function Navbar() {
                 ) : (
                   <Link
                       href="/sign-in"
-                      onClick={(e) => {
-                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
-                          e.preventDefault();
-                          clerk.openSignIn({
-                            fallbackRedirectUrl: '/post-auth',
-                            signUpFallbackRedirectUrl: '/post-auth'
-                          });
-                        }
-                      }}
+                      onClick={handleSignInClick}
                       className="dmc-press inline-flex items-center justify-center gap-1.5 min-h-[40px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
                     >
                       <LogIn className="w-4 h-4 shrink-0" aria-hidden="true" />
@@ -271,15 +281,7 @@ export function Navbar() {
                 ) : (
                   <Link
                       href="/sign-in"
-                      onClick={(e) => {
-                        if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
-                          e.preventDefault();
-                          clerk.openSignIn({
-                            fallbackRedirectUrl: '/post-auth',
-                            signUpFallbackRedirectUrl: '/post-auth'
-                          });
-                        }
-                      }}
+                      onClick={handleSignInClick}
                       className="dmc-press inline-flex items-center gap-1.5 min-h-[36px] px-3 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors shadow-xs"
                     >
                       <LogIn className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
@@ -467,13 +469,7 @@ export function Navbar() {
                         href="/sign-in"
                         onClick={(e) => {
                           setIsMobileMenuOpen(false);
-                          if (!e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey && e.button === 0) {
-                            e.preventDefault();
-                            clerk.openSignIn({
-                              fallbackRedirectUrl: '/post-auth',
-                              signUpFallbackRedirectUrl: '/post-auth'
-                            });
-                          }
+                          handleSignInClick(e);
                         }}
                         className="w-full min-h-[44px] px-4 rounded-[var(--radius-control)] bg-[var(--color-action)] hover:bg-[var(--color-action-hover)] text-[var(--color-action-ink)] text-sm font-semibold inline-flex items-center justify-center gap-2 cursor-pointer transition-colors shadow-xs"
                       >
