@@ -50,12 +50,12 @@ export function Footer() {
             <Link
               href="/"
               className="inline-flex items-center gap-3 group focus:outline-none rounded-[var(--radius-control)]"
-              aria-label="DocMubashir Exam Portal Home"
+              aria-label="DocMubashir Chaudhry Exam Portal Home"
             >
               <DmcLogo className="h-9 w-auto transition-transform duration-150 group-hover:scale-[1.03]" variant="inverted" />
               <div className="flex flex-col">
                 <span className="font-display font-bold text-base tracking-tight text-white leading-none">
-                  Doc<span className="text-emerald-300">Mubashir</span>
+                  DocMubashir<span className="text-emerald-300">Chaudhry</span>
                 </span>
                 <span className="text-[11px] font-medium text-white/75 tracking-wide mt-1 leading-none">
                   Exam Preparation Portal

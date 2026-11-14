@@ -221,12 +221,12 @@ export function Navbar() {
               href="/"
               onClick={() => notifyNavigationStart()}
               className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-deep)] rounded-[var(--radius-control)] shrink-0"
-              aria-label="DocMubashir Exam Portal Home"
+              aria-label="DocMubashir Chaudhry Exam Portal Home"
             >
               <DmcLogo className="h-9 w-auto transition-transform duration-150 group-hover:scale-[1.03]" />
               <div className="flex flex-col">
                 <span className="font-display font-bold text-[var(--color-ink)] text-sm sm:text-base tracking-tight leading-none whitespace-nowrap">
-                  Doc<span className="text-[var(--color-brand-deep)]">Mubashir</span>
+                  DocMubashir<span className="text-[var(--color-brand-deep)]">Chaudhry</span>
                 </span>
                 <span className="text-[11px] font-medium text-[var(--color-ink-secondary)] tracking-wide mt-0.5 leading-none whitespace-nowrap">
                   Exam Portal
@@ -612,7 +612,7 @@ export function Navbar() {
                   <div className="flex items-center gap-2.5">
                     <DmcLogo className="h-7 w-auto" />
                     <span className="font-display font-bold text-sm text-[var(--color-ink)]">
-                      DocMubashir Portal
+                      DocMubashirChaudhry Portal
                     </span>
                   </div>
                   <button
