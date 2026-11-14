@@ -3,7 +3,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { isAdminEmail, parseClerkConfig } from '@/lib/env';
 import { resolveSiteUrl } from '@/lib/seo/metadata';
 import type { ProfileRow } from '@/lib/supabase/database.types';
-import { syncClerkUserProfile } from '@/lib/supabase/admin';
+import { getOptionalAdminClient, syncClerkUserProfile } from '@/lib/supabase/admin';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -99,6 +99,7 @@ export async function getOptionalSessionUser(): Promise<{
 
 export async function requireAuthenticatedUser(options?: {
   syncProfile?: boolean;
+  allowBlocked?: boolean;
 }): Promise<AuthenticatedContext> {
   let userId: string | null = null;
   try {
@@ -148,6 +149,32 @@ export async function requireAuthenticatedUser(options?: {
       displayName,
       role: isAdmin ? 'admin' : 'user'
     }).catch(() => {});
+  }
+
+  // Check for blocked status in Supabase profiles unless explicitly allowed (e.g. GET /api/me)
+  if (!options?.allowBlocked) {
+    const admin = getOptionalAdminClient();
+    if (admin) {
+      try {
+        const { data } = await admin
+          .from('profiles')
+          .select('status, blocked_reason')
+          .or(`clerk_user_id.eq.${userId},id.eq.${userId}`)
+          .maybeSingle();
+        if (data && data.status === 'blocked') {
+          throw new ApiError(
+            403,
+            'ACCOUNT_BLOCKED',
+            data.blocked_reason
+              ? `Account blocked: ${data.blocked_reason}`
+              : 'Your account has been suspended or blocked. Please contact the administrator at faculty@docmubashirchaudhry.com.'
+          );
+        }
+      } catch (err) {
+        if (err instanceof ApiError) throw err;
+        // Non-blocking query failure
+      }
+    }
   }
 
   return {

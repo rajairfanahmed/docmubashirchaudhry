@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock,
+  Flag,
   Grid,
   Lock,
   RotateCcw,
@@ -36,6 +37,7 @@ import { BilingualQuestionStem } from '@/components/quizzes/BilingualQuestionSte
 import { MockExamTimerBar } from '@/components/quizzes/MockExamTimerBar';
 import { ConfirmSubmitModal } from '@/components/quizzes/ConfirmSubmitModal';
 import { QuizResultsPanel } from '@/components/quizzes/QuizResultsPanel';
+import { ReportQuestionModal } from '@/components/quizzes/ReportQuestionModal';
 import { cn } from '@/lib/utils';
 
 export interface QuizSessionRunnerProps {
@@ -80,6 +82,11 @@ export function QuizSessionRunner({ slug, initialMetadata }: QuizSessionRunnerPr
   const [isJumpGridOpen, setIsJumpGridOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<QuizSubmitResponse | null>(null);
+  const [reportingQuestion, setReportingQuestion] = useState<{
+    id: string;
+    textEn: string;
+    textUr: string | null;
+  } | null>(null);
 
   const hasAutoSubmittedRef = useRef(false);
 
@@ -539,9 +546,40 @@ export function QuizSessionRunner({ slug, initialMetadata }: QuizSessionRunnerPr
                 <span className="text-xs font-semibold text-[var(--color-ink-secondary)] tabular-nums">
                   Question {currentIndex + 1} of {totalCount}
                 </span>
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] px-2.5 py-0.5 rounded-full">
-                  {currentQ.difficulty}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] px-2.5 py-0.5 rounded-full">
+                    {currentQ.difficulty}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!session.authenticated) {
+                        openAuthModal({
+                          title: 'Sign in to report errors',
+                          description: 'Please sign in with a free account to flag question errors.',
+                          onAuthenticated: () =>
+                            setReportingQuestion({
+                              id: currentQ.id,
+                              textEn: currentQ.textEn ?? '',
+                              textUr: currentQ.textUr
+                            })
+                        });
+                        return;
+                      }
+                      setReportingQuestion({
+                        id: currentQ.id,
+                        textEn: currentQ.textEn ?? '',
+                        textUr: currentQ.textUr
+                      });
+                    }}
+                    title="Report question error"
+                    aria-label="Report an error in this question"
+                    className="inline-flex items-center gap-1 text-[11px] font-medium text-[var(--color-ink-muted)] hover:text-red-700 hover:bg-red-50/60 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
+                  >
+                    <Flag className="w-3 h-3" />
+                    <span>Report</span>
+                  </button>
+                </div>
               </div>
 
               <BilingualQuestionStem
@@ -857,6 +895,15 @@ export function QuizSessionRunner({ slug, initialMetadata }: QuizSessionRunnerPr
         negativeMarkingValue={quiz.negativeMarkingValue}
         isSubmitting={isSubmitting}
       />
+
+      {reportingQuestion && (
+        <ReportQuestionModal
+          isOpen={Boolean(reportingQuestion)}
+          questionId={reportingQuestion.id}
+          questionStem={reportingQuestion.textEn || reportingQuestion.textUr || undefined}
+          onClose={() => setReportingQuestion(null)}
+        />
+      )}
     </div>
   );
 }

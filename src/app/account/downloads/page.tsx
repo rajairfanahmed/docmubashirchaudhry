@@ -11,7 +11,7 @@ import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'My PDF Downloads',
-  description: 'Personal student log of watermarked PDF booklets you have accessed.',
+  description: 'Personal log of watermarked PDF booklets you have accessed.',
   path: '/account/downloads',
   index: false,
   follow: false
@@ -29,7 +29,7 @@ export default async function AccountDownloadsPage() {
         <div className="space-y-3">
           <Breadcrumbs
             items={[
-              { label: 'Student Profile', href: '/account' },
+              { label: 'User Profile', href: '/account' },
               { label: 'My PDF Downloads' }
             ]}
             currentPath="/account/downloads"
@@ -66,4 +66,3 @@ export default async function AccountDownloadsPage() {
     </div>
   );
 }
-

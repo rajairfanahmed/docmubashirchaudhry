@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkClient, clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { resolveRequestOrigin } from '@/lib/auth/guards';
 import { isAdminEmail } from '@/lib/env';
 
@@ -23,9 +23,27 @@ export default clerkMiddleware(async (auth, request) => {
       (sessionClaims as Record<string, unknown> | undefined)?.email ??
       (sessionClaims as Record<string, unknown> | undefined)?.primary_email_address ??
       (sessionClaims as Record<string, unknown> | undefined)?.email_address;
-    const isEmailAdmin = typeof claimsEmail === 'string' && isAdminEmail(claimsEmail);
+    let isEmailAdmin = typeof claimsEmail === 'string' && isAdminEmail(claimsEmail);
 
-    if (role === 'user' && !isEmailAdmin) {
+    let isAdmin = role === 'admin' || isEmailAdmin;
+    if (!isAdmin && userId) {
+      try {
+        const clerk = await clerkClient();
+        const user = await clerk.users.getUser(userId);
+        const email =
+          user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)?.emailAddress ??
+          user.emailAddresses[0]?.emailAddress;
+        if (email && isAdminEmail(email)) {
+          isAdmin = true;
+        } else if ((user.publicMetadata as { role?: string } | undefined)?.role === 'admin') {
+          isAdmin = true;
+        }
+      } catch {
+        // Fallback to non-admin
+      }
+    }
+
+    if (!isAdmin) {
       return NextResponse.json(
         { error: 'Not found.' },
         { status: 404, headers: { 'Cache-Control': 'no-store' } }
@@ -48,9 +66,27 @@ export default clerkMiddleware(async (auth, request) => {
       (sessionClaims as Record<string, unknown> | undefined)?.email ??
       (sessionClaims as Record<string, unknown> | undefined)?.primary_email_address ??
       (sessionClaims as Record<string, unknown> | undefined)?.email_address;
-    const isEmailAdmin = typeof claimsEmail === 'string' && isAdminEmail(claimsEmail);
+    let isEmailAdmin = typeof claimsEmail === 'string' && isAdminEmail(claimsEmail);
 
-    if (role === 'user' && !isEmailAdmin) {
+    let isAdmin = role === 'admin' || isEmailAdmin;
+    if (!isAdmin && userId) {
+      try {
+        const clerk = await clerkClient();
+        const user = await clerk.users.getUser(userId);
+        const email =
+          user.emailAddresses.find((e) => e.id === user.primaryEmailAddressId)?.emailAddress ??
+          user.emailAddresses[0]?.emailAddress;
+        if (email && isAdminEmail(email)) {
+          isAdmin = true;
+        } else if ((user.publicMetadata as { role?: string } | undefined)?.role === 'admin') {
+          isAdmin = true;
+        }
+      } catch {
+        // Fallback to non-admin
+      }
+    }
+
+    if (!isAdmin) {
       // Stealth 404 rewrite: non-admins never receive confirmation that an admin console exists
       return NextResponse.rewrite(new URL('/404', request.url));
     }

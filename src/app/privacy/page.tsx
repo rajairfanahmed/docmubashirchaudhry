@@ -8,9 +8,9 @@ import { ClearSavedProgressControl } from '@/components/privacy/ClearSavedProgre
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'Privacy Policy & Student Data Governance',
+  title: 'Privacy Policy & User Data Governance',
   description:
-    'Learn how docmubashirchaudhary protects student privacy, uses Clerk for identity, Supabase for saved attempt scores, and Cloudflare R2 for watermarked downloads.',
+    'Learn how docmubashirchaudhary protects user privacy, uses Clerk for identity, Supabase for saved attempt scores, and Cloudflare R2 for watermarked downloads.',
   path: '/privacy'
 });
 
@@ -26,10 +26,10 @@ export default function PrivacyPage() {
               ZERO ADVERTISEMENTS &middot; STRICT DATA PRIVACY
             </span>
             <h1 id="privacy-heading" className="type-page-title text-[var(--dmc-ink-primary)]">
-              Privacy &amp; Student Data Governance
+              Privacy &amp; User Data Governance
             </h1>
             <p className="type-body-base text-[var(--dmc-ink-secondary)]">
-              Transparent disclosure of identity management, student attempt records, secure watermarked PDF delivery, and browser storage.
+              Transparent disclosure of identity management, user attempt records, secure watermarked PDF delivery, and browser storage.
             </p>
           </div>
         </div>
@@ -47,17 +47,17 @@ export default function PrivacyPage() {
               <span>1. Zero Advertising Trackers &amp; No Data Monetization</span>
             </div>
             <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
-              docmubashirchaudhary does not display third-party advertisements, sell student data, or install cross-site tracking pixels. Your reading history, syllabus searches, and reference reviews are never monetized through commercial ad networks.
+              docmubashirchaudhary does not display third-party advertisements, sell user data, or install cross-site tracking pixels. Your reading history, syllabus searches, and reference reviews are never monetized through commercial ad networks.
             </p>
           </article>
 
           <article className="bg-white border border-[var(--dmc-border-subtle)] rounded-2xl p-6 elevation-1 space-y-3">
             <div className="flex items-center gap-2 text-sm font-bold text-[var(--dmc-ink-primary)]">
               <UserCheck className="w-4 h-4 text-[var(--dmc-brand-emerald)]" aria-hidden="true" />
-              <span>2. Student Accounts &amp; Authentication via Clerk</span>
+              <span>2. User Accounts &amp; Authentication via Clerk</span>
             </div>
             <p className="text-sm text-[var(--dmc-ink-secondary)] leading-relaxed">
-              To save your timed mock exam attempts, track personal accuracy percentages, and access watermarked PDF past papers, the portal provides optional free student accounts managed through Clerk. Authentication credentials (including Google OAuth and password hashes) are securely processed by Clerk; our database never stores raw passwords.
+              To save your timed mock exam attempts, track personal accuracy percentages, and access watermarked PDF past papers, the portal provides optional free user accounts managed through Clerk. Authentication credentials (including Google OAuth and password hashes) are securely processed by Clerk; our database never stores raw passwords.
             </p>
           </article>
 

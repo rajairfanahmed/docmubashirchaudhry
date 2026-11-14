@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useClerk, useUser } from '@clerk/nextjs';
 import {
+  AlertTriangle,
   ArrowRight,
   Award,
   CheckCircle2,
@@ -17,11 +18,13 @@ import {
   Mail,
   Shield,
   Sparkles,
+  Trash2,
   User,
   UserCheck
 } from 'lucide-react';
 import { useAuthSession } from '@/components/auth/AuthSessionProvider';
 import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/ToastProvider';
 import { v3Api } from '@/lib/v3/client';
 import { cn } from '@/lib/utils';
@@ -33,12 +36,23 @@ interface UserStatsSummary {
   lastAttemptAt?: string | null;
 }
 
+interface UserProfileData {
+  id: string;
+  email: string;
+  name: string | null;
+  avatarUrl: string | null;
+  status: string;
+  isAdmin: boolean;
+  createdAt: string;
+}
+
 export function UserProfileClient() {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isSignedIn, user } = useUser();
   const { session, logout } = useAuthSession();
   const { showToast } = useToast();
   const router = useRouter();
 
+  const [profile, setProfile] = useState<UserProfileData | null>(null);
   const [stats, setStats] = useState<UserStatsSummary>({
     attemptsCount: 0,
     avgScore: 0,
@@ -50,14 +64,37 @@ export function UserProfileClient() {
   const [displayNameInput, setDisplayNameInput] = useState('');
   const [isSavingName, setIsSavingName] = useState(false);
 
+  // Self-deletion modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  // Load Profile from API-02 (GET /api/me)
   useEffect(() => {
-    if (user?.firstName) {
-      setDisplayNameInput(user.firstName);
-    } else if (session.user?.displayName) {
-      setDisplayNameInput(session.user.displayName);
+    let isMounted = true;
+    async function loadProfile() {
+      try {
+        const res = await v3Api.me.getProfile();
+        if (isMounted && res.data) {
+          setProfile(res.data);
+          setDisplayNameInput(res.data.name || '');
+        }
+      } catch {
+        // Fallback to Clerk/session if API is warming up
+        if (user?.firstName) {
+          setDisplayNameInput(user.firstName);
+        } else if (session.user?.displayName) {
+          setDisplayNameInput(session.user.displayName);
+        }
+      }
     }
+    void loadProfile();
+    return () => {
+      isMounted = false;
+    };
   }, [user?.firstName, session.user?.displayName]);
 
+  // Load Stats from API
   useEffect(() => {
     if (!isSignedIn && !session.authenticated) return;
 
@@ -104,7 +141,7 @@ export function UserProfileClient() {
     return () => {
       isMounted = false;
     };
-  }, [isSignedIn]);
+  }, [isSignedIn, session.authenticated]);
 
   const handleSaveName = async () => {
     const trimmed = displayNameInput.trim();
@@ -119,9 +156,15 @@ export function UserProfileClient() {
 
     setIsSavingName(true);
     try {
+      // 1. Update backend profile (API-03) which syncs to Clerk & Supabase profiles
+      await v3Api.me.updateProfile(trimmed);
+
+      // 2. Also update Clerk client user object if available
       if (user) {
         await user.update({ firstName: trimmed });
       }
+
+      setProfile((prev) => (prev ? { ...prev, name: trimmed } : null));
       setIsEditingName(false);
       showToast({
         title: 'Profile Updated',
@@ -139,6 +182,39 @@ export function UserProfileClient() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmationText !== 'DELETE') {
+      showToast({
+        title: 'Confirmation Required',
+        description: 'Please type DELETE exactly to confirm account removal.',
+        tone: 'error'
+      });
+      return;
+    }
+
+    setIsDeletingAccount(true);
+    try {
+      await v3Api.me.deleteAccount();
+      setShowDeleteModal(false);
+      showToast({
+        title: 'Account Deleted',
+        description: 'Your account and personal data have been removed.',
+        tone: 'info'
+      });
+      await logout();
+      router.push('/');
+      router.refresh();
+    } catch {
+      showToast({
+        title: 'Deletion Failed',
+        description: 'Unable to complete account deletion. Please try again.',
+        tone: 'error'
+      });
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
   const handleSignOut = async () => {
     await logout();
     router.push('/');
@@ -146,21 +222,24 @@ export function UserProfileClient() {
   };
 
   const primaryEmail =
+    profile?.email ??
     user?.primaryEmailAddress?.emailAddress ??
     user?.emailAddresses?.[0]?.emailAddress ??
     session.user?.email ??
     '';
   const role =
+    profile?.isAdmin ||
     (user?.publicMetadata as { role?: string } | undefined)?.role === 'admin' ||
     session.user?.isAdmin
       ? 'admin'
       : 'user';
   const name =
+    profile?.name ||
     user?.fullName ||
     user?.firstName ||
     session.user?.displayName ||
     primaryEmail.split('@')[0] ||
-    'Student Aspirant';
+    'Exam Candidate';
 
   const initials = name
     .split(' ')
@@ -170,7 +249,12 @@ export function UserProfileClient() {
     .join('')
     .toUpperCase();
 
-  const joinedDate = user?.createdAt
+  const joinedDate = profile?.createdAt
+    ? new Date(profile.createdAt).toLocaleDateString('en-US', {
+        month: 'long',
+        year: 'numeric'
+      })
+    : user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString('en-US', {
         month: 'long',
         year: 'numeric'
@@ -179,6 +263,22 @@ export function UserProfileClient() {
 
   return (
     <div className="space-y-8">
+      {/* Account Blocked Alert Banner (DEC-024) */}
+      {profile?.status === 'blocked' && (
+        <div
+          role="alert"
+          className="rounded-[var(--radius-panel)] bg-red-50 border border-red-200 p-5 flex items-start gap-3.5 text-red-900 shadow-xs"
+        >
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" aria-hidden="true" />
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold">Account Access Suspended</h3>
+            <p className="text-xs text-red-700 leading-relaxed">
+              Your account is not active right now. Please write to rajairfana551@gmail.com for review and verification.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Profile Header Hero Card */}
       <div className="rounded-[var(--radius-panel)] bg-[var(--color-surface)] border border-[var(--color-border)] p-6 sm:p-8 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -200,7 +300,7 @@ export function UserProfileClient() {
                 ) : (
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
                     <UserCheck className="w-3 h-3" />
-                    Student Aspirant
+                    Registered Candidate
                   </span>
                 )}
               </div>
@@ -345,21 +445,37 @@ export function UserProfileClient() {
             <div className="flex justify-between py-2 border-b border-[var(--color-border-subtle)]">
               <span className="text-[var(--color-ink-secondary)]">User Identifier</span>
               <span className="font-mono text-xs text-[var(--color-ink-muted)]">
-                {session.user?.id ? `${session.user.id.slice(0, 16)}...` : 'Unknown'}
+                {session.user?.id ? `${session.user.id.slice(0, 16)}...` : 'Connected'}
               </span>
             </div>
             <div className="flex justify-between py-2 border-b border-[var(--color-border-subtle)]">
               <span className="text-[var(--color-ink-secondary)]">Account Status</span>
-              <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold text-xs">
+              <span className={cn(
+                'inline-flex items-center gap-1 font-semibold text-xs',
+                profile?.status === 'blocked' ? 'text-red-700' : 'text-emerald-700'
+              )}>
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                Active &amp; Verified
+                {profile?.status === 'blocked' ? 'Suspended' : 'Active & Verified'}
               </span>
             </div>
-            <div className="flex justify-between py-2">
+            <div className="flex justify-between py-2 border-b border-[var(--color-border-subtle)]">
               <span className="text-[var(--color-ink-secondary)]">Data Storage</span>
               <span className="text-xs text-[var(--color-ink)] font-medium">
-                Supabase PostgreSQL
+                Supabase PostgreSQL (RLS Protected)
               </span>
+            </div>
+            <div className="pt-3 flex justify-between items-center">
+              <span className="text-xs text-[var(--color-danger-ink)]">
+                Danger Zone
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className="text-xs font-semibold text-[var(--color-danger-ink)] hover:underline inline-flex items-center gap-1"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Account</span>
+              </button>
             </div>
           </div>
         </div>
@@ -405,6 +521,59 @@ export function UserProfileClient() {
           </div>
         </div>
       </div>
+
+      {/* Account Deletion Confirmation Modal */}
+      {showDeleteModal && (
+        <Modal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          title="Delete Account Permanently"
+        >
+          <div className="space-y-4 pt-2">
+            <p className="text-xs text-[var(--color-ink-secondary)]">
+              This action cannot be undone. All your personal data and identity records will be permanently removed.
+            </p>
+            <div className="p-3 rounded-[var(--radius-control)] bg-red-50 border border-red-200 text-xs text-red-800 leading-relaxed">
+              Please note: Deleting your account will anonymize your profile and remove your Clerk credentials. Past exam attempts are anonymized for integrity verification.
+            </div>
+
+            <div className="space-y-1.5">
+              <label htmlFor="confirm-delete-input" className="text-xs font-semibold text-[var(--color-ink)]">
+                Type <span className="font-mono font-bold text-red-600">DELETE</span> to confirm:
+              </label>
+              <input
+                id="confirm-delete-input"
+                type="text"
+                value={deleteConfirmationText}
+                onChange={(e) => setDeleteConfirmationText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full px-3.5 py-2 text-sm rounded-[var(--radius-control)] border border-[var(--color-border-strong)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-3 border-t border-[var(--color-border)]">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeletingAccount}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={() => void handleDeleteAccount()}
+                isLoading={isDeletingAccount}
+                disabled={deleteConfirmationText !== 'DELETE'}
+              >
+                Permanently Delete
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

@@ -8,9 +8,11 @@ import {
   ArrowRight,
   BarChart3,
   ClipboardCheck,
+  Database,
   Download,
   Eye,
   FileText,
+  HardDrive,
   HelpCircle,
   RefreshCw,
   Users
@@ -22,6 +24,14 @@ import type { AdminOverviewAnalytics } from '@/lib/v3/types';
 import { cn } from '@/lib/utils';
 
 type ChartWindowDays = 7 | 14 | 30;
+
+interface StorageMetricsData {
+  usedBytes: number;
+  allowanceBytes: number;
+  objectCount: number;
+  checkedAt: string;
+  cached: boolean;
+}
 
 function formatShortUtcDate(dateStr: string): string {
   const date = new Date(`${dateStr}T00:00:00Z`);
@@ -35,8 +45,17 @@ function formatShortUtcDate(dateStr: string): string {
   }).format(date);
 }
 
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+}
+
 export function AdminOverviewClient() {
   const [data, setData] = useState<AdminOverviewAnalytics | null>(null);
+  const [storageData, setStorageData] = useState<StorageMetricsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [windowDays, setWindowDays] = useState<ChartWindowDays>(30);
@@ -46,15 +65,23 @@ export function AdminOverviewClient() {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const res = await v3Api.admin.analytics.overview(signal);
-      setData(res);
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        return;
+      const [res, storageRes] = await Promise.allSettled([
+        v3Api.admin.analytics.overview(signal),
+        v3Api.admin.storage.get(signal)
+      ]);
+
+      if (res.status === 'fulfilled') {
+        setData(res.value);
+      } else {
+        const err = res.reason;
+        if (!(err instanceof DOMException && err.name === 'AbortError')) {
+          setErrorMsg(err instanceof Error ? err.message : 'Unable to load portal overview analytics.');
+        }
       }
-      setErrorMsg(
-        err instanceof Error ? err.message : 'Unable to load portal overview analytics.'
-      );
+
+      if (storageRes.status === 'fulfilled' && storageRes.value?.data) {
+        setStorageData(storageRes.value.data);
+      }
     } finally {
       setLoading(false);
     }
@@ -182,6 +209,11 @@ export function AdminOverviewClient() {
     seriesSlice.length > 0 ? (chartWidth - padX * 2) / seriesSlice.length : 1;
   const barWidth = Math.max(6, Math.min(26, stepX * 0.68));
 
+  // Storage calculation (10 GB free tier allowance)
+  const usedBytes = storageData?.usedBytes ?? 0;
+  const allowanceBytes = storageData?.allowanceBytes || 10 * 1024 * 1024 * 1024;
+  const storagePercentage = Math.min(100, Math.round((usedBytes / allowanceBytes) * 100));
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -234,118 +266,103 @@ export function AdminOverviewClient() {
               key={kpi.label}
               className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-5 shadow-xs space-y-2"
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-[var(--color-ink-muted)]">
-                  {kpi.label}
-                </span>
+              <div className="flex items-center justify-between gap-2 text-xs font-semibold text-[var(--color-ink-muted)]">
+                <span>{kpi.label}</span>
                 <Icon className="w-4 h-4 text-[var(--color-brand-deep)] shrink-0" aria-hidden="true" />
               </div>
-              <div className="font-display font-extrabold text-xl sm:text-2xl text-[var(--color-ink)] tabular-nums">
+              <div className="font-display font-extrabold text-2xl text-[var(--color-ink)] tabular-nums">
                 {kpi.value}
               </div>
-              <div className="text-xs text-[var(--color-ink-secondary)]">{kpi.sub}</div>
+              <div className="text-[11px] text-[var(--color-ink-secondary)] truncate">
+                {kpi.sub}
+              </div>
             </div>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         <div className="xl:col-span-8 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h2 className="type-card-title text-[var(--color-ink)]">
-                Daily Site Visits Trend (Last {windowDays} Days UTC)
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-0.5">
+              <h2 className="type-card-title text-[var(--color-ink)] flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                <span>Daily Traffic &amp; Active Aspirant Views</span>
               </h2>
               <p className="text-xs text-[var(--color-ink-muted)]">
-                Hover or focus any day bar to inspect logged first-party visits
+                Aggregated daily visits across past {windowDays} calendar days
               </p>
             </div>
             {activePoint ? (
-              <div
-                aria-live="polite"
-                className="inline-flex items-center gap-2 rounded-full bg-[var(--color-success-bg)] border border-[var(--color-success-border)] px-3 py-1 text-xs font-semibold text-[var(--color-success-ink)] tabular-nums"
-              >
-                <span className="w-2 h-2 rounded-full bg-[var(--color-brand-deep)]" />
-                <span>
-                  {formatShortUtcDate(activePoint.date)}: {activePoint.visits.toLocaleString()} visits
-                </span>
+              <div className="text-xs font-semibold text-[var(--color-ink-secondary)] bg-[var(--color-surface-soft)] border border-[var(--color-border)] px-3 py-1 rounded-full">
+                {formatShortUtcDate(activePoint.date)}: <span className="text-[var(--color-brand-deep)] font-bold">{activePoint.visits.toLocaleString()} visits</span>
               </div>
             ) : null}
           </div>
 
-          <div className="rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-4">
-            {seriesSlice.length === 0 ? (
-              <div className="min-h-[190px] flex flex-col items-center justify-center gap-2 text-center">
-                <BarChart3 className="w-8 h-8 text-[var(--color-brand-deep)]/60" aria-hidden="true" />
-                <p className="text-xs text-[var(--color-ink-secondary)]">
-                  No daily visit entries recorded in this window yet.
-                </p>
-              </div>
-            ) : (
+          <div className="space-y-2">
+            <div className="w-full overflow-x-auto pb-2">
               <svg
                 viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                className="w-full h-44 select-none"
                 role="img"
-                aria-label={`Daily site visits bar chart over the last ${windowDays} days`}
-                className="w-full h-48 overflow-visible select-none"
+                aria-label={`Bar chart showing daily visits for the last ${windowDays} days`}
               >
-                {[0.25, 0.5, 0.75, 1].map((fraction) => {
-                  const y = padTop + usableHeight * (1 - fraction);
+                {/* Horizontal guide lines */}
+                {[0.25, 0.5, 0.75, 1].map((pct) => {
+                  const y = padTop + usableHeight * (1 - pct);
                   return (
                     <line
-                      key={fraction}
+                      key={pct}
                       x1={padX}
                       x2={chartWidth - padX}
                       y1={y}
                       y2={y}
                       stroke="currentColor"
-                      strokeDasharray="3 4"
-                      className="text-[var(--color-border-strong)]"
+                      strokeOpacity="0.08"
+                      strokeDasharray="3 3"
                     />
                   );
                 })}
-                {seriesSlice.map((point, index) => {
-                  const ratio = point.visits / maxVisits;
-                  const h = Math.max(4, Math.round(ratio * usableHeight));
-                  const x = padX + index * stepX + (stepX - barWidth) / 2;
-                  const y = padTop + usableHeight - h;
-                  const isActive =
-                    hoveredIdx === index ||
-                    (hoveredIdx === null && index === seriesSlice.length - 1);
+
+                {/* Bars */}
+                {seriesSlice.map((pt, idx) => {
+                  const x = padX + idx * stepX + (stepX - barWidth) / 2;
+                  const ratio = maxVisits > 0 ? pt.visits / maxVisits : 0;
+                  const h = Math.max(3, ratio * usableHeight);
+                  const y = padTop + (usableHeight - h);
+                  const isHovered = hoveredIdx === idx;
 
                   return (
                     <g
-                      key={point.date}
+                      key={pt.date}
+                      onMouseEnter={() => setHoveredIdx(idx)}
+                      onMouseLeave={() => setHoveredIdx((prev) => (prev === idx ? null : prev))}
+                      className="cursor-pointer focus:outline-none"
                       tabIndex={0}
-                      role="button"
-                      aria-label={`${formatShortUtcDate(point.date)}: ${point.visits} visits`}
-                      onMouseEnter={() => setHoveredIdx(index)}
-                      onMouseLeave={() => setHoveredIdx(null)}
-                      onFocus={() => setHoveredIdx(index)}
-                      className="outline-none cursor-pointer"
+                      aria-label={`${formatShortUtcDate(pt.date)}: ${pt.visits} visits`}
                     >
-                      <rect
-                        x={x - 3}
-                        y={padTop}
-                        width={barWidth + 6}
-                        height={usableHeight}
-                        fill="transparent"
-                      />
                       <rect
                         x={x}
                         y={y}
                         width={barWidth}
                         height={h}
-                        rx={4}
-                        fill={isActive ? 'var(--color-action)' : 'var(--color-brand-deep)'}
-                        opacity={isActive ? 1 : 0.7}
+                        rx={3}
+                        className={cn(
+                          'transition-colors duration-150',
+                          isHovered
+                            ? 'fill-[var(--color-accent)]'
+                            : 'fill-[var(--color-brand-deep)] hover:fill-[var(--color-brand-deep)]/80'
+                        )}
                       />
                     </g>
                   );
                 })}
               </svg>
-            )}
+            </div>
+
             {seriesSlice.length > 0 ? (
-              <div className="mt-2 flex items-center justify-between text-[11px] font-semibold text-[var(--color-ink-muted)] px-1 tabular-nums">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-[var(--color-ink-muted)] px-1">
                 <span>{formatShortUtcDate(seriesSlice[0].date)}</span>
                 <span>Peak: {maxVisits.toLocaleString()} / day</span>
                 <span>{formatShortUtcDate(seriesSlice[seriesSlice.length - 1].date)}</span>
@@ -354,77 +371,117 @@ export function AdminOverviewClient() {
           </div>
         </div>
 
-        <aside className="xl:col-span-4 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-5 sm:p-6 shadow-xs space-y-4">
-          <div className="space-y-1">
-            <h2 className="type-card-title text-[var(--color-ink)]">Platform Totals</h2>
-            <p className="text-xs text-[var(--color-ink-muted)]">
-              Live totals and direct management shortcuts
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-3">
-              <div className="text-[11px] font-semibold text-[var(--color-ink-muted)]">
-                Total Attempts
+        <aside className="xl:col-span-4 space-y-5">
+          {/* Cloudflare R2 Storage Gauge (API-21) */}
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-5 sm:p-6 shadow-xs space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <h3 className="type-card-title text-[var(--color-ink)] flex items-center gap-2">
+                  <HardDrive className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                  <span>Cloudflare R2 Storage</span>
+                </h3>
+                <p className="text-xs text-[var(--color-ink-muted)]">
+                  Private exam booklet bucket quota
+                </p>
               </div>
-              <div className="font-display font-extrabold text-xl text-[var(--color-ink)] tabular-nums mt-0.5">
-                {(data?.totalQuizAttempts ?? 0).toLocaleString()}
-              </div>
-            </div>
-            <div className="rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-3">
-              <div className="text-[11px] font-semibold text-[var(--color-ink-muted)]">
-                PDF Downloads
-              </div>
-              <div className="font-display font-extrabold text-xl text-[var(--color-ink)] tabular-nums mt-0.5">
-                {(data?.totalPdfDownloads ?? 0).toLocaleString()}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2 pt-1">
-            <Link
-              href="/admin/users"
-              className="flex items-center justify-between gap-2 p-3 rounded-[var(--radius-control)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-soft)] transition-colors text-sm font-semibold text-[var(--color-ink)]"
-            >
-              <span className="inline-flex items-center gap-2">
-                <Users className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
-                <span>Inspect Student Users</span>
+              <span className="text-xs font-bold text-[var(--color-brand-deep)] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                {storagePercentage}% used
               </span>
-              <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)]" aria-hidden="true" />
-            </Link>
-            <Link
-              href="/admin/quizzes"
-              className="flex items-center justify-between gap-2 p-3 rounded-[var(--radius-control)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-soft)] transition-colors text-sm font-semibold text-[var(--color-ink)]"
-            >
-              <span className="inline-flex items-center gap-2">
-                <ClipboardCheck
-                  className="w-4 h-4 text-[var(--color-brand-deep)]"
-                  aria-hidden="true"
+            </div>
+
+            <div className="space-y-2">
+              <div className="w-full bg-[var(--color-surface-soft)] rounded-full h-2.5 overflow-hidden border border-[var(--color-border)]">
+                <div
+                  className="bg-[var(--color-brand-deep)] h-2.5 rounded-full transition-all duration-300"
+                  style={{ width: `${Math.max(3, storagePercentage)}%` }}
                 />
-                <span>Configure Quizzes &amp; Mocks</span>
-              </span>
-              <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)]" aria-hidden="true" />
-            </Link>
-            <Link
-              href="/admin/questions"
-              className="flex items-center justify-between gap-2 p-3 rounded-[var(--radius-control)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-soft)] transition-colors text-sm font-semibold text-[var(--color-ink)]"
-            >
-              <span className="inline-flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
-                <span>Author Bilingual MCQs</span>
-              </span>
-              <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)]" aria-hidden="true" />
-            </Link>
-            <Link
-              href="/admin/pdfs"
-              className="flex items-center justify-between gap-2 p-3 rounded-[var(--radius-control)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-soft)] transition-colors text-sm font-semibold text-[var(--color-ink)]"
-            >
-              <span className="inline-flex items-center gap-2">
-                <FileText className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
-                <span>Upload Watermarked PDFs</span>
-              </span>
-              <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)]" aria-hidden="true" />
-            </Link>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-[var(--color-ink-secondary)]">
+                <span>{formatBytes(usedBytes)} used</span>
+                <span className="text-[var(--color-ink-muted)]">10.0 GB quota</span>
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-[var(--color-border-subtle)] flex items-center justify-between text-[11px] text-[var(--color-ink-muted)]">
+              <span>{storageData?.objectCount ?? 0} private PDF booklets</span>
+              <span>{storageData?.cached ? 'Cached (10m)' : 'Live'}</span>
+            </div>
+          </div>
+
+          {/* Platform Totals & Navigation */}
+          <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="space-y-1">
+              <h2 className="type-card-title text-[var(--color-ink)]">Platform Totals</h2>
+              <p className="text-xs text-[var(--color-ink-muted)]">
+                Live totals and direct management shortcuts
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-3">
+                <div className="text-[11px] font-semibold text-[var(--color-ink-muted)]">
+                  Total Attempts
+                </div>
+                <div className="font-display font-extrabold text-xl text-[var(--color-ink)] tabular-nums mt-0.5">
+                  {(data?.totalQuizAttempts ?? 0).toLocaleString()}
+                </div>
+              </div>
+              <div className="rounded-[var(--radius-control)] border border-[var(--color-border)] bg-[var(--color-surface-soft)] p-3">
+                <div className="text-[11px] font-semibold text-[var(--color-ink-muted)]">
+                  PDF Downloads
+                </div>
+                <div className="font-display font-extrabold text-xl text-[var(--color-ink)] tabular-nums mt-0.5">
+                  {(data?.totalPdfDownloads ?? 0).toLocaleString()}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              <Link
+                href="/admin/users"
+                className="flex items-center justify-between gap-2 p-3 rounded-[var(--radius-control)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-soft)] transition-colors text-sm font-semibold text-[var(--color-ink)]"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Users className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                  <span>Inspect Registered Users</span>
+                </span>
+                <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)]" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/admin/quizzes"
+                className="flex items-center justify-between gap-2 p-3 rounded-[var(--radius-control)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-soft)] transition-colors text-sm font-semibold text-[var(--color-ink)]"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <ClipboardCheck
+                    className="w-4 h-4 text-[var(--color-brand-deep)]"
+                    aria-hidden="true"
+                  />
+                  <span>Configure Quizzes &amp; Mocks</span>
+                </span>
+                <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)]" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/admin/questions"
+                className="flex items-center justify-between gap-2 p-3 rounded-[var(--radius-control)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-soft)] transition-colors text-sm font-semibold text-[var(--color-ink)]"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                  <span>Author Bilingual MCQs</span>
+                </span>
+                <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)]" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/admin/pdfs"
+                className="flex items-center justify-between gap-2 p-3 rounded-[var(--radius-control)] border border-[var(--color-border)] hover:border-[var(--color-border-strong)] hover:bg-[var(--color-surface-soft)] transition-colors text-sm font-semibold text-[var(--color-ink)]"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-[var(--color-brand-deep)]" aria-hidden="true" />
+                  <span>Upload Watermarked PDFs</span>
+                </span>
+                <ArrowRight className="w-4 h-4 text-[var(--color-ink-muted)]" aria-hidden="true" />
+              </Link>
+            </div>
           </div>
         </aside>
       </div>

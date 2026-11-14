@@ -11,7 +11,7 @@ import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'My Quiz Attempts',
-  description: 'Personal student dashboard displaying your saved quiz and mock exam attempts.',
+  description: 'Personal candidate dashboard displaying your saved quiz and mock exam attempts.',
   path: '/account/attempts',
   index: false,
   follow: false
@@ -29,7 +29,7 @@ export default async function AccountAttemptsPage() {
         <div className="space-y-3">
           <Breadcrumbs
             items={[
-              { label: 'Student Profile', href: '/account' },
+              { label: 'User Profile', href: '/account' },
               { label: 'My Quiz Attempts' }
             ]}
             currentPath="/account/attempts"
@@ -38,7 +38,7 @@ export default async function AccountAttemptsPage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="space-y-1">
               <span className="text-xs font-semibold text-[var(--color-brand-deep)]">
-                Private Student History
+                Personal Exam History
               </span>
               <h1 id="account-attempts-heading" className="type-page-title text-[var(--color-ink)]">
                 My Quiz Attempts
@@ -66,4 +66,3 @@ export default async function AccountAttemptsPage() {
     </div>
   );
 }
-

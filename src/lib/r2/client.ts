@@ -3,6 +3,8 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
+  type ListObjectsV2CommandOutput,
   PutObjectCommand,
   S3Client
 } from '@aws-sdk/client-s3';
@@ -199,5 +201,61 @@ export async function deletePdfObject(options: {
       Key: options.fileKey
     })
   );
+}
+
+export const R2_FREE_ALLOWANCE_BYTES = 10 * 1024 * 1024 * 1024; // 10 GB Cloudflare R2 standard allowance
+
+export async function measureR2Storage(config?: R2Config): Promise<{
+  usedBytes: number;
+  allowanceBytes: number;
+  objectCount: number;
+  checkedAt: string;
+  largest: Array<{ key: string; sizeBytes: number; lastModified?: string }>;
+}> {
+  const r2Config = config ?? requireR2Config();
+  const client = createR2S3Client(r2Config);
+
+  let continuationToken: string | undefined = undefined;
+  let usedBytes = 0;
+  let objectCount = 0;
+  const objectsList: Array<{ key: string; sizeBytes: number; lastModified?: string }> = [];
+
+  do {
+    const response: ListObjectsV2CommandOutput = await client.send(
+      new ListObjectsV2Command({
+        Bucket: r2Config.bucketName,
+        ContinuationToken: continuationToken,
+        MaxKeys: 1000
+      })
+    );
+
+    const items = response.Contents ?? [];
+    for (const item of items) {
+      const size = item.Size ?? 0;
+      usedBytes += size;
+      objectCount += 1;
+      if (item.Key) {
+        objectsList.push({
+          key: item.Key,
+          sizeBytes: size,
+          lastModified: item.LastModified?.toISOString()
+        });
+      }
+    }
+
+    continuationToken = response.NextContinuationToken;
+  } while (continuationToken);
+
+  // Sort objects descending by size to return top largest files
+  objectsList.sort((a, b) => b.sizeBytes - a.sizeBytes);
+  const largest = objectsList.slice(0, 10);
+
+  return {
+    usedBytes,
+    allowanceBytes: R2_FREE_ALLOWANCE_BYTES,
+    objectCount,
+    checkedAt: new Date().toISOString(),
+    largest
+  };
 }
 

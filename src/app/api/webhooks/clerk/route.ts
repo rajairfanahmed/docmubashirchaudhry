@@ -46,6 +46,33 @@ export async function POST(req: Request): Promise<Response> {
     return new Response('Invalid webhook signature', { status: 400 });
   }
 
+  // Idempotency: Deduplicate events via webhook_events (DATA-14)
+  const client = getOptionalAdminClient();
+  if (client && svixId) {
+    try {
+      const { data: existingEvent } = await client
+        .from('webhook_events')
+        .select('id')
+        .eq('id', svixId)
+        .maybeSingle();
+
+      if (existingEvent) {
+        return new Response(JSON.stringify({ data: { ok: true, deduplicated: true } }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      await client.from('webhook_events').insert({
+        id: svixId,
+        provider: 'clerk',
+        received_at: new Date().toISOString()
+      });
+    } catch {
+      // Non-blocking deduplication fallback
+    }
+  }
+
   if (event.type === 'user.created' || event.type === 'user.updated') {
     const user = event.data;
     const primaryId = user.primary_email_address_id;
@@ -77,13 +104,43 @@ export async function POST(req: Request): Promise<Response> {
         displayName,
         role
       });
+
+      // On new user creation, create an admin notification (DATA-10)
+      if (event.type === 'user.created' && client) {
+        try {
+          await client.from('admin_notifications').insert({
+            type: 'new_user',
+            user_id: user.id,
+            title: 'New User Registered',
+            message: `${displayName} (${email}) has created an account.`,
+            email_status: 'pending'
+          });
+        } catch {
+          // Non-blocking notification insert
+        }
+      }
     }
   } else if (event.type === 'user.deleted') {
-    const client = getOptionalAdminClient();
     if (client && event.data.id) {
-      await client.from('profiles').delete().eq('clerk_user_id', event.data.id);
+      try {
+        // Anonymize rather than hard-delete so historical attempts remain intact (DEC-024)
+        await client
+          .from('profiles')
+          .update({
+            email: `deleted-${event.data.id.slice(0, 8)}@anon.local`,
+            display_name: 'Deleted user',
+            status: 'deleted',
+            last_active_at: new Date().toISOString()
+          })
+          .or(`clerk_user_id.eq.${event.data.id},id.eq.${event.data.id}`);
+      } catch {
+        // Non-blocking profile deletion fallback
+      }
     }
   }
 
-  return new Response('ok', { status: 200 });
+  return new Response(JSON.stringify({ data: { ok: true } }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }

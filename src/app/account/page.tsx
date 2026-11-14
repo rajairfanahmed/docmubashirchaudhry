@@ -8,8 +8,8 @@ import { UserProfileClient } from '@/components/account/UserProfileClient';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export const metadata: Metadata = buildPageMetadata({
-  title: 'My Student Profile & Account',
-  description: 'Manage your student profile, exam metrics, attempt history, and downloaded materials.',
+  title: 'User Profile & Account Settings',
+  description: 'Manage your user profile, exam metrics, attempt history, and downloaded materials.',
   path: '/account',
   index: false,
   follow: false
@@ -25,13 +25,13 @@ export default async function AccountPage() {
     <div className="flex flex-col">
       <SectionBand surface="hero" density="compact" className="py-8">
         <div className="space-y-3">
-          <Breadcrumbs items={[{ label: 'Student Profile' }]} currentPath="/account" />
+          <Breadcrumbs items={[{ label: 'User Profile' }]} currentPath="/account" />
           <div className="space-y-1">
             <span className="text-xs font-semibold text-[var(--color-brand-deep)]">
-              Student Dashboard
+              User Dashboard
             </span>
             <h1 className="type-page-title text-[var(--color-ink)]">
-              My Student Account
+              My Account
             </h1>
             <p className="type-supporting text-[var(--color-ink-secondary)] max-w-2xl">
               Track your exam prep progress, access personal mock attempts, manage account settings, and review downloaded past papers.
@@ -46,4 +46,3 @@ export default async function AccountPage() {
     </div>
   );
 }
-

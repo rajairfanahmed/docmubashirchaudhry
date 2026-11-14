@@ -437,6 +437,35 @@ export const v3Api = {
   },
 
   me: {
+    getProfile: (signal?: AbortSignal) =>
+      requestJson<{
+        data: {
+          id: string;
+          name: string | null;
+          email: string;
+          avatarUrl: string | null;
+          provider: string;
+          status: string;
+          isAdmin: boolean;
+          createdAt: string;
+        };
+      }>('/api/me', { signal }),
+    updateProfile: (name: string) =>
+      requestJson<{
+        data: {
+          id: string;
+          name: string;
+          email: string;
+          provider: string;
+          status: string;
+          isAdmin: boolean;
+        };
+      }>('/api/me', { method: 'PATCH', body: { name } }),
+    deleteAccount: () =>
+      requestJson<void>('/api/me', {
+        method: 'DELETE',
+        body: { confirm: 'DELETE' }
+      }),
     listAttempts: (query?: { page?: number; pageSize?: number }, signal?: AbortSignal) =>
       requestJson<UserAttemptsResponse>(
         `/api/me/attempts${buildQueryString(query)}`,
@@ -447,6 +476,21 @@ export const v3Api = {
         `/api/me/downloads${buildQueryString(query)}`,
         { signal }
       )
+  },
+
+  questionReports: {
+    create: (body: { questionId: string; message: string }) =>
+      requestJson<{
+        data: {
+          id: string;
+          questionId: string;
+          status: string;
+          createdAt: string;
+        };
+      }>('/api/question-reports', {
+        method: 'POST',
+        body
+      })
   },
 
   analytics: {
@@ -553,6 +597,127 @@ export const v3Api = {
           body,
           timeoutMs: 30_000
         })
+    },
+    storage: {
+      get: (signal?: AbortSignal) =>
+        requestJson<{
+          data: {
+            usedBytes: number;
+            allowanceBytes: number;
+            objectCount: number;
+            checkedAt: string;
+            cached: boolean;
+            largest?: Array<{ key: string; sizeBytes: number; lastModified?: string }>;
+          };
+        }>('/api/admin/storage', { signal })
+    },
+    users: {
+      list: (
+        query?: { page?: number; pageSize?: number; q?: string; status?: string; sort?: string },
+        signal?: AbortSignal
+      ) =>
+        requestJson<{
+          data: Array<{
+            id: string;
+            clerkUserId: string;
+            email: string;
+            displayName: string | null;
+            authProvider: string;
+            status: string;
+            blockedReason: string | null;
+            role: string;
+            isAdmin: boolean;
+            totalQuizzesAttempted: number;
+            averageScorePercentage: number;
+            totalPdfDownloads: number;
+            createdAt: string;
+            lastActiveAt: string;
+          }>;
+          meta: { page: number; pageSize: number; total: number; totalPages: number };
+        }>(`/api/admin/users${buildQueryString(query as Record<string, string | number | undefined>)}`, {
+          signal
+        }),
+      get: (id: string, signal?: AbortSignal) =>
+        requestJson<{ data: { profile: unknown; attempts: unknown[]; downloads: unknown[] } }>(
+          `/api/admin/users/${encodeURIComponent(id)}`,
+          { signal }
+        ),
+      updateStatus: (id: string, body: { status: 'active' | 'blocked'; reason?: string }) =>
+        requestJson<{ data: { id: string; status: string; blockedReason: string | null } }>(
+          `/api/admin/users/${encodeURIComponent(id)}/status`,
+          { method: 'PATCH', body }
+        )
+    },
+    notifications: {
+      list: (
+        query?: { page?: number; pageSize?: number; unreadOnly?: string; type?: string },
+        signal?: AbortSignal
+      ) =>
+        requestJson<{
+          data: Array<{
+            id: string;
+            type: string;
+            title: string;
+            message: string;
+            isRead: boolean;
+            createdAt: string;
+          }>;
+          meta: { page: number; pageSize: number; total: number; totalPages: number; unreadCount: number };
+        }>(`/api/admin/notifications${buildQueryString(query as Record<string, string | number | undefined>)}`, {
+          signal
+        }),
+      markRead: (body: { all: true } | { ids: string[] }) =>
+        requestJson<{ data: { ok: boolean; markedAt: string } }>(
+          '/api/admin/notifications/read',
+          { method: 'POST', body }
+        )
+    },
+    activity: {
+      list: (
+        query?: { page?: number; pageSize?: number; adminId?: string; action?: string },
+        signal?: AbortSignal
+      ) =>
+        requestJson<{
+          data: Array<{
+            id: string;
+            adminId: string;
+            adminEmail: string;
+            action: string;
+            entityType: string;
+            entityId: string | null;
+            details: Record<string, unknown> | null;
+            createdAt: string;
+          }>;
+          meta: { page: number; pageSize: number; total: number; totalPages: number };
+        }>(`/api/admin/activity${buildQueryString(query as Record<string, string | number | undefined>)}`, {
+          signal
+        })
+    },
+    reports: {
+      list: (
+        query?: { page?: number; pageSize?: number; status?: string },
+        signal?: AbortSignal
+      ) =>
+        requestJson<{
+          data: Array<{
+            id: string;
+            questionId: string;
+            reportedBy: string;
+            reporterEmail: string;
+            message: string;
+            status: string;
+            adminNote: string | null;
+            createdAt: string;
+          }>;
+          meta: { page: number; pageSize: number; total: number; totalPages: number };
+        }>(`/api/admin/reports${buildQueryString(query as Record<string, string | number | undefined>)}`, {
+          signal
+        }),
+      update: (id: string, body: { status: string; adminNote?: string }) =>
+        requestJson<{ data: { id: string; status: string; adminNote: string | null } }>(
+          `/api/admin/reports/${encodeURIComponent(id)}`,
+          { method: 'PATCH', body }
+        )
     }
   }
 };

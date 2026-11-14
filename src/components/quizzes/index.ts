@@ -15,3 +15,7 @@ export {
 } from './ConfirmSubmitModal';
 export { QuizResultsPanel, type QuizResultsPanelProps } from './QuizResultsPanel';
 export { QuizSessionRunner, type QuizSessionRunnerProps } from './QuizSessionRunner';
+export {
+  ReportQuestionModal,
+  type ReportQuestionModalProps
+} from './ReportQuestionModal';
