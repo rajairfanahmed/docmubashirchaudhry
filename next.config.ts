@@ -2,11 +2,13 @@ import type { NextConfig } from "next";
 
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
+  "worker-src 'self' blob:",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: https://flagcdn.com https://upload.wikimedia.org https://img.logo.dev",
+  "img-src 'self' data: https://flagcdn.com https://upload.wikimedia.org https://img.logo.dev https://img.clerk.com",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co https://*.r2.cloudflarestorage.com",
+  "connect-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://*.supabase.co https://*.r2.cloudflarestorage.com",
+  "frame-src 'self' https://*.clerk.accounts.dev https://*.clerk.com https://challenges.cloudflare.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
@@ -40,6 +42,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "img.logo.dev"
+      },
+      {
+        protocol: "https",
+        hostname: "img.clerk.com"
       }
     ]
   },
