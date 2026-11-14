@@ -13,6 +13,8 @@ import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 import { SUBJECT_PASTEL_TOKENS } from '@/lib/tokens/visual-tokens';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = buildPageMetadata({
   title: 'MCQ Practice Launcher & Subject Filters',
   description:

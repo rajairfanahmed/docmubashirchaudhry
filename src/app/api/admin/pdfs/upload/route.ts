@@ -89,15 +89,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .insert({
         slug,
         title,
-        description,
+        description: description || '',
         subject,
         exam_tag: examTag,
-        tags,
         file_key: fileKey,
-        file_size: fileBuffer.length,
+        file_bytes: fileBuffer.length,
         sha256,
-        watermark_confirmed: true,
-        is_published: isPublished
+        is_published: isPublished,
+        uploaded_by: auth.user.id
       })
       .select('*')
       .single();
@@ -114,22 +113,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           { status: 409 }
         );
       }
+      console.error('[upload] Supabase insert error:', error);
       throw error;
     }
 
-    // Record audit log
-    await admin.from('activity_audit_logs').insert({
-      actor_id: auth.user.id,
-      actor_email: auth.email,
-      action: 'pdf.upload_direct',
-      entity_type: 'pdf_resource',
-      entity_id: (data as PdfResourceRow).id,
-      metadata: { slug, title, fileKey, fileSize: fileBuffer.length }
-    });
+    // Record audit log safely without failing upload
+    try {
+      await admin.from('activity_audit_logs').insert({
+        actor_id: auth.user.id,
+        actor_email: auth.email,
+        action: 'pdf.upload_direct',
+        entity_type: 'pdf_resource',
+        entity_id: (data as any)?.id,
+        metadata: { slug, title, fileKey, fileSize: fileBuffer.length }
+      });
+    } catch {
+      // Non-blocking audit log
+    }
+
+    const item: PdfResourceRow = {
+      ...(data as any),
+      file_size: (data as any)?.file_bytes ?? fileBuffer.length,
+      tags
+    };
 
     return auth.applyAuthCookies(
       NextResponse.json(
-        { item: data as PdfResourceRow },
+        { item },
         { status: 201, headers: { 'Cache-Control': 'no-store' } }
       )
     );

@@ -22,6 +22,8 @@ import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = buildPageMetadata({
   title: 'PPSC Recruitment Posts & Solved PDF Booklets',
   description:

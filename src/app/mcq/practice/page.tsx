@@ -12,6 +12,8 @@ import { getServerDatasetVersion } from '@/lib/data/server-manifest';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildQuizResourceSchema } from '@/lib/seo/structured-data';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = buildPageMetadata({
   title: 'Interactive MCQ Practice Session',
   description:

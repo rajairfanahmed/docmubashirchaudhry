@@ -29,10 +29,6 @@ export async function PATCH(
     if (parsed.data.description !== undefined) patch.description = parsed.data.description;
     if (parsed.data.subject !== undefined) patch.subject = parsed.data.subject;
     if (parsed.data.examTag !== undefined) patch.exam_tag = parsed.data.examTag;
-    if (parsed.data.tags !== undefined) patch.tags = parsed.data.tags;
-    if (parsed.data.watermarkConfirmed !== undefined) {
-      patch.watermark_confirmed = parsed.data.watermarkConfirmed;
-    }
     if (parsed.data.isPublished !== undefined) patch.is_published = parsed.data.isPublished;
 
     const admin = createSupabaseAdminClient();
@@ -52,9 +48,15 @@ export async function PATCH(
       });
     }
 
+    const item = {
+      ...data,
+      file_size: (data as any).file_bytes ?? (data as any).file_size ?? 0,
+      tags: (data as any).tags ?? []
+    };
+
     return auth.applyAuthCookies(
       NextResponse.json(
-        { item: data },
+        { item },
         { status: 200, headers: { 'Cache-Control': 'no-store' } }
       )
     );

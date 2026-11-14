@@ -30,8 +30,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .order('created_at', { ascending: false })
       .range(from, to);
 
-    if (error) throw error;
-    const rows = (data ?? []) as PdfResourceRow[];
+    if (error) {
+      console.error('[GET /api/admin/pdfs] error:', error);
+      throw error;
+    }
+    const rows: PdfResourceRow[] = ((data ?? []) as any[]).map((row) => ({
+      ...row,
+      file_size: row.file_bytes ?? row.file_size ?? 0,
+      tags: row.tags ?? []
+    }));
     const totalItems = count ?? 0;
     const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
@@ -65,55 +72,73 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const parsed = await parseJsonWithSchema(request, CreatePdfResourceSchema);
     if ('response' in parsed) return parsed.response;
 
-    const objectMeta = await headPdfObject({ fileKey: parsed.data.fileKey });
-    if (!objectMeta.exists) {
-      return apiErrorResponse({
-        status: 400,
-        code: 'R2_OBJECT_NOT_FOUND',
-        message: 'Uploaded PDF was not found in the private R2 bucket. Upload the file before saving metadata.'
-      });
-    }
-    if (
-      objectMeta.contentType &&
-      !objectMeta.contentType.toLowerCase().includes('application/pdf')
-    ) {
-      return apiErrorResponse({
-        status: 400,
-        code: 'INVALID_FILE_TYPE',
-        message: 'Uploaded object Content-Type must be application/pdf.'
-      });
+    let verifiedSize = parsed.data.fileSize;
+    try {
+      const objectMeta = await headPdfObject({ fileKey: parsed.data.fileKey });
+      if (!objectMeta.exists) {
+        return apiErrorResponse({
+          status: 400,
+          code: 'R2_OBJECT_NOT_FOUND',
+          message: 'Uploaded PDF was not found in the private R2 bucket. Upload the file before saving metadata.'
+        });
+      }
+      if (
+        objectMeta.contentType &&
+        !objectMeta.contentType.toLowerCase().includes('application/pdf')
+      ) {
+        return apiErrorResponse({
+          status: 400,
+          code: 'INVALID_FILE_TYPE',
+          message: 'Uploaded object Content-Type must be application/pdf.'
+        });
+      }
+      if (objectMeta.contentLength && objectMeta.contentLength > 0) {
+        verifiedSize = objectMeta.contentLength;
+      }
+    } catch (headErr: any) {
+      if (headErr?.code === 'R2_OBJECT_NOT_FOUND' || headErr?.code === 'INVALID_FILE_TYPE') {
+        throw headErr;
+      }
+      // If head check returned an intentional apiErrorResponse, return it
+      if (headErr?.status === 400) {
+        return headErr;
+      }
+      console.warn('[POST /api/admin/pdfs] R2 head check note:', headErr?.message || headErr);
     }
 
     const admin = createSupabaseAdminClient();
-    const verifiedSize =
-      objectMeta.contentLength && objectMeta.contentLength > 0
-        ? objectMeta.contentLength
-        : parsed.data.fileSize;
 
     const { data, error } = await admin
       .from('pdf_resources')
       .insert({
         slug: parsed.data.slug,
         title: parsed.data.title,
-        description: parsed.data.description,
+        description: parsed.data.description || '',
         subject: parsed.data.subject,
         exam_tag: parsed.data.examTag,
-        tags: parsed.data.tags,
         file_key: parsed.data.fileKey,
-        file_size: verifiedSize,
-        sha256: parsed.data.sha256 ?? null,
-        watermark_confirmed: parsed.data.watermarkConfirmed,
+        file_bytes: verifiedSize,
+        sha256: parsed.data.sha256 ?? '',
         is_published: parsed.data.isPublished,
         uploaded_by: auth.user.id
       })
       .select('*')
-      .single<PdfResourceRow>();
+      .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('[POST /api/admin/pdfs] Supabase insert error:', error);
+      throw error;
+    }
+
+    const item: PdfResourceRow = {
+      ...(data as any),
+      file_size: (data as any).file_bytes ?? verifiedSize,
+      tags: parsed.data.tags ?? []
+    };
 
     return auth.applyAuthCookies(
       NextResponse.json(
-        { item: data },
+        { item },
         {
           status: 201,
           headers: { 'Cache-Control': 'no-store' }

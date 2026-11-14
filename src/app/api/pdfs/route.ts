@@ -61,7 +61,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     let query = admin
       .from('pdf_resources')
       .select(
-        'id, slug, title, description, subject, exam_tag, tags, file_size, download_count, created_at',
+        'id, slug, title, description, subject, exam_tag, file_bytes, download_count, created_at',
         { count: 'exact' }
       )
       .eq('is_published', true);
@@ -85,23 +85,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         : query.order('created_at', { ascending: false });
 
     const { data, count, error } = await query.range(from, to);
-    if (error) throw error;
+    if (error) {
+      console.error('[GET /api/pdfs] query error:', error);
+      throw error;
+    }
 
-    const rows = (data ?? []) as Array<
-      Pick<
-        PdfResourceRow,
-        | 'id'
-        | 'slug'
-        | 'title'
-        | 'description'
-        | 'subject'
-        | 'exam_tag'
-        | 'tags'
-        | 'file_size'
-        | 'download_count'
-        | 'created_at'
-      >
-    >;
+    const rows = (data ?? []) as any[];
     const totalItems = count ?? 0;
     const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
 
@@ -114,9 +103,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           description: row.description,
           subject: row.subject,
           examTag: row.exam_tag,
-          tags: row.tags,
-          fileSize: row.file_size,
-          downloadCount: row.download_count,
+          tags: row.tags ?? [],
+          fileSize: row.file_bytes ?? row.file_size ?? 0,
+          downloadCount: row.download_count ?? 0,
           createdAt: row.created_at,
           requiresAuth: true
         })),

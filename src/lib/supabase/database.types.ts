@@ -42,11 +42,15 @@ export interface PdfResourceRow {
   description: string;
   subject: string;
   exam_tag: string;
-  tags: string[];
+  year?: number;
+  language?: string;
+  page_count?: number;
+  file_bytes?: number;
+  file_size?: number;
+  tags?: string[];
   file_key: string;
-  file_size: number;
   sha256: string | null;
-  watermark_confirmed: boolean;
+  watermark_confirmed?: boolean;
   is_published: boolean;
   download_count: number;
   uploaded_by: string | null;

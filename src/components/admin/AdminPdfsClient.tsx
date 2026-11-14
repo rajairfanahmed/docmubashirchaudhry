@@ -721,7 +721,7 @@ export function AdminPdfsClient() {
                           {pdf.subject} - {pdf.exam_tag}
                         </td>
                         <td className="py-3.5 px-4 text-xs text-[var(--color-ink-secondary)] tabular-nums">
-                          {formatBytes(pdf.file_size)}
+                          {formatBytes(pdf.file_size ?? (pdf as any).file_bytes ?? 0)}
                         </td>
                         <td className="py-3.5 px-4 font-bold text-[var(--color-brand-deep)] tabular-nums">
                           {pdf.download_count}

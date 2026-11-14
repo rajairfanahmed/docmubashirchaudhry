@@ -37,10 +37,13 @@ export async function GET(
     const lookupColumn = isUuid(rawIdOrSlug) ? 'id' : 'slug';
     const { data: pdf, error: pdfError } = await admin
       .from('pdf_resources')
-      .select('id, slug, title, file_key, file_size, is_published')
+      .select('id, slug, title, file_key, file_bytes, is_published')
       .eq(lookupColumn, rawIdOrSlug)
       .maybeSingle<
-        Pick<PdfResourceRow, 'id' | 'slug' | 'title' | 'file_key' | 'file_size' | 'is_published'>
+        Pick<PdfResourceRow, 'id' | 'slug' | 'title' | 'file_key' | 'is_published'> & {
+          file_bytes?: number;
+          file_size?: number;
+        }
       >();
 
     if (pdfError) throw pdfError;
@@ -71,7 +74,7 @@ export async function GET(
           {
             pdfId: pdf.id,
             title: pdf.title,
-            fileSize: pdf.file_size,
+            fileSize: pdf.file_bytes ?? pdf.file_size ?? 0,
             downloadUrl: signed.downloadUrl,
             expiresInSeconds: signed.expiresInSeconds,
             expiresAt: signed.expiresAt

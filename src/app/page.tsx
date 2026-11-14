@@ -28,6 +28,8 @@ import { createSupabaseAdminClient } from '@/lib/supabase/server';
 
 export const revalidate = 60;
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = buildPageMetadata({
   absoluteTitle: `${SITE_NAME} | Free Competitive Exam Preparation Portal`,
   description:
@@ -117,7 +119,7 @@ async function getSafeDbCounts(): Promise<PortalLiveMetrics> {
       description: p.description,
       subject: p.subject,
       examTag: p.exam_tag,
-      fileSize: p.file_size,
+      fileSize: (p as any).file_bytes ?? p.file_size ?? 0,
       downloadCount: p.download_count,
       isPublished: p.is_published
     }));

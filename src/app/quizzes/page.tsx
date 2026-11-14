@@ -13,7 +13,7 @@ import type { PaginationMeta, QuizSummaryItem } from '@/lib/v3/types';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'Quizzes & Full-Length Mock Exams',

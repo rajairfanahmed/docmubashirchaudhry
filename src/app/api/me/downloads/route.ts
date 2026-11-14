@@ -36,16 +36,16 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const pdfMap = new Map<
       string,
-      Pick<PdfResourceRow, 'id' | 'slug' | 'title' | 'subject' | 'exam_tag' | 'file_size'>
+      Pick<PdfResourceRow, 'id' | 'slug' | 'title' | 'subject' | 'exam_tag'> & { file_bytes?: number; file_size?: number }
     >();
     if (pdfIds.length > 0) {
       const { data: pdfs, error: pError } = await admin
         .from('pdf_resources')
-        .select('id, slug, title, subject, exam_tag, file_size')
+        .select('id, slug, title, subject, exam_tag, file_bytes')
         .in('id', pdfIds);
       if (pError) throw pError;
       for (const p of (pdfs ?? []) as Array<
-        Pick<PdfResourceRow, 'id' | 'slug' | 'title' | 'subject' | 'exam_tag' | 'file_size'>
+        Pick<PdfResourceRow, 'id' | 'slug' | 'title' | 'subject' | 'exam_tag'> & { file_bytes?: number; file_size?: number }
       >) {
         pdfMap.set(p.id, p);
       }
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
               title: pdf?.title ?? 'Study PDF',
               subject: pdf?.subject ?? null,
               examTag: pdf?.exam_tag ?? null,
-              fileSize: pdf?.file_size ?? null,
+              fileSize: pdf?.file_bytes ?? pdf?.file_size ?? null,
               downloadedAt: log.downloaded_at
             };
           }),

@@ -16,6 +16,8 @@ import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildLearningResourceSchema } from '@/lib/seo/structured-data';
 import { SUBJECT_PASTEL_TOKENS } from '@/lib/tokens/visual-tokens';
 
+export const revalidate = 0;
+
 export async function generateStaticParams() {
   const repo = getContentRepository();
   const [subjects, topics] = await Promise.all([repo.getSubjects(), repo.getTopics()]);

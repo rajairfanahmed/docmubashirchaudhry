@@ -159,10 +159,10 @@ export function aggregateQuizAnalytics(options: {
 }
 
 export function aggregatePdfAnalytics(options: {
-  pdfs: readonly Pick<
+  pdfs: readonly (Pick<
     PdfResourceRow,
-    'id' | 'slug' | 'title' | 'subject' | 'exam_tag' | 'file_size' | 'download_count' | 'is_published'
-  >[];
+    'id' | 'slug' | 'title' | 'subject' | 'exam_tag' | 'download_count' | 'is_published'
+  > & { file_bytes?: number; file_size?: number })[];
   logs: readonly Pick<PdfAccessLogRow, 'user_id' | 'pdf_id' | 'downloaded_at'>[];
   profiles: readonly Pick<ProfileRow, 'id' | 'email' | 'display_name'>[];
 }): {
@@ -212,7 +212,7 @@ export function aggregatePdfAnalytics(options: {
       title: pdf.title,
       subject: pdf.subject,
       examTag: pdf.exam_tag,
-      fileSize: pdf.file_size,
+      fileSize: pdf.file_bytes ?? pdf.file_size ?? 0,
       isPublished: pdf.is_published,
       downloadCount: pdf.download_count,
       loggedDownloads: loggedByPdf.get(pdf.id) ?? 0

@@ -15,7 +15,7 @@ export async function GET(): Promise<NextResponse> {
     const [pdfsRes, logsRes, profilesRes] = await Promise.all([
       admin
         .from('pdf_resources')
-        .select('id, slug, title, subject, exam_tag, file_size, download_count, is_published')
+        .select('id, slug, title, subject, exam_tag, file_bytes, download_count, is_published')
         .order('download_count', { ascending: false })
         .limit(1000),
       admin
@@ -26,12 +26,26 @@ export async function GET(): Promise<NextResponse> {
       admin.from('profiles').select('id, email, display_name').limit(5000)
     ]);
 
-    if (pdfsRes.error) throw pdfsRes.error;
-    if (logsRes.error) throw logsRes.error;
-    if (profilesRes.error) throw profilesRes.error;
+    if (pdfsRes.error) {
+      console.error('[analytics/pdfs] pdf_resources query error:', pdfsRes.error);
+      throw pdfsRes.error;
+    }
+    if (logsRes.error) {
+      console.error('[analytics/pdfs] pdf_access_log query error:', logsRes.error);
+      throw logsRes.error;
+    }
+    if (profilesRes.error) {
+      console.error('[analytics/pdfs] profiles query error:', profilesRes.error);
+      throw profilesRes.error;
+    }
+
+    const pdfList = ((pdfsRes.data ?? []) as any[]).map((p) => ({
+      ...p,
+      file_size: p.file_bytes ?? 0
+    }));
 
     const aggregated = aggregatePdfAnalytics({
-      pdfs: (pdfsRes.data ?? []) as Array<
+      pdfs: pdfList as Array<
         Pick<
           PdfResourceRow,
           | 'id'

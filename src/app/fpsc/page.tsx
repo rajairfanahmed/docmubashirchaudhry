@@ -11,6 +11,8 @@ import { parseSecretSupabaseConfig } from '@/lib/env';
 import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const repo = getContentRepository();
   const [fpscExam, pdfs, questions] = await Promise.all([

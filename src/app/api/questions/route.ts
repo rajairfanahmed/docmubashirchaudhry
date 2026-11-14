@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { getContentRepository } from '@/lib/data';
 import { getLiveDatabaseQuestions } from '@/lib/data/live-questions';
 
+export const dynamic = 'force-dynamic';
+
 const OptionalPositiveIntSchema = z.preprocess((val) => {
   if (val === null || val === undefined || val === '') return undefined;
   const parsed = Number(val);

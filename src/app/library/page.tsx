@@ -10,6 +10,8 @@ import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = buildPageMetadata({
   title: 'Solved Exam PDFs & Watermarked Study Booklets Library',
   description:
