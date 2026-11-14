@@ -22,6 +22,9 @@ export default function SignUpPage() {
       <SectionBand surface="muted" size="reading" density="standard">
         <div className="flex flex-col items-center justify-center py-6 sm:py-10">
           <SignUp
+            path="/sign-up"
+            routing="path"
+            signInUrl="/sign-in"
             fallbackRedirectUrl="/post-auth"
             signInFallbackRedirectUrl="/post-auth"
           />

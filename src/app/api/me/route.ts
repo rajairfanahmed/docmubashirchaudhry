@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { clerkClient } from '@clerk/nextjs/server';
 import { requireAuthenticatedUser } from '@/lib/auth/guards';
-import { getOptionalAdminClient } from '@/lib/supabase/admin';
+import { getOptionalAdminClient, syncClerkUserProfile } from '@/lib/supabase/admin';
 import type { ProfileRow } from '@/lib/supabase/database.types';
 import { apiErrorResponse, handleRouteError, parseJsonWithSchema } from '@/lib/v3/http';
 
@@ -32,11 +32,30 @@ export async function GET(): Promise<NextResponse> {
     let avatarUrl: string | null = null;
 
     if (admin) {
-      const { data } = await admin
+      let { data } = await admin
         .from('profiles')
         .select('*')
         .or(`clerk_user_id.eq.${auth.user.id},id.eq.${auth.user.id}`)
         .maybeSingle<ProfileRow>();
+
+      if (!data && auth.email) {
+        try {
+          await syncClerkUserProfile({
+            clerkUserId: auth.user.id,
+            email: auth.email,
+            displayName: auth.displayName,
+            role: auth.isAdmin ? 'admin' : 'user'
+          });
+          const res = await admin
+            .from('profiles')
+            .select('*')
+            .or(`clerk_user_id.eq.${auth.user.id},id.eq.${auth.user.id}`)
+            .maybeSingle<ProfileRow>();
+          data = res.data;
+        } catch {
+          // Fallback if sync encounters network error
+        }
+      }
 
       if (data) {
         if (data.status) profileStatus = data.status;

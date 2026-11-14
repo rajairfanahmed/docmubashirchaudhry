@@ -75,14 +75,25 @@ export async function getOptionalSessionUser(): Promise<{
       ? 'email'
       : 'unknown';
 
+    const isAdmin =
+      (clerkUser?.publicMetadata as { role?: string } | undefined)?.role === 'admin' ||
+      isAdminEmail(email);
+
+    if (userId && email) {
+      void syncClerkUserProfile({
+        clerkUserId: userId,
+        email,
+        displayName,
+        role: isAdmin ? 'admin' : 'user'
+      }).catch(() => {});
+    }
+
     return {
       user: { id: userId },
       email,
       displayName: displayName || null,
       authProvider,
-      isAdmin:
-        (clerkUser?.publicMetadata as { role?: string } | undefined)?.role === 'admin' ||
-        isAdminEmail(email),
+      isAdmin,
       applyAuthCookies: <T extends NextResponse>(res: T) => res
     };
   } catch {
