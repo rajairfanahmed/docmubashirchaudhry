@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import {
+  ArrowRight,
+  ChevronDown,
   ClipboardCheck,
   FileText,
   Globe,
@@ -52,13 +54,41 @@ export function Navbar() {
     [clerk]
   );
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isExamsDropdownOpen, setIsExamsDropdownOpen] = useState(false);
+  const [isMobileExamsOpen, setIsMobileExamsOpen] = useState(true);
+  const examsDropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mobileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const mobileDrawerRef = useRef<HTMLElement>(null);
   const mobileCloseBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setIsExamsDropdownOpen(false);
   }, [pathname]);
+
+  const handleExamsMouseEnter = () => {
+    if (examsDropdownTimeoutRef.current) {
+      clearTimeout(examsDropdownTimeoutRef.current);
+      examsDropdownTimeoutRef.current = null;
+    }
+    setIsExamsDropdownOpen(true);
+  };
+
+  const handleExamsMouseLeave = () => {
+    if (examsDropdownTimeoutRef.current) {
+      clearTimeout(examsDropdownTimeoutRef.current);
+    }
+    examsDropdownTimeoutRef.current = setTimeout(() => {
+      setIsExamsDropdownOpen(false);
+    }, 180);
+  };
+
+  const isExamsActive =
+    pathname.startsWith('/ppsc') ||
+    pathname.startsWith('/fpsc') ||
+    pathname.startsWith('/css-pms') ||
+    pathname.startsWith('/nts') ||
+    pathname.startsWith('/exams');
 
   useEffect(() => {
     if (!isMobileMenuOpen) return;
@@ -109,7 +139,7 @@ export function Navbar() {
     };
   }, [isMobileMenuOpen]);
 
-  const navLinks = [
+  const primaryNavLinks = [
     {
       label: 'Home',
       href: '/',
@@ -123,18 +153,6 @@ export function Navbar() {
       isActive: pathname.startsWith('/geography') || pathname.startsWith('/countries')
     },
     {
-      label: 'PPSC',
-      href: '/ppsc',
-      icon: GraduationCap,
-      isActive: pathname.startsWith('/ppsc') || pathname.startsWith('/exams')
-    },
-    {
-      label: 'FPSC',
-      href: '/fpsc',
-      icon: ShieldCheck,
-      isActive: pathname.startsWith('/fpsc')
-    },
-    {
       label: 'PDF Library',
       href: '/library',
       icon: FileText,
@@ -145,6 +163,44 @@ export function Navbar() {
       href: '/quizzes',
       icon: ClipboardCheck,
       isActive: pathname.startsWith('/quizzes') || pathname.startsWith('/mcq')
+    }
+  ];
+
+  const examSubMenuItems = [
+    {
+      label: 'PPSC',
+      fullName: 'Punjab Public Service Commission',
+      badge: 'Punjab',
+      description: 'Lecturer, Sub-Inspector & Screening Tests',
+      href: '/ppsc'
+    },
+    {
+      label: 'FPSC',
+      fullName: 'Federal Public Service Commission',
+      badge: 'Federal',
+      description: 'Customs, FIA, AD & General Recruitment',
+      href: '/fpsc'
+    },
+    {
+      label: 'CSS',
+      fullName: 'Central Superior Services (MPT)',
+      badge: 'Federal',
+      description: 'MPT Screening & Compulsory Subject Drills',
+      href: '/css-pms'
+    },
+    {
+      label: 'PMS',
+      fullName: 'Provincial Management Service',
+      badge: 'Punjab',
+      description: 'Combined Competitive Exam & GK Papers',
+      href: '/css-pms'
+    },
+    {
+      label: 'NTS',
+      fullName: 'National Testing Service',
+      badge: 'Aptitude',
+      description: 'NAT & GAT General Aptitude Practice',
+      href: '/nts'
     }
   ];
 
@@ -183,41 +239,249 @@ export function Navbar() {
               aria-label="Primary Navigation"
               className="hidden lg:flex items-center justify-center gap-1 xl:gap-2 flex-1 max-w-2xl mx-auto"
             >
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => notifyNavigationStart()}
-                    aria-current={link.isActive ? 'page' : undefined}
+              {/* Home */}
+              <Link
+                href="/"
+                onClick={() => notifyNavigationStart()}
+                aria-current={pathname === '/' ? 'page' : undefined}
+                className={cn(
+                  'dmc-press group relative px-2.5 xl:px-3 py-2 rounded-[var(--radius-control)] text-xs xl:text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors',
+                  pathname === '/'
+                    ? 'text-[var(--color-ink)] font-semibold bg-[var(--color-surface-soft)] border border-[var(--color-border)]'
+                    : 'text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]/70 border border-transparent'
+                )}
+              >
+                <Home
+                  className={cn(
+                    'w-4 h-4 shrink-0 transition-transform duration-150 ease-out group-hover:-translate-y-0.5 motion-reduce:transform-none',
+                    pathname === '/' ? 'text-[var(--color-brand-deep)]' : 'text-[var(--color-ink-muted)]'
+                  )}
+                  aria-hidden="true"
+                />
+                <span>Home</span>
+                {pathname === '/' && (
+                  <m.span
+                    aria-hidden="true"
+                    initial={prefersReduced ? { opacity: 1 } : { opacity: 0, scaleX: 0.4 }}
+                    animate={{ opacity: 1, scaleX: 1 }}
+                    transition={{ duration: prefersReduced ? 0.05 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-[var(--color-brand-deep)] origin-center"
+                  />
+                )}
+              </Link>
+
+              {/* Geography */}
+              <Link
+                href="/geography"
+                onClick={() => notifyNavigationStart()}
+                aria-current={pathname.startsWith('/geography') || pathname.startsWith('/countries') ? 'page' : undefined}
+                className={cn(
+                  'dmc-press group relative px-2.5 xl:px-3 py-2 rounded-[var(--radius-control)] text-xs xl:text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors',
+                  pathname.startsWith('/geography') || pathname.startsWith('/countries')
+                    ? 'text-[var(--color-ink)] font-semibold bg-[var(--color-surface-soft)] border border-[var(--color-border)]'
+                    : 'text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]/70 border border-transparent'
+                )}
+              >
+                <Globe
+                  className={cn(
+                    'w-4 h-4 shrink-0 transition-transform duration-150 ease-out group-hover:-translate-y-0.5 motion-reduce:transform-none',
+                    pathname.startsWith('/geography') || pathname.startsWith('/countries')
+                      ? 'text-[var(--color-brand-deep)]'
+                      : 'text-[var(--color-ink-muted)]'
+                  )}
+                  aria-hidden="true"
+                />
+                <span>Geography</span>
+                {(pathname.startsWith('/geography') || pathname.startsWith('/countries')) && (
+                  <m.span
+                    aria-hidden="true"
+                    initial={prefersReduced ? { opacity: 1 } : { opacity: 0, scaleX: 0.4 }}
+                    animate={{ opacity: 1, scaleX: 1 }}
+                    transition={{ duration: prefersReduced ? 0.05 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-[var(--color-brand-deep)] origin-center"
+                  />
+                )}
+              </Link>
+
+              {/* Exams Dropdown (Hover & Click) */}
+              <div
+                className="relative"
+                onMouseEnter={handleExamsMouseEnter}
+                onMouseLeave={handleExamsMouseLeave}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsExamsDropdownOpen((prev) => !prev)}
+                  onFocus={() => setIsExamsDropdownOpen(true)}
+                  aria-expanded={isExamsDropdownOpen}
+                  aria-haspopup="true"
+                  aria-label="Toggle competitive examinations menu"
+                  className={cn(
+                    'dmc-press group relative px-2.5 xl:px-3 py-2 rounded-[var(--radius-control)] text-xs xl:text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors cursor-pointer',
+                    isExamsActive
+                      ? 'text-[var(--color-ink)] font-semibold bg-[var(--color-surface-soft)] border border-[var(--color-border)]'
+                      : 'text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]/70 border border-transparent'
+                  )}
+                >
+                  <GraduationCap
                     className={cn(
-                      'dmc-press group relative px-2.5 xl:px-3 py-2 rounded-[var(--radius-control)] text-xs xl:text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors',
-                      link.isActive
-                        ? 'text-[var(--color-ink)] font-semibold bg-[var(--color-surface-soft)] border border-[var(--color-border)]'
-                        : 'text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]/70 border border-transparent'
+                      'w-4 h-4 shrink-0 transition-transform duration-150 ease-out group-hover:-translate-y-0.5 motion-reduce:transform-none',
+                      isExamsActive ? 'text-[var(--color-brand-deep)]' : 'text-[var(--color-ink-muted)]'
                     )}
-                  >
-                    <Icon
-                      className={cn(
-                        'w-4 h-4 shrink-0 transition-transform duration-150 ease-out group-hover:-translate-y-0.5 motion-reduce:transform-none',
-                        link.isActive ? 'text-[var(--color-brand-deep)]' : 'text-[var(--color-ink-muted)]'
-                      )}
+                    aria-hidden="true"
+                  />
+                  <span>Exams</span>
+                  <ChevronDown
+                    className={cn(
+                      'w-3.5 h-3.5 text-[var(--color-ink-muted)] transition-transform duration-200 motion-reduce:transform-none',
+                      isExamsDropdownOpen && 'rotate-180 text-[var(--color-brand-deep)]'
+                    )}
+                    aria-hidden="true"
+                  />
+                  {isExamsActive && (
+                    <m.span
                       aria-hidden="true"
+                      initial={prefersReduced ? { opacity: 1 } : { opacity: 0, scaleX: 0.4 }}
+                      animate={{ opacity: 1, scaleX: 1 }}
+                      transition={{ duration: prefersReduced ? 0.05 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+                      className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-[var(--color-brand-deep)] origin-center"
                     />
-                    <span>{link.label}</span>
-                    {link.isActive && (
-                      <m.span
-                        aria-hidden="true"
-                        initial={prefersReduced ? { opacity: 1 } : { opacity: 0, scaleX: 0.4 }}
-                        animate={{ opacity: 1, scaleX: 1 }}
-                        transition={{ duration: prefersReduced ? 0.05 : 0.18, ease: [0.22, 1, 0.36, 1] }}
-                        className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-[var(--color-brand-deep)] origin-center"
-                      />
-                    )}
-                  </Link>
-                );
-              })}
+                  )}
+                </button>
+
+                {/* Floating Exams Dropdown Panel */}
+                <AnimatePresence>
+                  {isExamsDropdownOpen && (
+                    <m.div
+                      role="menu"
+                      aria-label="Competitive examinations menu"
+                      initial={prefersReduced ? { opacity: 1 } : { opacity: 0, y: 6, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={prefersReduced ? { opacity: 0 } : { opacity: 0, y: 4, scale: 0.98 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      className="absolute top-full left-1/2 -translate-x-1/2 pt-2 z-50 w-72 sm:w-80"
+                    >
+                      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-xl p-2 divide-y divide-[var(--color-border)] elevation-3">
+                        <div className="space-y-1 pb-1.5">
+                          {examSubMenuItems.map((item) => {
+                            const itemActive = pathname === item.href;
+                            return (
+                              <Link
+                                key={item.label}
+                                href={item.href}
+                                role="menuitem"
+                                onClick={() => {
+                                  notifyNavigationStart();
+                                  setIsExamsDropdownOpen(false);
+                                }}
+                                className={cn(
+                                  'flex items-start gap-2.5 px-3 py-2 rounded-xl transition-colors group/item text-left',
+                                  itemActive
+                                    ? 'bg-[var(--color-surface-soft)] text-[var(--color-brand-deep)] font-semibold'
+                                    : 'hover:bg-[var(--color-surface-soft)] text-[var(--color-ink)]'
+                                )}
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-xs sm:text-sm text-[var(--color-ink)] group-hover/item:text-[var(--color-brand-deep)]">
+                                      {item.label}
+                                    </span>
+                                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-[var(--color-surface-soft)] text-[var(--color-ink-muted)] border border-[var(--color-border)]">
+                                      {item.badge}
+                                    </span>
+                                  </div>
+                                  <div className="text-[11px] text-[var(--color-ink-secondary)] truncate mt-0.5">
+                                    {item.fullName}
+                                  </div>
+                                </div>
+                              </Link>
+                            );
+                          })}
+                        </div>
+
+                        <div className="pt-1.5">
+                          <Link
+                            href="/exams"
+                            role="menuitem"
+                            onClick={() => {
+                              notifyNavigationStart();
+                              setIsExamsDropdownOpen(false);
+                            }}
+                            className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-[var(--color-brand-deep)] hover:bg-[var(--color-surface-soft)] transition-colors group/all"
+                          >
+                            <span>All Examinations Directory</span>
+                            <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover/all:translate-x-0.5" aria-hidden="true" />
+                          </Link>
+                        </div>
+                      </div>
+                    </m.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* PDF Library */}
+              <Link
+                href="/library"
+                onClick={() => notifyNavigationStart()}
+                aria-current={pathname.startsWith('/library') ? 'page' : undefined}
+                className={cn(
+                  'dmc-press group relative px-2.5 xl:px-3 py-2 rounded-[var(--radius-control)] text-xs xl:text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors',
+                  pathname.startsWith('/library')
+                    ? 'text-[var(--color-ink)] font-semibold bg-[var(--color-surface-soft)] border border-[var(--color-border)]'
+                    : 'text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]/70 border border-transparent'
+                )}
+              >
+                <FileText
+                  className={cn(
+                    'w-4 h-4 shrink-0 transition-transform duration-150 ease-out group-hover:-translate-y-0.5 motion-reduce:transform-none',
+                    pathname.startsWith('/library') ? 'text-[var(--color-brand-deep)]' : 'text-[var(--color-ink-muted)]'
+                  )}
+                  aria-hidden="true"
+                />
+                <span>PDF Library</span>
+                {pathname.startsWith('/library') && (
+                  <m.span
+                    aria-hidden="true"
+                    initial={prefersReduced ? { opacity: 1 } : { opacity: 0, scaleX: 0.4 }}
+                    animate={{ opacity: 1, scaleX: 1 }}
+                    transition={{ duration: prefersReduced ? 0.05 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-[var(--color-brand-deep)] origin-center"
+                  />
+                )}
+              </Link>
+
+              {/* Quizzes */}
+              <Link
+                href="/quizzes"
+                onClick={() => notifyNavigationStart()}
+                aria-current={pathname.startsWith('/quizzes') || pathname.startsWith('/mcq') ? 'page' : undefined}
+                className={cn(
+                  'dmc-press group relative px-2.5 xl:px-3 py-2 rounded-[var(--radius-control)] text-xs xl:text-sm font-medium whitespace-nowrap inline-flex items-center gap-1.5 transition-colors',
+                  pathname.startsWith('/quizzes') || pathname.startsWith('/mcq')
+                    ? 'text-[var(--color-ink)] font-semibold bg-[var(--color-surface-soft)] border border-[var(--color-border)]'
+                    : 'text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-soft)]/70 border border-transparent'
+                )}
+              >
+                <ClipboardCheck
+                  className={cn(
+                    'w-4 h-4 shrink-0 transition-transform duration-150 ease-out group-hover:-translate-y-0.5 motion-reduce:transform-none',
+                    pathname.startsWith('/quizzes') || pathname.startsWith('/mcq')
+                      ? 'text-[var(--color-brand-deep)]'
+                      : 'text-[var(--color-ink-muted)]'
+                  )}
+                  aria-hidden="true"
+                />
+                <span>Quizzes</span>
+                {(pathname.startsWith('/quizzes') || pathname.startsWith('/mcq')) && (
+                  <m.span
+                    aria-hidden="true"
+                    initial={prefersReduced ? { opacity: 1 } : { opacity: 0, scaleX: 0.4 }}
+                    animate={{ opacity: 1, scaleX: 1 }}
+                    transition={{ duration: prefersReduced ? 0.05 : 0.18, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-[var(--color-brand-deep)] origin-center"
+                  />
+                )}
+              </Link>
             </nav>
 
             {/* Right Slot: User Auth Slot (Desktop) + Compact Controls (Mobile) */}
@@ -366,35 +630,142 @@ export function Navbar() {
                 </div>
 
                 <div className="space-y-1">
-                  {navLinks.map((link) => {
-                    const Icon = link.icon;
-                    return (
-                      <Link
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => {
-                          notifyNavigationStart();
-                          setIsMobileMenuOpen(false);
-                        }}
-                        aria-current={link.isActive ? 'page' : undefined}
+                  {/* Home */}
+                  <Link
+                    href="/"
+                    onClick={() => {
+                      notifyNavigationStart();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    aria-current={pathname === '/' ? 'page' : undefined}
+                    className={cn(
+                      'flex items-center gap-3 px-3.5 py-3 rounded-[var(--radius-panel)] text-sm font-semibold min-h-[44px] transition-colors',
+                      pathname === '/'
+                        ? 'bg-[var(--color-surface-soft)] text-[var(--color-ink)] border border-[var(--color-border)]'
+                        : 'text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)]/70 hover:text-[var(--color-ink)]'
+                    )}
+                  >
+                    <Home className="w-4 h-4 text-[var(--color-brand-deep)] shrink-0" aria-hidden="true" />
+                    <span>Home</span>
+                  </Link>
+
+                  {/* Geography */}
+                  <Link
+                    href="/geography"
+                    onClick={() => {
+                      notifyNavigationStart();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    aria-current={pathname.startsWith('/geography') || pathname.startsWith('/countries') ? 'page' : undefined}
+                    className={cn(
+                      'flex items-center gap-3 px-3.5 py-3 rounded-[var(--radius-panel)] text-sm font-semibold min-h-[44px] transition-colors',
+                      pathname.startsWith('/geography') || pathname.startsWith('/countries')
+                        ? 'bg-[var(--color-surface-soft)] text-[var(--color-ink)] border border-[var(--color-border)]'
+                        : 'text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)]/70 hover:text-[var(--color-ink)]'
+                    )}
+                  >
+                    <Globe className="w-4 h-4 text-[var(--color-brand-deep)] shrink-0" aria-hidden="true" />
+                    <span>Geography</span>
+                  </Link>
+
+                  {/* Competitive Exams Accordion */}
+                  <div className="rounded-[var(--radius-panel)] border border-[var(--color-border)] overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => setIsMobileExamsOpen((prev) => !prev)}
+                      aria-expanded={isMobileExamsOpen}
+                      className={cn(
+                        'w-full flex items-center justify-between px-3.5 py-3 text-sm font-semibold min-h-[44px] transition-colors cursor-pointer',
+                        isExamsActive
+                          ? 'bg-[var(--color-surface-soft)] text-[var(--color-ink)]'
+                          : 'text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)]/70 hover:text-[var(--color-ink)]'
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <GraduationCap className="w-4 h-4 text-[var(--color-brand-deep)] shrink-0" aria-hidden="true" />
+                        <span>Exams</span>
+                      </div>
+                      <ChevronDown
                         className={cn(
-                          'flex items-center gap-3 px-3.5 py-3 rounded-[var(--radius-panel)] text-sm font-semibold min-h-[44px] transition-colors',
-                          link.isActive
-                            ? 'bg-[var(--color-surface-soft)] text-[var(--color-ink)] border border-[var(--color-border)]'
-                            : 'text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)]/70 hover:text-[var(--color-ink)]'
+                          'w-4 h-4 text-[var(--color-ink-muted)] transition-transform duration-200',
+                          isMobileExamsOpen && 'rotate-180'
                         )}
-                      >
-                        <Icon
-                          className={cn(
-                            'w-4 h-4 shrink-0',
-                            link.isActive ? 'text-[var(--color-brand-deep)]' : 'text-[var(--color-ink-muted)]'
-                          )}
-                          aria-hidden="true"
-                        />
-                        <span>{link.label}</span>
-                      </Link>
-                    );
-                  })}
+                        aria-hidden="true"
+                      />
+                    </button>
+                    {isMobileExamsOpen && (
+                      <div className="bg-[var(--color-surface-soft)]/50 px-3 py-2 space-y-1 border-t border-[var(--color-border)]">
+                        {examSubMenuItems.map((item) => (
+                          <Link
+                            key={item.label}
+                            href={item.href}
+                            onClick={() => {
+                              notifyNavigationStart();
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className={cn(
+                              'flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-colors',
+                              pathname === item.href
+                                ? 'bg-[var(--color-surface)] text-[var(--color-brand-deep)] shadow-xs'
+                                : 'text-[var(--color-ink-secondary)] hover:text-[var(--color-ink)]'
+                            )}
+                          >
+                            <span>{item.label} - {item.fullName}</span>
+                            <span className="text-[10px] text-[var(--color-ink-muted)] shrink-0 ml-1">{item.badge}</span>
+                          </Link>
+                        ))}
+                        <Link
+                          href="/exams"
+                          onClick={() => {
+                            notifyNavigationStart();
+                            setIsMobileMenuOpen(false);
+                          }}
+                          className="flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold text-[var(--color-brand-deep)] hover:underline pt-2 border-t border-[var(--color-border)]/50"
+                        >
+                          <span>All Examinations Directory</span>
+                          <ArrowRight className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* PDF Library */}
+                  <Link
+                    href="/library"
+                    onClick={() => {
+                      notifyNavigationStart();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    aria-current={pathname.startsWith('/library') ? 'page' : undefined}
+                    className={cn(
+                      'flex items-center gap-3 px-3.5 py-3 rounded-[var(--radius-panel)] text-sm font-semibold min-h-[44px] transition-colors',
+                      pathname.startsWith('/library')
+                        ? 'bg-[var(--color-surface-soft)] text-[var(--color-ink)] border border-[var(--color-border)]'
+                        : 'text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)]/70 hover:text-[var(--color-ink)]'
+                    )}
+                  >
+                    <FileText className="w-4 h-4 text-[var(--color-brand-deep)] shrink-0" aria-hidden="true" />
+                    <span>PDF Library</span>
+                  </Link>
+
+                  {/* Quizzes */}
+                  <Link
+                    href="/quizzes"
+                    onClick={() => {
+                      notifyNavigationStart();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    aria-current={pathname.startsWith('/quizzes') || pathname.startsWith('/mcq') ? 'page' : undefined}
+                    className={cn(
+                      'flex items-center gap-3 px-3.5 py-3 rounded-[var(--radius-panel)] text-sm font-semibold min-h-[44px] transition-colors',
+                      pathname.startsWith('/quizzes') || pathname.startsWith('/mcq')
+                        ? 'bg-[var(--color-surface-soft)] text-[var(--color-ink)] border border-[var(--color-border)]'
+                        : 'text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)]/70 hover:text-[var(--color-ink)]'
+                    )}
+                  >
+                    <ClipboardCheck className="w-4 h-4 text-[var(--color-brand-deep)] shrink-0" aria-hidden="true" />
+                    <span>Quizzes</span>
+                  </Link>
 
                   <Link
                     href="/search"

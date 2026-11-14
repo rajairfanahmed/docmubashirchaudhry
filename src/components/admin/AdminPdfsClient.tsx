@@ -497,6 +497,7 @@ export function AdminPdfsClient() {
                   <option value="FPSC">FPSC</option>
                   <option value="CSS">CSS</option>
                   <option value="PMS">PMS</option>
+                  <option value="NTS">NTS</option>
                   <option value="FIA">FIA</option>
                   <option value="PERA">PERA</option>
                   <option value="General">General</option>
@@ -857,6 +858,7 @@ export function AdminPdfsClient() {
                 <option value="FPSC">FPSC</option>
                 <option value="CSS">CSS</option>
                 <option value="PMS">PMS</option>
+                <option value="NTS">NTS</option>
                 <option value="FIA">FIA</option>
                 <option value="PERA">PERA</option>
                 <option value="General">General</option>

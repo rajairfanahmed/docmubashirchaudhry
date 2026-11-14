@@ -130,7 +130,7 @@ describe('Dynamic Sitemap & Robots Configuration', () => {
     expect(urls.has(`${SITE_URL}/geography`)).toBe(true);
     expect(urls.has(`${SITE_URL}/ppsc`)).toBe(true);
     expect(urls.has(`${SITE_URL}/quizzes`)).toBe(true);
-    expect(urls.has(`${SITE_URL}/ppsc/intelligent-officer`)).toBe(true);
+    expect(urls.has(`${SITE_URL}/ppsc/intelligent-officer`)).toBe(false);
     expect(urls.has(`${SITE_URL}/geography/pakistan`)).toBe(true);
     expect(urls.has(`${SITE_URL}/library/resource/intelligence-officer-bs-14-set-01`)).toBe(false);
     expect(urls.has(`${SITE_URL}/library/ppsc`)).toBe(true);

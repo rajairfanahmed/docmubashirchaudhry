@@ -9,6 +9,7 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
+import { EXAM_FILTERS } from '@/lib/constants/exam-filters';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,14 +19,6 @@ export const metadata: Metadata = buildPageMetadata({
     'Browse watermarked educational PDF booklets with verified metadata, page counts, file sizes, and signed temporary downloads for PPSC & FPSC aspirants.',
   path: '/library'
 });
-
-const EXAM_FILTERS = [
-  { slug: 'all', label: 'All Exams', href: '/library' },
-  { slug: 'ppsc', label: 'PPSC', href: '/library/ppsc' },
-  { slug: 'fpsc', label: 'FPSC', href: '/library/fpsc' },
-  { slug: 'css-pms', label: 'CSS / PMS', href: '/library/css-pms' },
-  { slug: 'nts', label: 'NTS', href: '/library/nts' }
-];
 
 export default async function PdfLibraryPage() {
   const repo = getContentRepository();

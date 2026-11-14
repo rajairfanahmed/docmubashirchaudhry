@@ -70,31 +70,33 @@ export function PostFilterBar({ posts, questionCountByPostId }: PostFilterBarPro
           </p>
         </div>
 
-        <div
-          role="group"
-          aria-label="Filter PPSC posts by recruitment status"
-          className="inline-flex flex-wrap items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-1.5 self-start shadow-xs"
-        >
-          <Filter className="w-3.5 h-3.5 text-[var(--color-brand-deep)] ml-1.5 mr-0.5" aria-hidden="true" />
-          {tabs.map((tab) => {
-            const active = filter === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                aria-pressed={active}
-                onClick={() => handleSelectFilter(tab.key)}
-                className={`dmc-press min-h-[44px] px-3.5 py-1.5 rounded-[var(--radius-control)] text-xs font-semibold cursor-pointer tabular-nums focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)] ${
-                  active
-                    ? 'bg-[var(--color-action)] text-[var(--color-action-ink)]'
-                    : 'text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)] hover:text-[var(--color-ink)]'
-                }`}
-              >
-                {tab.label} ({tab.count})
-              </button>
-            );
-          })}
-        </div>
+        {posts.length > 0 && (
+          <div
+            role="group"
+            aria-label="Filter PPSC posts by recruitment status"
+            className="inline-flex flex-wrap items-center gap-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-panel)] p-1.5 self-start shadow-xs"
+          >
+            <Filter className="w-3.5 h-3.5 text-[var(--color-brand-deep)] ml-1.5 mr-0.5" aria-hidden="true" />
+            {tabs.map((tab) => {
+              const active = filter === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => handleSelectFilter(tab.key)}
+                  className={`dmc-press min-h-[44px] px-3.5 py-1.5 rounded-[var(--radius-control)] text-xs font-semibold cursor-pointer tabular-nums focus-visible:outline-2 focus-visible:outline-[var(--color-brand-deep)] ${
+                    active
+                      ? 'bg-[var(--color-action)] text-[var(--color-action-ink)]'
+                      : 'text-[var(--color-ink-secondary)] hover:bg-[var(--color-surface-soft)] hover:text-[var(--color-ink)]'
+                  }`}
+                >
+                  {tab.label} ({tab.count})
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div aria-live="polite" className="sr-only">
@@ -104,12 +106,20 @@ export function PostFilterBar({ posts, questionCountByPostId }: PostFilterBarPro
       {visiblePosts.length === 0 ? (
         <EmptyStateCard
           icon={Inbox}
-          title={`No ${filter === 'open' ? 'Open' : 'Closed'} Recruitment Posts Listed`}
-          description="No PPSC posts in the current snapshot match this status filter. Reset to view all tracked cadres."
-          primaryAction={{
-            label: 'Show All Posts',
-            onClick: () => handleSelectFilter('all')
-          }}
+          title={posts.length === 0 ? 'No Recruitment Posts Published Yet' : `No ${filter === 'open' ? 'Open' : 'Closed'} Recruitment Posts Listed`}
+          description={
+            posts.length === 0
+              ? 'Tracked recruitment posts and cadre study guides will appear here once officially published by the commission.'
+              : 'No PPSC posts in the current snapshot match this status filter. Reset to view all tracked cadres.'
+          }
+          primaryAction={
+            posts.length > 0
+              ? {
+                  label: 'Show All Posts',
+                  onClick: () => handleSelectFilter('all')
+                }
+              : undefined
+          }
         />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

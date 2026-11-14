@@ -12,22 +12,53 @@ import { getContentRepository } from '@/lib/data';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
-const SCOPED_EXAM_META: Record<string, { label: string; description: string }> = {
+import { EXAM_FILTERS } from '@/lib/constants/exam-filters';
+
+const SCOPED_EXAM_META: Record<string, { label: string; description: string; examTag: string }> = {
   ppsc: {
     label: 'PPSC Booklets',
-    description: 'Download SHA-256 verified solved MCQ PDF booklets aligned to Punjab Public Service Commission syllabi.'
+    description: 'Download SHA-256 verified solved MCQ PDF booklets aligned to Punjab Public Service Commission syllabi.',
+    examTag: 'PPSC'
   },
   fpsc: {
     label: 'FPSC Booklets',
-    description: 'Federal Public Service Commission general recruitment screening booklets and verified solved papers.'
+    description: 'Federal Public Service Commission general recruitment screening booklets and verified solved papers.',
+    examTag: 'FPSC'
+  },
+  css: {
+    label: 'CSS Booklets',
+    description: 'Central Superior Services (MPT & Compulsory) downloadable study guides and past papers.',
+    examTag: 'CSS'
+  },
+  pms: {
+    label: 'PMS Booklets',
+    description: 'Provincial Management Service screening and subject preparation booklets.',
+    examTag: 'PMS'
   },
   'css-pms': {
     label: 'CSS & PMS Booklets',
-    description: 'Central Superior Services (MPT / Compulsory) and Provincial Management Service downloadable study guides.'
+    description: 'Central Superior Services (MPT / Compulsory) and Provincial Management Service downloadable study guides.',
+    examTag: 'CSS'
   },
   nts: {
     label: 'NTS Booklets',
-    description: 'National Testing Service (NAT / GAT General) quantitative, verbal, and screening MCQ compilations.'
+    description: 'National Testing Service (NAT / GAT General) quantitative, verbal, and screening MCQ compilations.',
+    examTag: 'NTS'
+  },
+  fia: {
+    label: 'FIA Booklets',
+    description: 'Federal Investigation Agency screening test past papers and syllabus study booklets.',
+    examTag: 'FIA'
+  },
+  pera: {
+    label: 'PERA Booklets',
+    description: 'Punjab Enforcement and Regulatory Authority test preparation and screening booklets.',
+    examTag: 'PERA'
+  },
+  general: {
+    label: 'General Knowledge Booklets',
+    description: 'Comprehensive General Knowledge, World Geography, and current affairs PDF compilations.',
+    examTag: 'General'
   }
 };
 
@@ -130,13 +161,21 @@ export default async function ScopedLibraryPage({
               <p className="type-body-base text-[var(--dmc-ink-secondary)]">{description}</p>
             </div>
 
-            <Link
-              href="/library"
-              className="inline-flex items-center gap-1.5 bg-white border border-[var(--dmc-border-subtle)] text-[var(--dmc-ink-primary)] text-xs font-bold px-4 py-2.5 rounded-xl shrink-0"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>All Exam PDFs</span>
-            </Link>
+            <div className="flex flex-wrap gap-2">
+              {EXAM_FILTERS.map((ef) => (
+                <Link
+                  key={ef.slug}
+                  href={ef.href}
+                  className={`pill-badge border transition-colors ${
+                    ef.slug === exam
+                      ? 'bg-[var(--color-brand-deep)] text-white border-[var(--color-brand-deep)]'
+                      : 'bg-white text-[var(--color-ink-secondary)] border-[var(--color-border)] hover:border-[var(--color-brand-deep)] hover:text-[var(--color-brand-deep)]'
+                  }`}
+                >
+                  {ef.label}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </SectionBand>
@@ -146,7 +185,7 @@ export default async function ScopedLibraryPage({
           <h2 id="scoped-results-title" className="type-section-heading text-[var(--dmc-ink-primary)]">
             {label} Archive
           </h2>
-          <CloudPdfCatalogSection examTag={meta?.label.replace(' Booklets', '').trim() ?? exam.toUpperCase()} />
+          <CloudPdfCatalogSection examTag={meta?.examTag ?? exam.toUpperCase()} />
         </div>
       </SectionBand>
     </>

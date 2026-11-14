@@ -1,7 +1,7 @@
 {
-  "datasetVersion": "v1-d6cfe0083e79",
+  "datasetVersion": "v1-f845a9ac1f81",
   "schemaVersion": 1,
-  "generatedAt": "2026-11-14T10:16:17.769Z",
+  "generatedAt": "2026-11-14T11:02:12.529Z",
   "counts": {
     "sources": 8,
     "continents": 6,
@@ -11,8 +11,8 @@
     "countriesTotal": 250,
     "countriesPublished": 250,
     "exams": 1,
-    "recruitmentPosts": 2,
-    "blueprints": 1,
+    "recruitmentPosts": 0,
+    "blueprints": 0,
     "questions": 0,
     "pdfResources": 0
   },
@@ -90,12 +90,12 @@
       "sha256": "46b6b1ee4d602ec01f224d97415c9303d78dbd1a0231f01658363977c124f9b7"
     },
     "examinations/posts-ppsc.json": {
-      "bytes": 2042,
-      "sha256": "e557cb6f181777342ec8976aa722b11cbacba4cfd4b5e3aea26ebd88bb53c0bc"
+      "bytes": 12,
+      "sha256": "a14592560126042a799e0da2b44a5dc4c6aafbfb5d350ae9e44bea99d5fd8e5b"
     },
     "examinations/blueprints-ppsc.json": {
-      "bytes": 3367,
-      "sha256": "391b7982ea6c7134c4d70e7a3481d98758c0f0606c71316016b9f258589b4203"
+      "bytes": 17,
+      "sha256": "4e401b32b577c5c8bbacff5ee0340d274658f757ade54d94c6ec3d135a6a9b4e"
     },
     "taxonomy/subjects.json": {
       "bytes": 2331,
@@ -122,8 +122,8 @@
       "sha256": "b2dc734ce2305f6a36ffdc8f6cd7ef605bb4f1589cf43ef9c597c1f2bc1c0858"
     },
     "search-index/all.json": {
-      "bytes": 115463,
-      "sha256": "0bfef8bd72e3c8121c6ee964c418ae2e02fe9fe9c389ea2d6f576c9f3007cb29"
+      "bytes": 112931,
+      "sha256": "17766954fd8919d4ba6a84d27b37c9fde997fbe5758b1e4941e4fa20c1d37f6e"
     }
   }
 }
