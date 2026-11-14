@@ -16,6 +16,9 @@ import { PostFilterBar } from '@/components/exams/PostFilterBar';
 import { CommissionBrandBadge } from '@/components/branding/CommissionBrandBadge';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getContentRepository } from '@/lib/data';
+import { getLiveDatabaseQuestions } from '@/lib/data/live-questions';
+import { parseSecretSupabaseConfig } from '@/lib/env';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 import { buildCollectionPageSchema } from '@/lib/seo/structured-data';
 
@@ -28,12 +31,35 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function PPSCPage() {
   const repo = getContentRepository();
-  const [ppscExam, posts, pdfs, questions] = await Promise.all([
+  const [ppscExam, posts, pdfs, questions, topics, subjects] = await Promise.all([
     repo.getExam('ppsc'),
     repo.getRecruitmentPosts('ppsc'),
     repo.getPdfResources({ includeDrafts: false }),
-    repo.getQuestions({ includeDrafts: false })
+    repo.getQuestions({ includeDrafts: false }),
+    repo.getTopics(),
+    repo.getSubjects()
   ]);
+
+  const liveQuestions = await getLiveDatabaseQuestions(topics, subjects, posts);
+  const ppscQuestions = (liveQuestions.length > 0 ? liveQuestions : questions).filter(
+    (q) => q.postIds.some((p) => p.toLowerCase().includes('ppsc'))
+  );
+
+  let livePdfCount = 0;
+  if (parseSecretSupabaseConfig()) {
+    try {
+      const admin = createSupabaseAdminClient();
+      const res = await admin
+        .from('pdf_resources')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_published', true)
+        .ilike('exam_tag', '%ppsc%');
+      livePdfCount = res.count ?? 0;
+    } catch {
+      livePdfCount = 0;
+    }
+  }
+  const totalPdfCount = livePdfCount > 0 ? livePdfCount : pdfs.length;
 
   const pdfByPost: Record<string, number> = {};
   for (const pdf of pdfs) {
@@ -102,7 +128,7 @@ export default async function PPSCPage() {
                 <span>Verified Booklets &amp; Question Bank</span>
               </div>
               <div className="text-xl font-extrabold text-[var(--dmc-ink-primary)] tabular-nums">
-                {pdfs.length} PDFs &middot; {questions.length} MCQs
+                {totalPdfCount} PDFs &middot; {ppscQuestions.length} MCQs
               </div>
               <p className="text-xs text-[var(--dmc-ink-muted)]">
                 SHA-256 checksummed compilations with zero login wall

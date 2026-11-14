@@ -6,6 +6,9 @@ import { SectionBand } from '@/components/layout/SectionBand';
 import { EmptyStateCard } from '@/components/ui/EmptyStateCard';
 import { CommissionBrandBadge } from '@/components/branding/CommissionBrandBadge';
 import { getContentRepository } from '@/lib/data';
+import { getLiveDatabaseQuestions } from '@/lib/data/live-questions';
+import { parseSecretSupabaseConfig } from '@/lib/env';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import { buildPageMetadata } from '@/lib/seo/metadata';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,11 +32,34 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function FpscHubPage() {
   const repo = getContentRepository();
-  const [fpscExam, pdfs, questions] = await Promise.all([
+  const [fpscExam, pdfs, questions, topics, subjects] = await Promise.all([
     repo.getExam('fpsc'),
     repo.getPdfResources({ examSlug: 'fpsc', includeDrafts: false }),
-    repo.getQuestions({ examId: 'exam-fpsc', includeDrafts: false })
+    repo.getQuestions({ examId: 'exam-fpsc', includeDrafts: false }),
+    repo.getTopics(),
+    repo.getSubjects()
   ]);
+
+  const liveQuestions = await getLiveDatabaseQuestions(topics, subjects);
+  const fpscQuestions = (liveQuestions.length > 0 ? liveQuestions : questions).filter(
+    (q) => q.postIds.some((p) => p.toLowerCase().includes('fpsc'))
+  );
+
+  let livePdfCount = 0;
+  if (parseSecretSupabaseConfig()) {
+    try {
+      const admin = createSupabaseAdminClient();
+      const res = await admin
+        .from('pdf_resources')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_published', true)
+        .ilike('exam_tag', '%fpsc%');
+      livePdfCount = res.count ?? 0;
+    } catch {
+      livePdfCount = 0;
+    }
+  }
+  const totalPdfCount = livePdfCount > 0 ? livePdfCount : pdfs.length;
 
   return (
     <>
@@ -73,7 +99,7 @@ export default async function FpscHubPage() {
           </h2>
           <EmptyStateCard
             icon={Info}
-            title={`FPSC Dedicated Content Status (${questions.length} FPSC MCQs · ${pdfs.length} FPSC PDFs)`}
+            title={`FPSC Dedicated Content Status (${fpscQuestions.length} FPSC MCQs · ${totalPdfCount} FPSC PDFs)`}
             description="No FPSC-specific recruitment posts or downloadable booklets are published yet. You can practice published World Geography drills and browse our verified PDF Library right now."
             primaryAction={{ label: 'Open MCQ Subject Selector', href: '/mcq' }}
             secondaryAction={{ label: 'Open Full PDF Library', href: '/library' }}

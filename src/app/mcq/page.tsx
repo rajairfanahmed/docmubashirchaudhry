@@ -27,12 +27,12 @@ export default async function McqHubPage() {
     repo.getSubjects(),
     repo.getTopics()
   ]);
+  const posts = (await Promise.all(exams.map((exam) => repo.getRecruitmentPosts(exam.slug)))).flat();
   const [staticQuestions, liveQuestions] = await Promise.all([
     repo.getQuestions({ includeDrafts: false }),
-    getLiveDatabaseQuestions(topics)
+    getLiveDatabaseQuestions(topics, subjects, posts)
   ]);
   const questions = liveQuestions.length > 0 ? liveQuestions : staticQuestions;
-  const posts = (await Promise.all(exams.map((exam) => repo.getRecruitmentPosts(exam.slug)))).flat();
   const subjById = new Map(subjects.map((s) => [s.id, s]));
 
   const countByTopic = new Map<string, number>();

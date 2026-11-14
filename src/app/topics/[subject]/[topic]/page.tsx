@@ -74,12 +74,19 @@ export default async function TopicLandingPage({
   }
 
   const { subject, topic } = resolved;
+  const [allTopics, allSubjects, exams] = await Promise.all([
+    repo.getTopics(),
+    repo.getSubjects(),
+    repo.getExams()
+  ]);
+  const allPosts = (await Promise.all(exams.map((exam) => repo.getRecruitmentPosts(exam.slug)))).flat();
   const [staticQuestions, liveQuestions, relatedPdfs] = await Promise.all([
     repo.getQuestions({ topicIds: [topic.id], includeDrafts: false }),
-    getLiveDatabaseQuestions([topic]),
+    getLiveDatabaseQuestions(allTopics, allSubjects, allPosts),
     repo.getPdfResources({ topicId: topic.id, includeDrafts: false })
   ]);
-  const questions = liveQuestions.length > 0 ? liveQuestions : staticQuestions;
+  const topicLiveQuestions = liveQuestions.filter((q) => q.topicIds.includes(topic.id));
+  const questions = topicLiveQuestions.length > 0 ? topicLiveQuestions : staticQuestions;
 
   const token = SUBJECT_PASTEL_TOKENS[subject.id] ?? {
     bgVar: 'var(--dmc-subject-gk-bg)',

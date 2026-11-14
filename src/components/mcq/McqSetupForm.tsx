@@ -100,10 +100,17 @@ export function McqSetupForm({
   const examScopedQuestions = useMemo(() => {
     if (!selectedExam) return questions;
     return questions.filter((q) => {
-      if (examPostSet) {
+      const matchesExamTag = q.postIds.some(
+        (pid) =>
+          pid === selectedExam.id ||
+          pid === selectedExam.slug ||
+          pid.toLowerCase().includes(selectedExam.slug.toLowerCase())
+      );
+      if (matchesExamTag) return true;
+      if (examPostSet && examPostSet.size > 0) {
         return q.postIds.some((pid) => examPostSet.has(pid));
       }
-      return q.postIds.some((pid) => pid.includes(selectedExam.slug));
+      return false;
     });
   }, [questions, selectedExam, examPostSet]);
 

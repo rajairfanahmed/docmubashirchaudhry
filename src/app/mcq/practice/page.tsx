@@ -45,6 +45,7 @@ export default async function McqPracticePage({
   const exam = examSlug ? exams.find((e) => e.slug === examSlug) : undefined;
   const subject = subjectSlug ? subjects.find((s) => s.slug === subjectSlug) : undefined;
   const topic = topicSlug ? topics.find((t) => t.slug === topicSlug) : undefined;
+  const posts = (await Promise.all(exams.map((exam) => repo.getRecruitmentPosts(exam.slug)))).flat();
 
   const [staticQuestions, liveQuestions] = await Promise.all([
     repo.getQuestions({
@@ -53,14 +54,29 @@ export default async function McqPracticePage({
       topicIds: topic ? [topic.id] : undefined,
       includeDrafts: false
     }),
-    getLiveDatabaseQuestions(topics)
+    getLiveDatabaseQuestions(topics, subjects, posts)
   ]);
+
+  const subjectTopicIds = subject
+    ? new Set(topics.filter((t) => t.subjectId === subject.id).map((t) => t.id))
+    : null;
 
   const questions =
     liveQuestions.length > 0
       ? liveQuestions.filter((q) => {
-          if (exam && !q.postIds.some((p) => p.includes(exam.slug))) return false;
+          if (
+            exam &&
+            !q.postIds.some(
+              (p) =>
+                p === exam.id ||
+                p === exam.slug ||
+                p.toLowerCase().includes(exam.slug.toLowerCase())
+            )
+          ) {
+            return false;
+          }
           if (topic && !q.topicIds.includes(topic.id)) return false;
+          if (subjectTopicIds && !q.topicIds.some((tid) => subjectTopicIds.has(tid))) return false;
           return true;
         })
       : staticQuestions;
