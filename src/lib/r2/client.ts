@@ -22,6 +22,7 @@ export function createR2S3Client(config: R2Config = requireR2Config()): S3Client
       accessKeyId: config.accessKeyId,
       secretAccessKey: config.secretAccessKey
     },
+    forcePathStyle: true,
     // Required for Cloudflare R2 compatibility with AWS SDK v3 >= 3.729
     requestChecksumCalculation: 'WHEN_REQUIRED',
     responseChecksumValidation: 'WHEN_REQUIRED'
@@ -101,7 +102,7 @@ export async function createPresignedPdfUploadUrl(options: {
     expiresIn: UPLOAD_URL_TTL_SECONDS
   });
 
-  return {
+    return {
     uploadUrl,
     fileKey,
     expiresInSeconds: UPLOAD_URL_TTL_SECONDS,
@@ -109,6 +110,34 @@ export async function createPresignedPdfUploadUrl(options: {
       'Content-Type': 'application/pdf'
     }
   };
+}
+
+export async function uploadPdfObjectDirect(options: {
+  filename: string;
+  body: Uint8Array | Buffer;
+  config?: R2Config;
+  fileKey?: string;
+}): Promise<{ fileKey: string; fileSizeBytes: number }> {
+  const config = options.config ?? requireR2Config();
+  const client = createR2S3Client(config);
+  const fileKey = options.fileKey ?? buildPdfObjectKey(options.filename);
+  const fileSizeBytes = options.body.length;
+
+  if (fileSizeBytes <= 0 || fileSizeBytes > MAX_PDF_UPLOAD_BYTES) {
+    throw new Error(`PDF file size must be between 1 byte and ${MAX_PDF_UPLOAD_BYTES} bytes.`);
+  }
+
+  await client.send(
+    new PutObjectCommand({
+      Bucket: config.bucketName,
+      Key: fileKey,
+      Body: options.body,
+      ContentType: 'application/pdf',
+      ContentLength: fileSizeBytes
+    })
+  );
+
+  return { fileKey, fileSizeBytes };
 }
 
 export async function createPresignedPdfDownloadUrl(options: {

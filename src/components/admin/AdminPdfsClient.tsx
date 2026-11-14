@@ -188,43 +188,62 @@ export function AdminPdfsClient() {
       const sha256 = await computeFileSha256(selectedFile);
 
       setUploadStage('Requesting private R2 presigned URL...');
-      const grant = await v3Api.admin.pdfs.createUploadUrl({
-        filename: selectedFile.name,
-        contentType: 'application/pdf',
-        fileSizeBytes: selectedFile.size
-      });
+      try {
+        const grant = await v3Api.admin.pdfs.createUploadUrl({
+          filename: selectedFile.name,
+          contentType: 'application/pdf',
+          fileSizeBytes: selectedFile.size
+        });
 
-      setUploadStage('Uploading directly to Cloudflare R2...');
-      const controller = new AbortController();
-      uploadAbortRef.current = controller;
-      await uploadPdfBinaryToR2({
-        uploadUrl: grant.uploadUrl,
-        file: selectedFile,
-        requiredHeaders: grant.requiredHeaders,
-        onProgress: (pct: number) => setUploadProgress(pct),
-        signal: controller.signal
-      });
-      uploadAbortRef.current = null;
+        setUploadStage('Uploading directly to Cloudflare R2...');
+        const controller = new AbortController();
+        uploadAbortRef.current = controller;
+        await uploadPdfBinaryToR2({
+          uploadUrl: grant.uploadUrl,
+          file: selectedFile,
+          requiredHeaders: grant.requiredHeaders,
+          onProgress: (pct: number) => setUploadProgress(pct),
+          signal: controller.signal
+        });
+        uploadAbortRef.current = null;
 
-      setUploadStage('Saving metadata to catalog...');
-      const tags = tagsCsv
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean);
+        setUploadStage('Saving metadata to catalog...');
+        const tags = tagsCsv
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean);
 
-      await v3Api.admin.pdfs.create({
-        slug: slug.trim(),
-        title: title.trim(),
-        description: description.trim(),
-        subject: subject.trim(),
-        examTag: examTag.trim(),
-        tags,
-        fileKey: grant.fileKey,
-        fileSize: selectedFile.size,
-        sha256,
-        watermarkConfirmed: true,
-        isPublished
-      });
+        await v3Api.admin.pdfs.create({
+          slug: slug.trim(),
+          title: title.trim(),
+          description: description.trim(),
+          subject: subject.trim(),
+          examTag: examTag.trim(),
+          tags,
+          fileKey: grant.fileKey,
+          fileSize: selectedFile.size,
+          sha256,
+          watermarkConfirmed: true,
+          isPublished
+        });
+      } catch (uploadErr: any) {
+        if (uploadErr?.code === 'ABORTED') throw uploadErr;
+
+        // Fallback: Upload directly to server endpoint to bypass client CORS restrictions
+        setUploadStage('Connecting via server-side storage pipeline...');
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('title', title.trim());
+        formData.append('slug', slug.trim());
+        formData.append('description', description.trim());
+        formData.append('subject', subject.trim());
+        formData.append('examTag', examTag.trim());
+        formData.append('sha256', sha256 || '');
+        formData.append('tags', tagsCsv || '');
+        formData.append('isPublished', String(isPublished));
+
+        await v3Api.admin.pdfs.uploadDirect(formData);
+      }
 
       showToast({
         title: 'Watermarked PDF uploaded',

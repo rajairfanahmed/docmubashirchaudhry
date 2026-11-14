@@ -146,10 +146,11 @@ async function requestJson<T>(
   }
 
   try {
+    const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
     const headers: Record<string, string> = {
       Accept: 'application/json'
     };
-    if (options.body !== undefined) {
+    if (options.body !== undefined && !isFormData) {
       headers['Content-Type'] = 'application/json';
     }
 
@@ -157,7 +158,11 @@ async function requestJson<T>(
       method: options.method ?? 'GET',
       credentials: 'same-origin',
       headers,
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      body: isFormData
+        ? (options.body as FormData)
+        : options.body !== undefined
+        ? JSON.stringify(options.body)
+        : undefined,
       signal: controller.signal,
       keepalive: options.keepalive
     });
@@ -371,7 +376,8 @@ export async function uploadPdfBinaryToR2(options: {
         new V3ClientError({
           status: 0,
           code: 'R2_UPLOAD_NETWORK_ERROR',
-          message: 'Network interruption during PDF upload. Please try again.'
+          message:
+            'Upload blocked by storage provider (CORS or unauthorized token). Please ensure your Cloudflare R2 API token has Object Read & Write permissions and the R2 bucket has CORS enabled.'
         })
       );
     };
@@ -530,6 +536,12 @@ export const v3Api = {
         requestJson<AdminUploadUrlResponse>('/api/admin/pdfs/upload-url', {
           method: 'POST',
           body
+        }),
+      uploadDirect: (formData: FormData, signal?: AbortSignal) =>
+        requestJson<{ item: PdfResourceRow }>('/api/admin/pdfs/upload', {
+          method: 'POST',
+          body: formData as any,
+          signal
         }),
       create: (body: CreatePdfInput) =>
         requestJson<{ item: PdfResourceRow }>('/api/admin/pdfs', { method: 'POST', body }),
